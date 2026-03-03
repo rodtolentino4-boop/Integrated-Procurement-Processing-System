@@ -1,15 +1,39 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF‑8">
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Enterprise Payroll System</title>
 <style>
 body{margin:0;font-family:Segoe UI;background:#eef1f7;}
-.top-header{text-align:center;background:#0d47a1;color:white;padding:20px;}
+
+.top-header{
+  text-align:center;
+  background:#0d47a1;
+  color:white;
+  padding:20px;
+
+  position: sticky;
+  top: 0;
+  z-index: 1001;
+}
+
+
 .top-header h3{margin:0;font-size:20px;}
 .top-header h4{margin:5px 0 0 0;font-size:16px;font-weight:normal;}
-header{background:#0d47a1;color:white;padding:15px;display:flex;justify-content:space-between;}
+
+header{
+  background:#0d47a1;
+  color:white;
+  padding:15px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+
+  position: sticky;
+  top: 80px; /* taas ng top-header para hindi mag-overlap */
+  z-index: 1000;
+}
 .sidebar{width:230px;background:#1565c0;min-height:100vh;padding:20px;}
 .sidebar button{width:100%;padding:10px;margin-bottom:10px;border:none;border-radius:6px;background:white;color:#1565c0;font-weight:bold;cursor:pointer;}
 .container{display:flex;}
@@ -22,103 +46,254 @@ th,td{border:1px solid #ccc;padding:8px;text-align:center;}
 th{background:#0d47a1;color:white;}
 .hidden{display:none;}
 .login-box{max-width:400px;margin:120px auto;background:white;padding:30px;border-radius:10px;}
+.flex-row{display:flex;gap:25px;align-items:flex-start;}
+.half{flex:1;}
+@media(max-width:900px){.flex-row{flex-direction:column;}}
+.form-grid{display:grid;gap:12px;}
+//.form-row{display:flex;flex-direction:column;}
+
+
+
+.form-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.form-row label {
+  width: 150px; /* adjust depende sa label length */
+  margin-right: 10px;
+  font-weight: bold;
+}
+
+.form-row input,
+.form-row select {
+  flex: 1;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+
+
+
+
+
+
+
+.full-width{grid-column:1/-1;}
 </style>
 </head>
 <body>
 
-<!-- TOP HEADER -->
 <div class="top-header">
-  <h3>DEPARTMENT OF SCIENCE AND TECHNOLOGY REGIONAL OFFICE NO. 02</h3>
-  <h4>FINANCE ADMINISTRATIVE SUPPORT SERVICES</h4>
+  <div class="logo">
+    <img src="  " alt="DOST Logo">
+  </div>
+  <div class="title">
+    <h3>DEPARTMENT OF SCIENCE AND TECHNOLOGY</h3>
+    <h4>REGIONAL OFFICE NO. 02 - FINANCE ADMINISTRATIVE SUPPORT SERVICES</h4>
+  </div>
 </div>
+
 
 <!-- LOGIN -->
 <div id="loginSection" class="login-box">
 <h3>Login</h3>
-<input type="email" id="email" placeholder="User Account">
-<input type="password" id="password" placeholder="Password">
+<input type="email" id="email" placeholder="User Email" required>
+<input type="password" id="password" placeholder="Password" required>
 <button class="action" id="loginBtn">Login</button>
 <p id="loginError" style="color:red;"></p>
 </div>
 
-<!-- MAIN APP -->
+<!-- APP -->
 <div id="appSection" class="hidden">
-
 <header>
 <h2>ADVANCE PAYROLL AND PAYSLIP SYSTEM</h2>
+<div>
 <button class="action" id="logoutBtn">Logout</button>
+</div>
 </header>
 
 <div class="container">
-
 <div class="sidebar">
+<button onclick="showSection('dashboard')">Dashboard</button>
 <button onclick="showSection('library')">List of Employees</button>
-<button onclick="showSection('payroll')">Payroll Transaction</button>
 <button onclick="showSection('usermanagement')">User Management</button>
+<button onclick="showSection('payroll')">Add Payroll</button>
 <button onclick="showSection('payslip')">Generate Pay Slip</button>
 </div>
 
 <div class="content">
 
-<!-- EMPLOYEE -->
-<div id="library" class="card">
-<h3>Add Employee</h3>
-<input type="text" id="empName" placeholder="Employee Name">
-<input type="text" id="empPosition" placeholder="Position">
-<input type="number" id="empSalary" placeholder="Monthly Salary">
-<input type="number" id="empSSS" placeholder="SSS">
-<input type="number" id="empPagibigSavings" placeholder="Pagibig Savings">
-<input type="number" id="empPagibigMPL" placeholder="Pagibig MPL">
-<input type="number" id="empPagibigMP2" placeholder="Pagibig MP2">
-<input type="number" id="empPhilhealth" placeholder="Philhealth (Auto 5%)" readonly>
-<button class="action" id="saveEmployeeBtn">Save Employee</button>
+<!-- DASHBOARD -->
+<div id="dashboard" class="card hidden">
+<h3>Dashboard</h3>
+<p>Total Employees: <span id="totalEmployees">0</span></p>
+<p>Total Payrolls: <span id="totalPayroll">0</span></p>
+<p>Total Net Pay: <span id="totalNetPay">0</span></p>
+</div>
+
+<!-- EMPLOYEES -->
+
+<div id="library" class="card hidden">
+  <h3>Employees</h3>
+  <div class="flex-row"> <!-- flex container -->
+    <!-- Left: Add Employee Form -->
+    <div class="half">
+      <input type="text" id="empName" placeholder="Employee Name" required>
+      <input type="text" id="empPosition" placeholder="Position" required>
+      <input type="number" id="empSalary" placeholder="Monthly Salary" required>
+      <input type="number" id="empSSS" placeholder="SSS">
+      <input type="number" id="empPagibigSavings" placeholder="Pagibig Savings">
+      <input type="number" id="empPagibigMPL" placeholder="Pagibig MPL">
+      <input type="number" id="empPagibigMP2" placeholder="Pagibig MP2">
+      <input type="number" id="empPhilhealth" placeholder="Philhealth (Auto 5%)" readonly>
+      <button class="action" id="saveEmployeeBtn">Save Employee</button>
+    </div>
+
+    <!-- Right: Employee Table -->
+    <div class="half">
+      <table>
+        <thead>
+          <tr>
+           
+<tr>
+<th>Name</th>
+<th>Position</th>
+<th>Salary</th>
+
+          </tr>
+        </thead>
+        <tbody id="employeeTable"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+
+<!-- USER MANAGEMENT -->
+<div id="usermanagement" class="card hidden">
+<h3>User Management</h3>
+<select id="newUserName"><option disabled selected>Select Employee</option></select>
+<input type="email" id="newUserEmail" placeholder="User Email" required>
+<input type="password" id="newUserPassword" placeholder="Password" required>
+<select id="newUserRole">
+<option value="admin">Admin</option>
+<option value="staff">Staff</option>
+</select>
+<button class="action" id="createUserBtn">Create User</button>
+
 <table>
-<thead>
-<tr><th>Name</th><th>Position</th><th>Salary</th><th>SSS</th><th>Pagibig Savings</th><th>Pagibig MPL</th><th>Pagibig MP2</th><th>Philhealth</th></tr>
-</thead>
-<tbody id="employeeTable"></tbody>
+<thead><tr><th>Employee</th><th>Email</th><th>Role</th></tr></thead>
+<tbody id="userTable"></tbody>
 </table>
 </div>
 
 <!-- PAYROLL -->
 <div id="payroll" class="card hidden">
-<h3>Payroll Transaction</h3>
-<select id="empSelect"></select>
+<h3>Add Payroll</h3>
+<div class="flex-row">
+<div class="card half">
+<div class="form-grid">
+<div class="form-row">
+<label>Employee:</label>
+<select id="empSelect"><option disabled selected>Select Employee</option></select>
+</div>
+<div class="form-row">
+<label>Position:</label>
 <input type="text" id="position" readonly>
+</div>
+<div class="form-row">
+<label>Salary:</label>
 <input type="number" id="salary" readonly>
+</div>
+<div class="form-row">
+<label>Month:</label>
 <select id="monthSelect">
 <option>January</option><option>February</option><option>March</option>
 <option>April</option><option>May</option><option>June</option>
 <option>July</option><option>August</option><option>September</option>
 <option>October</option><option>November</option><option>December</option>
 </select>
+</div>
+<div class="form-row">
+<label>Year:</label>
 <select id="yearSelect"></select>
-<input type="number" id="cutoffSalary" placeholder="Cutoff Salary" readonly>
-<input type="number" id="daysWorked" placeholder="Days Worked">
+</div>
+<div class="form-row">
+<label>Days Worked:</label>
+<input type="number" id="daysWorked" value="22">
+</div>
+<div class="form-row">
+<label>Cutoff:</label>
+<select id="cutoffSelect">
+<option disabled selected>Select Cutoff</option>
+<option value="1">1st Cutoff</option>
+<option value="2">2nd Cutoff</option>
+</select>
+</div>
+<div class="form-row">
+<label>Tardiness (minutes):</label>
+<input type="number" id="tardiness" value="0">
+</div>
+<div class="form-row">
+<label>Tax %:</label>
+<input type="number" id="taxPercent" value="0">
+</div>
+<div class="form-row">
+<label>PhilHealth:</label>
+<input type="number" id="philhealth" readonly>
+</div>
+<div class="form-row">
+<label>SSS:</label>
+<input type="number" id="sss" readonly>
+</div>
+<div class="form-row">
+<label>Pag-IBIG:</label>
+<input type="number" id="pagibig" readonly>
+</div>
+<div class="form-row">
+<label>Gross Pay:</label>
+<input type="number" id="grossPay" readonly>
+</div>
+<div class="form-row">
+<label>Total Deduction:</label>
+<input type="number" id="deduction" readonly>
+</div>
+<div class="form-row">
+<label>Net Pay:</label>
+<input type="number" id="netPay" readonly>
+</div>
+<div class="form-row full-width">
 <button class="action" id="savePayrollBtn">Save Payroll</button>
-<table>
+</div>
+</div>
+</div>
+
+<div class="card half">
+<table border="1" style="width:100%;border-collapse:collapse;">
 <thead>
-<tr><th>Name</th><th>Month</th><th>Year</th><th>Days Worked</th></tr>
+<tr>
+
+<th>Employee</th>
+      <th>Position</th>
+      <th>Salary</th>
+      <th>Days Worked</th>
+      <th>Gross Pay</th>
+      <th>Total Deduction</th>
+      <th>Net Pay</th>
+
+</tr>
+
 </thead>
 <tbody id="payrollTable"></tbody>
 </table>
 </div>
-
-<!-- USER MANAGEMENT -->
-<div id="usermanagement" class="card hidden">
-<h3>User Management</h3>
-<input type="text" id="newUserName" placeholder="User Name">
-<input type="email" id="newUserEmail" placeholder="User Account">
-<input type="password" id="newUserPassword" placeholder="Password">
-<select id="newUserRole"><option value="admin">Admin</option><option value="staff">Staff</option></select>
-<button class="action" id="createUserBtn">Create User</button>
-<table>
-<thead><tr><th>Name</th><th>Email</th><th>Role</th></tr></thead>
-<tbody id="userTable"></tbody>
-</table>
+</div>
 </div>
 
-<!-- PAY SLIP -->
+<!-- PAYSLIP -->
 <div id="payslip" class="card hidden">
 <h3>Generate Pay Slip</h3>
 <select id="payslipEmpSelect"></select>
@@ -131,223 +306,483 @@ th{background:#0d47a1;color:white;}
 <select id="payslipYearSelect"></select>
 <button class="action" id="generatePayslipBtn">Generate Pay Slip</button>
 
-<div id="payslipResult" class="hidden">
-<table style="width:100%;border:1px solid #000;border-collapse:collapse;">
-<thead>
-<tr><th colspan="2" style="text-align:center;font-size:16px;">DEPARTMENT OF SCIENCE AND TECHNOLOGY REGION 02</th></tr>
-<tr><td>Employee Name:</td><td id="psEmpName"></td></tr>
-<tr><td>Month:</td><td id="psMonth"></td></tr>
-<tr><td>Year:</td><td id="psYear"></td></tr>
-<tr><td>Total Days Worked:</td><td id="psDaysWorked"></td></tr>
-</thead>
+<div id="payslipResult" class="hidden" style="margin-top:25px;">
+<h3 style="text-align:center; margin-bottom:5px;">DEPARTMENT OF SCIENCE AND TECHNOLOGY</h3>
+<h4 style="text-align:center; margin-top:0;">REGIONAL OFFICE NO. 02</h4>
+<p><strong>Employee Name:</strong> <span id="psEmpName"></span></p>
+<p><strong>Month & Year:</strong> <span id="psMonthYear"></span></p>
+<p><strong>Total Days Worked:</strong> <span id="psDaysWorked"></span></p>
+<table>
+<thead><tr><th>Description</th><th>Amount</th></tr></thead>
 <tbody>
-<tr><td>Gross Pay</td><td id="psGross"></td></tr>
-<tr><td>Total Deduction</td><td id="psTotalDed"></td></tr>
-<tr><td>Net Pay</td><td id="psNet"></td></tr>
+<tr><td>Gross</td><td id="psGross"></td></tr>
+<tr><td>PhilHealth</td><td id="psPhilhealth"></td></tr>
+<tr><td>SSS</td><td id="psSSS"></td></tr>
+<tr><td>Pagibig Savings</td><td id="psPagibigSavings"></td></tr>
+<tr><td>Pagibig MP2</td><td id="psPagibigMP2"></td></tr>
+<tr><td>Pagibig MPL</td><td id="psPagibigMPL"></td></tr>
+<tr><td>Tax</td><td id="psTax"></td></tr>
+<tr><td>Tardiness</td><td id="psTardiness"></td></tr>
+<tr><th>Total Deduction</th><th id="psTotalDeduction"></th></tr>
+<tr><th>Net Pay</th><th id="psNet"></th></tr>
 </tbody>
 </table>
 </div>
 </div>
 
-</div></div></div>
+</div>
+</div>
+</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+import { 
+  getFirestore, 
+  collection, 
+  addDoc, 
+  getDocs, 
+  doc, 
+  getDoc 
+} from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
-/* Firebase Config */
+
 const firebaseConfig = {
-  apiKey: "AIzaSyCDhTfNVO5jTqredgHe9t7emxOlvGMczxM",
-  authDomain: "enterprise-payroll-2026.firebaseapp.com",
-  projectId: "enterprise-payroll-2026",
-  storageBucket: "enterprise-payroll-2026.firebasestorage.app",
-  messagingSenderId: "877928180953",
-  appId: "1:877928180953:web:3b09060848347031c1e2c8"
+  apiKey:"AIzaSyCDhTfNVO5jTqredgHe9t7emxOlvGMczxM",
+  authDomain:"enterprise-payroll-2026.firebaseapp.com",
+  projectId:"enterprise-payroll-2026",
+  storageBucket:"enterprise-payroll-2026.appspot.com",
+  messagingSenderId:"877928180953",
+  appId:"1:877928180953:web:3b09060848347031c1e2c8"
 };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-/* ELEMENTS */
-const loginSection = document.getElementById("loginSection");
-const appSection = document.getElementById("appSection");
-const loginBtn = document.getElementById("loginBtn");
-const email = document.getElementById("email");
-const password = document.getElementById("password");
-const loginError = document.getElementById("loginError");
-const logoutBtn = document.getElementById("logoutBtn");
+/* DOM Elements */
+const loginSection=document.getElementById("loginSection");
+const appSection=document.getElementById("appSection");
+const email=document.getElementById("email");
+const password=document.getElementById("password");
+const loginBtn=document.getElementById("loginBtn");
+const logoutBtn=document.getElementById("logoutBtn");
+const loginError=document.getElementById("loginError");
 
-const empName = document.getElementById("empName");
-const empPosition = document.getElementById("empPosition");
-const empSalary = document.getElementById("empSalary");
-const empSSS = document.getElementById("empSSS");
-const empPagibigSavings = document.getElementById("empPagibigSavings");
-const empPagibigMPL = document.getElementById("empPagibigMPL");
-const empPagibigMP2 = document.getElementById("empPagibigMP2");
-const empPhilhealth = document.getElementById("empPhilhealth");
-const saveEmployeeBtn = document.getElementById("saveEmployeeBtn");
-const employeeTable = document.getElementById("employeeTable");
+const empName=document.getElementById("empName");
+const empPosition=document.getElementById("empPosition");
+const empSalary=document.getElementById("empSalary");
+const empSSS=document.getElementById("empSSS");
+const empPagibigSavings=document.getElementById("empPagibigSavings");
+const empPagibigMPL=document.getElementById("empPagibigMPL");
+const empPagibigMP2=document.getElementById("empPagibigMP2");
+const empPhilhealth=document.getElementById("empPhilhealth");
+const saveEmployeeBtn=document.getElementById("saveEmployeeBtn");
+const employeeTable=document.getElementById("employeeTable");
 
-const empSelect = document.getElementById("empSelect");
-const position = document.getElementById("position");
-const salary = document.getElementById("salary");
-const monthSelect = document.getElementById("monthSelect");
-const yearSelect = document.getElementById("yearSelect");
-const cutoffSalary = document.getElementById("cutoffSalary");
-const daysWorked = document.getElementById("daysWorked");
-const savePayrollBtn = document.getElementById("savePayrollBtn");
-const payrollTable = document.getElementById("payrollTable");
+const newUserName=document.getElementById("newUserName");
+const newUserEmail=document.getElementById("newUserEmail");
+const newUserPassword=document.getElementById("newUserPassword");
+const newUserRole=document.getElementById("newUserRole");
+const createUserBtn=document.getElementById("createUserBtn");
+const userTable=document.getElementById("userTable");
 
-const newUserName = document.getElementById("newUserName");
-const newUserEmail = document.getElementById("newUserEmail");
-const newUserPassword = document.getElementById("newUserPassword");
-const newUserRole = document.getElementById("newUserRole");
-const createUserBtn = document.getElementById("createUserBtn");
-const userTable = document.getElementById("userTable");
+const empSelect=document.getElementById("empSelect");
+const positionEl=document.getElementById("position");
+const salaryEl=document.getElementById("salary");
+const daysWorked=document.getElementById("daysWorked");
+const cutoffSelect=document.getElementById("cutoffSelect");
+const tardiness=document.getElementById("tardiness");
+const taxPercent=document.getElementById("taxPercent");
+const philhealth=document.getElementById("philhealth");
+const sss=document.getElementById("sss");
+const pagibig=document.getElementById("pagibig");
+const grossPay=document.getElementById("grossPay");
+const deduction=document.getElementById("deduction");
+const netPay=document.getElementById("netPay");
+const savePayrollBtn=document.getElementById("savePayrollBtn");
+const payrollTable=document.getElementById("payrollTable");
+const monthSelect=document.getElementById("monthSelect");
+const yearSelect=document.getElementById("yearSelect");
 
-const payslipEmpSelect = document.getElementById("payslipEmpSelect");
-const payslipMonthSelect = document.getElementById("payslipMonthSelect");
-const payslipYearSelect = document.getElementById("payslipYearSelect");
-const generatePayslipBtn = document.getElementById("generatePayslipBtn");
+const payslipEmpSelect=document.getElementById("payslipEmpSelect");
+const payslipMonthSelect=document.getElementById("payslipMonthSelect");
+const payslipYearSelect=document.getElementById("payslipYearSelect");
+const generatePayslipBtn=document.getElementById("generatePayslipBtn");
+const payslipResult=document.getElementById("payslipResult");
+const psEmpName=document.getElementById("psEmpName");
+const psMonthYear=document.getElementById("psMonthYear");
+const psDaysWorked=document.getElementById("psDaysWorked");
+const psGross=document.getElementById("psGross");
+const psPhilhealth=document.getElementById("psPhilhealth");
+const psSSS=document.getElementById("psSSS");
+const psPagibigSavings=document.getElementById("psPagibigSavings");
+const psPagibigMP2=document.getElementById("psPagibigMP2");
+const psPagibigMPL=document.getElementById("psPagibigMPL");
+const psTax=document.getElementById("psTax");
+const psTardiness=document.getElementById("psTardiness");
+const psTotalDeduction=document.getElementById("psTotalDeduction");
+const psNet=document.getElementById("psNet");
 
-const psEmpName = document.getElementById("psEmpName");
-const psMonth = document.getElementById("psMonth");
-const psYear = document.getElementById("psYear");
-const psDaysWorked = document.getElementById("psDaysWorked");
-const psGross = document.getElementById("psGross");
-const psTotalDed = document.getElementById("psTotalDed");
-const psNet = document.getElementById("psNet");
+const totalEmployees=document.getElementById("totalEmployees");
+const totalPayroll=document.getElementById("totalPayroll");
+const totalNetPay=document.getElementById("totalNetPay");
+let selectedEmployeeData = null;
 
-/* AUTH */
-loginBtn.onclick = async()=>{
+
+/* --- LOGIN / LOGOUT --- */
+loginBtn.onclick=async()=>{try{await signInWithEmailAndPassword(auth,email.value,password.value);loginError.textContent="";}catch(e){loginError.textContent="Invalid Email or Password";}};
+logoutBtn.onclick=async()=>{await signOut(auth);};
+
+/* --- AUTH STATE --- */
+
+
+onAuthStateChanged(auth, async user => {
   try {
-    await signInWithEmailAndPassword(auth,email.value,password.value);
-    loginError.textContent="";
-  } catch(e) {
-    loginError.textContent=e.message;
-  }
-};
+    if (user) {
 
-logoutBtn.onclick = ()=>signOut(auth);
+      loginSection.classList.add("hidden");
+      appSection.classList.remove("hidden");
 
-onAuthStateChanged(auth,user=>{
-  if(user) {
-    loginSection.classList.add("hidden");
-    appSection.classList.remove("hidden");
-    initializeAppData();
-  } else {
-    loginSection.classList.remove("hidden");
-    appSection.classList.add("hidden");
+      await loadEmployees();
+      await loadUsers();
+      await loadPayrollTable();
+      loadYearSelect();
+
+      let role = "admin";
+      let empNameLogin = "";
+      let empIdLogin = "";
+
+      const snap = await getDocs(collection(db, "users"));
+      snap.forEach(doc => {
+        const d = doc.data();
+        if (d.uid === user.uid) {
+          role = d.role;
+          empNameLogin = d.employeeName;
+          empIdLogin = d.employeeId;
+        }
+      });
+
+      // ✅ RESET SIDEBAR FIRST
+      document.querySelectorAll(".sidebar button")
+        .forEach(btn => btn.style.display = "block");
+
+      // ✅ STAFF RESTRICTION
+      if (role === "staff") {
+        document.querySelectorAll(".sidebar button").forEach(btn => {
+          if (btn.textContent !== "Generate Pay Slip") {
+            btn.style.display = "none";
+          }
+        });
+
+        showSection("payslip");
+
+        payslipEmpSelect.innerHTML =
+          `<option value="${empIdLogin}">${empNameLogin}</option>`;
+      } else {
+        showSection("dashboard");
+      }
+
+    } else {
+      loginSection.classList.remove("hidden");
+      appSection.classList.add("hidden");
+    }
+
+  } catch (error) {
+    console.log("Auth error:", error);
   }
 });
 
-/* INITIALIZE */
-async function initializeAppData() {
-  loadEmployees();
-  loadPayrolls();
-  loadPayslipEmployees();
+
+
+
+
+
+
+
+
+
+
+
+/* --- SHOW SECTION --- */
+function showSection(section){
+  document.querySelectorAll(".content > div").forEach(d=>d.classList.add("hidden"));
+  document.getElementById(section).classList.remove("hidden");
+
 }
 
-/* ADD EMPLOYEE */
-saveEmployeeBtn.onclick = async ()=>{
+window.showSection = showSection;
+/* --- AUTO PHILHEALTH --- */
+empSalary.addEventListener("input",()=>{empPhilhealth.value=(parseFloat(empSalary.value)*0.05||0).toFixed(2);});
+
+/* --- ADD EMPLOYEE --- */
+saveEmployeeBtn.onclick=async()=>{
+  if(!empName.value || !empPosition.value || !empSalary.value){alert("Fill all fields"); return;}
   await addDoc(collection(db,"employees"),{
-    name:empName.value,
-    position:empPosition.value,
-    salary:parseFloat(empSalary.value),
-    sss:parseFloat(empSSS.value)||0,
-    pagibigSavings:parseFloat(empPagibigSavings.value)||0,
-    pagibigMPL:parseFloat(empPagibigMPL.value)||0,
-    pagibigMP2:parseFloat(empPagibigMP2.value)||0,
-    philhealth:parseFloat(empPhilhealth.value)||0
+    name: empName.value,
+    position: empPosition.value,
+    salary: parseFloat(empSalary.value),
+    sss: parseFloat(empSSS.value)||0,
+    pagibigSavings: parseFloat(empPagibigSavings.value)||0,
+    pagibigMPL: parseFloat(empPagibigMPL.value)||0,
+    pagibigMP2: parseFloat(empPagibigMP2.value)||0,
+    philhealth: parseFloat(empPhilhealth.value)||0
   });
-  loadEmployees();
+  empName.value="";empPosition.value="";empSalary.value="";empSSS.value="";
+  empPagibigSavings.value="";empPagibigMPL.value="";empPagibigMP2.value="";
+  empPhilhealth.value="";
+  await loadEmployees();
 };
 
-/* LOAD EMPLOYEES */
+/* --- LOAD EMPLOYEES --- */
 async function loadEmployees(){
   const snap = await getDocs(collection(db,"employees"));
-  employeeTable.innerHTML="";
-  empSelect.innerHTML="";
+  employeeTable.innerHTML=""; empSelect.innerHTML='<option disabled selected>Select Employee</option>';
+  newUserName.innerHTML='<option disabled selected>Select Employee</option>';
   payslipEmpSelect.innerHTML="";
+  let total=0;
   snap.forEach(doc=>{
-    const d = doc.data();
-    const tr = `<tr><td>${d.name}</td><td>${d.position}</td><td>${d.salary}</td><td>${d.sss}</td><td>${d.pagibigSavings}</td><td>${d.pagibigMPL}</td><td>${d.pagibigMP2}</td><td>${d.philhealth}</td></tr>`;
-    employeeTable.innerHTML+=tr;
-    empSelect.innerHTML+=`<option value="${d.name}|${d.salary}|${d.sss}|${d.philhealth}|${d.pagibigSavings}|${d.pagibigMPL}|${d.pagibigMP2}">${d.name}</option>`;
-    payslipEmpSelect.innerHTML+=`<option value="${d.name}">${d.name}</option>`;
+    const e=doc.data();
+
+    employeeTable.innerHTML+=`<tr>
+
+     <td>${e.name}</td>
+  <td>${e.position}</td>
+  <td>${e.salary}</td>
+
+    </tr>`;
+
+    empSelect.innerHTML+=`<option value="${doc.id}">${e.name}</option>`;
+    newUserName.innerHTML+=`<option value="${doc.id}">${e.name}</option>`;
+    payslipEmpSelect.innerHTML+=`<option value="${doc.id}">${e.name}</option>`;
+    total++;
   });
+  totalEmployees.textContent=total;
 }
 
-/* PAYROLL */
-empSelect.onchange=()=>{
-  const parts = empSelect.value.split("|");
-  position.value=parts[0];
-  salary.value=parts[1];
-  cutoffSalary.value=(parseFloat(parts[1])/2).toFixed(2);
-  sss.value=parts[2];
-  philhealth.value=parts[3];
-  pagibigSavings.value=parts[4];
-  pagibigMPL.value=parts[5];
-  pagibigMP2.value=parts[6];
+/* --- CREATE USER --- */
+
+createUserBtn.onclick = async () => {
+  if(!newUserName.value || !newUserEmail.value || !newUserPassword.value){
+    alert("Fill all fields");
+    return;
+  }
+
+  try {
+    const adminUser = auth.currentUser;
+
+    const cred = await createUserWithEmailAndPassword(
+      auth,
+      newUserEmail.value,
+      newUserPassword.value
+    );
+
+    await addDoc(collection(db,"users"),{
+      uid: cred.user.uid,
+      employeeId: newUserName.value,
+      employeeName: newUserName.options[newUserName.selectedIndex].text,
+      email: newUserEmail.value,
+      role: newUserRole.value
+    });
+
+   
+
+alert("User created successfully. Please login again.");
+await signOut(auth);
+
+
+
+    newUserEmail.value="";
+    newUserPassword.value="";
+    newUserName.selectedIndex=0;
+
+    await loadUsers();
+
+  } catch(error){
+    alert(error.message);
+  }
 };
+
+
+
+
+/* --- LOAD USERS --- */
+
+/* --- LOAD USERS --- */
+async function loadUsers(){
+  try{
+    const snap = await getDocs(collection(db,"users"));
+    userTable.innerHTML="";
+
+    snap.forEach(doc=>{
+      const u = doc.data();
+
+      userTable.innerHTML += `
+        <tr>
+          <td>${u.employeeName || ""}</td>
+          <td>${u.email || ""}</td>
+          <td>${u.role || ""}</td>
+        </tr>
+      `;
+    });
+
+  }catch(error){
+    console.log("Error loading users:", error);
+  }
+}
+
+
+
+
+
+
+
+/* --- PAYROLL --- */
+
+empSelect.onchange = async () => {
+  const id = empSelect.value;
+  if (!id) return;
+
+  const docRef = doc(db, "employees", id);
+  const docSnap = await getDoc(docRef);
+
+  if (docSnap.exists()) {
+    const e = docSnap.data();
+    selectedEmployeeData = e;
+
+    positionEl.value = e.position;
+    salaryEl.value = e.salary;
+    philhealth.value = (e.salary * 0.05).toFixed(2);
+    sss.value = e.sss;
+    pagibig.value = (e.pagibigSavings + e.pagibigMPL + e.pagibigMP2).toFixed(2);
+
+    computePayroll();
+  }
+};
+
+function computePayroll(){
+  const sal=parseFloat(salaryEl.value)||0;
+  const days=parseFloat(daysWorked.value)||0;
+  const tard=parseFloat(tardiness.value)||0;
+  const tax=parseFloat(taxPercent.value)||0;
+  const ph=parseFloat(philhealth.value)||0;
+  const s=parseFloat(sss.value)||0;
+  const p=parseFloat(pagibig.value)||0;
+
+  const dailyRate=sal/22;
+  const cutoffSal=dailyRate*days;
+  const tardDeduction=(dailyRate/8/60)*tard;
+  const gross = cutoffSal;
+const taxDeduction = gross * (tax / 100);
+const totalDed = ph + s + p + taxDeduction + tardDeduction;
+
+
+
+  grossPay.value=gross.toFixed(2);
+  deduction.value=totalDed.toFixed(2);
+  netPay.value=(gross-totalDed).toFixed(2);
+}
+
+[daysWorked,tardiness,taxPercent].forEach(el=>el.addEventListener("input",computePayroll));
 
 savePayrollBtn.onclick=async()=>{
+  if(!empSelect.value || !cutoffSelect.value){alert("Select employee and cutoff"); return;}
   await addDoc(collection(db,"payrolls"),{
-    name:empSelect.value.split("|")[0],
+    empId:empSelect.value,
+    empName:empSelect.options[empSelect.selectedIndex].text,
+    position:positionEl.value,
+    salary:parseFloat(salaryEl.value),
     month:monthSelect.value,
-    year:payslipYearSelect.value,
-    daysWorked:parseFloat(daysWorked.value)
+    year:yearSelect.value,
+    daysWorked:parseFloat(daysWorked.value),
+    cutoff:cutoffSelect.value,
+    tardiness:parseFloat(tardiness.value),
+    taxPercent:parseFloat(taxPercent.value),
+    philhealth:parseFloat(philhealth.value),
+    sss:parseFloat(sss.value),
+   
+pagibigSavings: selectedEmployeeData ? selectedEmployeeData.pagibigSavings : 0,
+pagibigMP2: selectedEmployeeData ? selectedEmployeeData.pagibigMP2 : 0,
+pagibigMPL: selectedEmployeeData ? selectedEmployeeData.pagibigMPL : 0,
+
+
+
+     grossPay:parseFloat(grossPay.value),
+    totalDeduction:parseFloat(deduction.value),
+    netPay:parseFloat(netPay.value)
   });
-  loadPayrolls();
+  alert("Payroll saved!");
+  await loadPayrollTable();
 };
 
-/* LOAD PAYROLLS */
-async function loadPayrolls(){
-  const snap = await getDocs(collection(db,"payrolls"));
+/* --- LOAD PAYROLL TABLE --- */
+async function loadPayrollTable(){
+  const snap=await getDocs(collection(db,"payrolls"));
   payrollTable.innerHTML="";
+  let totalPay=0;
   snap.forEach(doc=>{
-    const d = doc.data();
-    payrollTable.innerHTML+=`<tr><td>${d.name}</td><td>${d.month}</td><td>${d.year}</td><td>${d.daysWorked}</td></tr>`;
+    const p=doc.data();
+
+    payrollTable.innerHTML+=`<tr>
+
+     <td>${p.empName}</td>
+      <td>${p.position}</td>
+      <td>${p.salary}</td>
+      <td>${p.daysWorked}</td>
+      <td>${p.grossPay}</td>
+      <td>${p.totalDeduction}</td>
+      <td>${p.netPay}</td>
+
+    </tr>`;
+    totalPay+=p.netPay;
   });
+  totalPayroll.textContent=snap.size;
+  totalNetPay.textContent=totalPay.toFixed(2);
 }
 
-/* GENERATE PAY SLIP */
-generatePayslipBtn.onclick = async()=>{
-  const name = payslipEmpSelect.value;
-  const month = payslipMonthSelect.value;
-  const year = payslipYearSelect.value;
+/* --- YEAR SELECT --- */
 
-  const snap = await getDocs(collection(db,"payrolls"));
-  let totalDays=0;
+
+function loadYearSelect(){
+  const y = new Date().getFullYear();
+
+  yearSelect.innerHTML = "";
+  payslipYearSelect.innerHTML = "";
+
+  for(let i = y; i >= y-5; i--){
+    yearSelect.innerHTML += `<option>${i}</option>`;
+    payslipYearSelect.innerHTML += `<option>${i}</option>`;
+  }
+}
+
+/* --- PAYSLIP --- */
+generatePayslipBtn.onclick=async()=>{
+  const emp=payslipEmpSelect.value; const month=payslipMonthSelect.value; const year=payslipYearSelect.value;
+  const snap=await getDocs(collection(db,"payrolls"));
+  let found=null;
   snap.forEach(doc=>{
-    const d = doc.data();
-    if(d.name === name && d.month === month && d.year === year) totalDays += d.daysWorked;
+    const p=doc.data();
+    if(p.empId===emp && p.month===month && p.year===year) found=p;
   });
+  if(found){
+    psEmpName.textContent=found.empName;
+    psMonthYear.textContent=found.month+" "+found.year;
+    psDaysWorked.textContent=found.daysWorked;
+    psGross.textContent=found.grossPay;
+    psPhilhealth.textContent=found.philhealth;
+    psSSS.textContent=found.sss;
 
-  psEmpName.textContent=name;
-  psMonth.textContent=month;
-  psYear.textContent=year;
-  psDaysWorked.textContent=totalDays;
+   psPagibigSavings.textContent = found.pagibigSavings || 0;
+psPagibigMP2.textContent = found.pagibigMP2 || 0;
+psPagibigMPL.textContent = found.pagibigMPL || 0;
 
-  const gross = (parseFloat(salary.value)/2)/11 * totalDays;
-  const totalDed = 0; // you can add actual deduction fields later
-  const net = gross - totalDed;
-
-  psGross.textContent=gross.toFixed(2);
-  psTotalDed.textContent=totalDed.toFixed(2);
-  psNet.textContent=net.toFixed(2);
-
-  document.getElementById("payslipResult").classList.remove("hidden");
-};
-
-/* SHOW SECTION */
-window.showSection=id=>{
-  document.querySelectorAll(".card").forEach(c=>c.classList.add("hidden"));
-  document.getElementById(id).classList.remove("hidden");
+    psTax.textContent=(found.grossPay*(found.taxPercent/100)).toFixed(2);
+    psTardiness.textContent=found.tardiness;
+    psTotalDeduction.textContent=found.totalDeduction;
+    psNet.textContent=found.netPay;
+    payslipResult.classList.remove("hidden");
+  }else{alert("No payroll found for this employee in selected month/year."); payslipResult.classList.add("hidden");}
 };
 </script>
 </body>
 </html>
-
