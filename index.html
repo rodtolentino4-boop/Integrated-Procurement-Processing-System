@@ -1,1 +1,3785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Enterprise Payroll System</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+<style>
+:root{
+  --primary:#0b3d91;
+  --secondary:#1565c0;
+  --accent:#1e88e5;
+  --light:#f4f6fb;
+  --white:#ffffff;
+  --shadow:0 4px 12px rgba(0,0,0,0.08);
+  --radius:10px;
+}
 
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:'Segoe UI', Tahoma, sans-serif;
+  background:var(--light);
+  color:#333;
+}
+
+/* ===== TOP HEADER ===== */
+.top-header{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:20px;
+  background:linear-gradient(135deg,var(--primary),var(--secondary));
+  color:white;
+  padding:0px;
+  position:sticky;
+  top:0;
+  z-index:1001;
+  box-shadow:var(--shadow);
+}
+
+.top-header img{
+  height:60px;
+}
+
+.top-header h3{
+  margin:0;
+  font-size:20px;
+  letter-spacing:1px;
+}
+
+.top-header h4{
+  margin:5px 0 0;
+  font-weight:400;
+  font-size:14px;
+  opacity:.9;
+}
+
+/* ===== MAIN HEADER ===== */
+header{
+  background:var(--primary);
+  color:white;
+  padding:15px 25px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  position:sticky;
+ top:0;
+  z-index:1000;
+  box-shadow:var(--shadow);
+}
+
+header h2{
+  margin:0;
+  font-size:18px;
+  letter-spacing:1px;
+}
+
+/* ===== LAYOUT ===== */
+.container{
+  display:flex;
+}
+
+/* ===== SIDEBAR ===== */
+.sidebar{
+  width:220px;
+  background:#1e2a38;
+  color:white;
+  padding:20px;
+  height:100vh;
+}
+.sidebar button{
+  width:100%;
+  padding:12px;
+  margin-bottom:12px;
+  border:none;
+  border-radius:8px;
+  background:white;
+  color:var(--secondary);
+  font-weight:600;
+  cursor:pointer;
+  transition:.3s;
+}
+
+.sidebar button:hover{
+  background:var(--accent);
+  color:white;
+}
+
+/* ===== CONTENT ===== */
+.content{
+  flex:1;
+  padding:35px;
+}
+
+.card{
+  background:#ffffff;
+  padding:20px;
+  border-radius:12px;
+  box-shadow:0 4px 15px rgba(0,0,0,0.08);
+  margin-bottom:20px;
+}
+
+/* ===== FORMS ===== */
+input,select{
+  width:100%;
+  padding:10px;
+  margin-bottom:14px;
+  border-radius:8px;
+  border:1px solid #d0d7e2;
+  font-size:14px;
+}
+
+input:focus,select:focus{
+  outline:none;
+  border-color:var(--accent);
+  box-shadow:0 0 0 2px rgba(30,136,229,0.2);
+}
+
+/* ===== BUTTONS ===== */
+button.action{
+  background:var(--primary);
+  color:white;
+  border:none;
+  padding:10px 18px;
+  border-radius:8px;
+  font-weight:600;
+  cursor:pointer;
+  transition:.3s;
+}
+
+button.action:hover{
+  background:var(--accent);
+}
+
+/* ===== TABLE ===== */
+table{
+  width:100%;
+  border-collapse:collapse;
+  background:white;
+  border-radius:10px;
+  overflow:hidden;
+}
+
+th{
+  background:#0b3d91;
+  color:white;
+  text-transform:uppercase;
+  font-size:12px;
+}
+
+td{
+  font-size:13px;
+}
+
+tr:nth-child(even){
+  background:#f7f9fc;
+}
+th, td{
+  padding:10px;
+  text-align:left;
+}
+
+tr:hover{
+  background:#eef3ff;
+}
+
+th{
+  letter-spacing:0.5px;
+}
+
+
+
+
+
+
+/* ===== LOGIN BOX ===== */
+.login-box{
+  max-width:420px;
+  margin:120px auto;
+  background:white;
+  padding:35px;
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+}
+
+.hidden{display:none}
+
+.flex-row{
+  display:flex;
+  gap:25px;
+}
+
+.half{flex:1}
+
+@media(max-width:900px){
+  .flex-row{flex-direction:column;}
+  .sidebar{display:none;}
+  header{top:0;}
+}
+
+@media print {
+
+@page{
+size: A4;
+margin: 10mm;
+}
+
+body *{
+visibility: hidden;
+}
+
+#payslipPrint, #payslipPrint *{
+visibility: visible;
+}
+
+#payslipPrint{
+position: absolute;
+top: -40px;   /* ito ang magtataas sa payslip */
+left: 0;
+width: 100%;
+}
+
+/* hide buttons when printing */
+.no-print{
+display:none !important;
+}
+
+table{
+width:100%;
+border-collapse: collapse;
+}
+
+th, td{
+border:1px solid black;
+padding:8px;
+text-align:left;
+}
+
+
+.no-print{
+display:none !important;
+}
+
+
+
+
+
+
+}
+
+
+.form-row{
+  display:flex;
+  align-items:center;
+  gap:3px;
+  margin-bottom:1px;
+}
+
+.form-row label{
+  width:110px;
+  font-size:12px;
+  font-weight:500;
+  margin:0;
+}
+
+.form-row input,
+.form-row select{
+  flex:1;
+  padding:2px 4px;
+  font-size:12px;
+  height:22px;
+  margin:0;
+}
+
+
+/* ===== ENTERPRISE POPUP STYLE ===== */
+
+.popup-form{
+
+background:white;
+
+width:500px;
+max-height:90vh;
+
+border-radius:10px;
+
+box-shadow:0 20px 50px rgba(0,0,0,0.25);
+
+padding:25px;
+
+animation:popupFade .3s ease;
+
+overflow-y:auto;
+
+}
+
+@keyframes popupFade{
+
+from{
+opacity:0;
+transform:translateY(-30px);
+}
+
+to{
+opacity:1;
+transform:translateY(0);
+}
+
+}
+
+/* ===== ENTERPRISE DASHBOARD ===== */
+
+.dashboard-grid{
+
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:20px;
+margin-bottom:25px;
+
+}
+
+.stat-card{
+
+background:linear-gradient(135deg,#1565c0,#1e88e5);
+color:white;
+
+padding:25px;
+
+border-radius:12px;
+
+display:flex;
+align-items:center;
+justify-content:space-between;
+
+box-shadow:0 10px 25px rgba(0,0,0,0.15);
+
+transition:0.3s;
+
+}
+
+.stat-card:hover{
+
+transform:translateY(-6px);
+box-shadow:0 15px 35px rgba(0,0,0,0.25);
+
+}
+
+.stat-info h3{
+
+margin:0;
+font-size:14px;
+font-weight:500;
+opacity:.9;
+
+}
+
+.stat-info h1{
+
+margin:5px 0 0;
+font-size:26px;
+
+}
+
+.stat-icon{
+
+font-size:36px;
+opacity:.9;
+
+}
+
+
+
+.top-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.top-header img {
+  height: 70px;
+}
+
+.top-header div {
+  display: flex;
+  flex-direction: column;
+}
+
+.gov-header{
+display:flex;
+align-items:center;
+justify-content:space-between;
+background:#1f5a8a;
+color:white;
+padding:15px 40px;
+}
+
+.gov-left img{
+height:70px;
+}
+
+.gov-center{
+flex:1;
+margin-left:20px;
+}
+
+.gov-top{
+font-size:14px;
+letter-spacing:1px;
+}
+
+.gov-center h1{
+margin:2px 0;
+font-size:26px;
+font-weight:600;
+}
+
+.gov-right{
+text-align:right;
+font-size:14px;
+}
+
+/* SHOW HEADER ONLY WHEN PRINTING */
+.print-only{
+display:none;
+}
+
+@media print{
+
+.print-only{
+display:block;
+}
+
+}
+
+#toast{
+position:fixed;
+top:20px;
+right:20px;
+background:#2ecc71;
+color:#fff;
+padding:15px 25px;
+border-radius:8px;
+font-weight:bold;
+box-shadow:0 5px 10px rgba(0,0,0,0.2);
+opacity:0;
+transform:translateY(-20px);
+transition:all .4s;
+z-index:9999;
+}
+
+#toast.show{
+opacity:1;
+transform:translateY(0);
+}
+
+#toast.error{
+background:#e74c3c;
+}
+
+#toast.warning{
+background:#f39c12;
+}
+
+
+
+</style>
+</head>
+<body>
+
+<div class="gov-header">
+
+<div class="gov-left">
+<img src="C:\Users\user\Desktop\PAYROLL ONLINE\Photo Motivational Quote Instagram Post.jpg">
+</div>
+
+<div class="gov-center">
+<span class="gov-top">FINANCE ADMINISTRATIVE SUPPORT SERVICES</span>
+<h1>DEPARTMENT OF SCIENCE AND TECHNOLOGY REGIONAL OFFICE No. 02</h1>
+</div>
+
+<div class="gov-right">
+<div id="clock"></div>
+</div>
+
+</div>
+
+
+<!-- LOGIN -->
+<div id="loginSection" class="login-box">
+<h3>Login</h3>
+<input type="email" id="email" placeholder="User Email" required>
+<input type="password" id="password" placeholder="Password" required>
+<button class="action" id="loginBtn">Login</button>
+<p id="loginError" style="color:red;"></p>
+</div>
+
+<!-- APP -->
+<div id="appSection" class="hidden">
+
+<header>
+<h2>ADVANCE DOST-02 EMPLOYEE PORTAL - ONLINE</h2>
+
+<div style="display:flex;align-items:center;gap:15px;">
+
+<span id="loggedUser" style="
+font-weight:600;
+font-size:14px;
+background:#ffffff20;
+padding:6px 12px;
+border-radius:6px;
+">
+👤 Loading...
+</span>
+
+<button class="action" id="logoutBtn">Logout</button>
+<button class="action" onclick="openPasswordForm()">Change Password</button>
+
+</div>
+</header>
+
+
+
+<div class="container">
+<div class="sidebar">
+
+<button onclick="showSection('dashboard')">📊 Dashboard</button>
+<button onclick="showSection('library')">👨‍💼 EMPLOYEE RECORDS</button>
+<button onclick="showSection('payroll')">💰 TRANSACTION</button>
+<button onclick="showSection('payslip')">📄 PAYSLIP GENERATOR</button>
+<button onclick="showSection('servicerecord')">📋 SERVICE RECORD</button>
+<button onclick="showSection('usermanagement')">👤 USER MANAGEMENT</button>
+<button onclick="showSection('notifications')">🔔 REQUESTS
+<span id="notifBadge" style="background:#e53935;color:white;padding:2px 6px;border-radius:12px;font-size:12px;display:none;">0</span>
+</button>
+
+
+
+
+</button>
+</div>
+
+<div class="content">
+
+
+
+
+<!-- DASHBOARD -->
+
+<div id="dashboard" class="card hidden">
+
+<h2>Payroll Analytics Dashboard</h2>
+
+<div class="dashboard-grid">
+
+<div class="stat-card">
+<div class="stat-info">
+<h3>Total Employees</h3>
+<h1 id="totalEmployees">0</h1>
+</div>
+<div class="stat-icon">👨‍💼</div>
+</div>
+
+<div class="stat-card">
+<div class="stat-info">
+<h3>Total Payroll Records</h3>
+<h1 id="totalPayroll">0</h1>
+</div>
+<div class="stat-icon">📊</div>
+</div>
+
+<div class="stat-card">
+<div class="stat-info">
+<h3>Total Net Pay</h3>
+<h1 id="totalNetPay">0</h1>
+</div>
+<div class="stat-icon">💰</div>
+</div>
+
+<div class="stat-card">
+<div class="stat-info">
+<h3>Average Salary</h3>
+<h1 id="avgSalary">0</h1>
+</div>
+<div class="stat-icon">📈</div>
+</div>
+
+</div>
+
+<br>
+
+<div class="card">
+<h3>Monthly Payroll Distribution</h3>
+<canvas id="payrollChart"></canvas>
+</div>
+
+<div class="card">
+<h3>Deduction Distribution</h3>
+<canvas id="deductionChart"></canvas>
+</div>
+
+
+</div>
+
+
+
+<!-- EMPLOYEES -->
+
+
+<div id="library" class="card hidden">
+
+<h3>Employees</h3>
+
+<button class="action" onclick="openEmployeeForm()">Add Employee</button>
+
+<button class="action" onclick="openEmployeeDetails()">
+Employee Details
+</button>
+
+<br><br>
+
+<input type="text" id="searchEmployee" placeholder="Search Employee...">
+
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Position</th>
+<th>Salary</th>
+<th>SSS</th>
+<th>Pagibig Savings</th>
+<th>Pagibig MPL</th>
+<th>Pagibig MP2</th>
+<th>Philhealth</th>
+<th>Action</th>
+</tr>
+</thead>
+
+<tbody id="employeeTable"></tbody>
+</table>
+
+</div>
+
+
+
+
+
+<!-- USER MANAGEMENT -->
+
+<div id="usermanagement" class="card hidden">
+
+<h3>User Management</h3>
+
+<button class="action" onclick="openUserForm()">Add User</button>
+
+<br><br>
+
+<table>
+
+<thead>
+<tr>
+<th>Employee</th>
+<th>Email</th>
+<th>Role</th>
+<th>Action</th>
+</tr>
+</thead>
+
+<tbody id="userTable"></tbody>
+
+</table>
+
+</div>
+
+
+
+<!-- PAYROLL -->
+
+<div id="payroll" class="card hidden">
+
+<h3>Payroll Records</h3>
+
+<button class="action" onclick="openPayrollForm()">
+Add Payroll
+</button>
+
+
+<br><br>
+
+<h4>Import Payroll via Excel</h4>
+
+<input type="file" id="excelFile" accept=".xlsx,.xls">
+
+<button class="action" onclick="previewExcel()">
+Preview Excel
+</button>
+
+<button class="action" onclick="importPayroll()">
+Import Payroll
+</button>
+
+<div id="excelPreview" style="margin-top:20px;"></div>
+
+
+
+
+
+
+
+
+
+
+
+<br><br>
+
+<table border="1" style="width:100%;border-collapse:collapse;">
+<thead>
+<tr>
+
+<th>Employee</th>
+<th>Month</th>
+<th>Year</th>
+<th>Position</th>
+<th>Salary</th>
+<th>Days Worked</th>
+<th>Gross Pay</th>
+<th>Total Deduction</th>
+<th>Net Pay</th>
+<th>Action</th>
+
+</tr>
+</thead>
+
+<tbody id="payrollTable"></tbody>
+
+</table>
+
+</div>
+
+
+
+
+<!-- PAYROLL POPUP FORM -->
+<div id="payrollForm" class="popup-form"
+style="position:fixed;
+top:0px;
+left:50%;
+transform:translateX(-50%);
+width:480px;
+
+height: 650px;
+overflow-y: auto;
+
+
+z-index:2000;
+background:white;
+
+border:4px double #0b3d91;
+border-radius:6px;
+box-shadow:0 10px 30px rgba(0,0,0,0.25);
+
+padding:15px;
+
+max-height:90vh;
+overflow-y:auto;
+
+font-size:13px;">
+<div style="
+text-align:center;
+font-weight:bold;
+font-size:16px;
+border-bottom:2px solid #0b3d91;
+padding-bottom:6px;
+margin-bottom:10px;
+color:#0b3d91;
+letter-spacing:1px;
+">
+PAYROLL ENTRY FORM
+</div>
+
+<select id="empSelect">
+<option disabled selected>Select Employee</option>
+</select>
+
+<div class="form-row">
+<label>Position:</label>
+<input type="text" id="position" readonly>
+</div>
+
+<div class="form-row">
+<label>Salary:</label>
+<input type="number" id="salary" readonly>
+</div>
+
+<div class="form-row">
+<label>Month:</label>
+<select id="monthSelect">
+<option>January</option>
+<option>February</option>
+<option>March</option>
+<option>April</option>
+<option>May</option>
+<option>June</option>
+<option>July</option>
+<option>August</option>
+<option>September</option>
+<option>October</option>
+<option>November</option>
+<option>December</option>
+</select>
+</div>
+
+<div class="form-row">
+<label>Year:</label>
+<select id="yearSelect"></select>
+</div>
+
+<div class="form-row">
+<label>Days Worked:</label>
+<input type="number" id="daysWorked" value="22">
+</div>
+
+<div class="form-row">
+<label>Cutoff:</label>
+<select id="cutoffSelect">
+<option disabled selected>Select Cutoff</option>
+<option value="1">1st Cutoff</option>
+<option value="2">2nd Cutoff</option>
+</select>
+</div>
+
+<div class="form-row">
+<label>Tardiness Deduction:</label>
+<input type="number" id="tardiness" value="0">
+</div>
+
+<div class="form-row">
+<label>Tax %:</label>
+<input type="number" id="taxPercent" value="0">
+</div>
+
+<div class="form-row">
+<label>PhilHealth:</label>
+<input type="number" id="philhealth" readonly>
+</div>
+
+<div class="form-row">
+<label>SSS:</label>
+<input type="number" id="sss" readonly>
+</div>
+
+<div class="form-row">
+<label>Pag-IBIG:</label>
+<input type="number" id="pagibig" readonly>
+</div>
+
+<div class="form-row">
+<label>Gross Pay:</label>
+<input type="number" id="grossPay" readonly>
+</div>
+
+<div class="form-row">
+<label>Total Deduction:</label>
+<input type="number" id="deduction" readonly>
+</div>
+
+<div class="form-row">
+<label>Net Pay:</label>
+<input type="number" id="netPay" readonly>
+</div>
+
+<button class="action" id="savePayrollBtn">Save Payroll</button>
+
+<button class="action" style="background:#e53935;margin-bottom:10px;" onclick="closePayrollForm()">Close</button>
+
+
+</div>
+
+
+<!-- end payrollForm -->
+
+
+<!-- EMPLOYEE POPUP FORM -->
+
+<div id="employeeForm" class="popup-form" style="
+display:none;
+position:fixed;
+top:50%;
+left:50%;
+transform:translate(-50%, -50%);
+width:480px;
+max-height:80vh;
+overflow-y:auto;
+z-index:5000;
+background:white;
+border:4px double #0b3d91;
+border-radius:6px;
+box-shadow:0 10px 30px rgba(0,0,0,0.25);
+padding:15px;
+font-size:13px;">
+
+<div style="
+text-align:center;
+font-weight:bold;
+font-size:16px;
+border-bottom:2px solid #0b3d91;
+padding-bottom:6px;
+margin-bottom:10px;
+color:#0b3d91;
+letter-spacing:1px;
+">
+EMPLOYEE ENTRY FORM
+</div>
+
+<div class="form-row">
+<label>Name:</label>
+<input type="text" id="empName">
+</div>
+
+<div class="form-row">
+<label>Position:</label>
+<input type="text" id="empPosition">
+</div>
+
+<div class="form-row">
+<label>Salary:</label>
+<input type="number" id="empSalary">
+</div>
+
+<div class="form-row">
+<label>SSS:</label>
+<input type="number" id="empSSS">
+</div>
+
+<div class="form-row">
+<label>Pagibig Savings:</label>
+<input type="number" id="empPagibigSavings">
+</div>
+
+<div class="form-row">
+<label>Pagibig MPL:</label>
+<input type="number" id="empPagibigMPL">
+</div>
+
+<div class="form-row">
+<label>Pagibig MP2:</label>
+<input type="number" id="empPagibigMP2">
+</div>
+
+<div class="form-row">
+<label>Philhealth:</label>
+<input type="number" id="empPhilhealth" readonly>
+</div>
+
+<button class="action" id="saveEmployeeBtn">Save Employee</button>
+
+<button class="action" style="background:#e53935;margin-bottom:10px;" onclick="closeEmployeeForm()">Close</button>
+
+</div>
+
+
+
+<!-- USER POPUP FORM -->
+
+<div id="userForm" class="popup-form" style="
+display:none;
+position:fixed;
+top:50%;
+left:50%;
+transform:translate(-50%, -50%);
+width:480px;
+max-height:80vh;
+overflow-y:auto;
+z-index:5000;
+background:white;
+border:4px double #0b3d91;
+border-radius:6px;
+box-shadow:0 10px 30px rgba(0,0,0,0.25);
+padding:15px;
+font-size:13px;">
+
+<div style="
+text-align:center;
+font-weight:bold;
+font-size:16px;
+border-bottom:2px solid #0b3d91;
+padding-bottom:6px;
+margin-bottom:10px;
+color:#0b3d91;
+letter-spacing:1px;
+">
+USER ENTRY FORM
+</div>
+
+<div class="form-row">
+<label>Employee:</label>
+<select id="newUserName">
+<option disabled selected>Select Employee</option>
+</select>
+</div>
+
+<div class="form-row">
+<label>Email:</label>
+<input type="email" id="newUserEmail">
+</div>
+
+<div class="form-row">
+<label>Password:</label>
+<input type="password" id="newUserPassword">
+</div>
+
+<div class="form-row">
+<label>Role:</label>
+
+<select id="newUserRole">
+<option disabled selected>Select Role</option>
+<option value="admin">Admin</option>
+<option value="staff">Staff</option>
+
+</select>
+</div>
+
+<button class="action" id="createUserBtn">Create User</button>
+
+<button class="action" style="background:#e53935;margin-bottom:10px;" onclick="closeUserForm()">Close</button>
+
+</div>
+
+
+
+
+
+
+<!-- PAYSLIP -->
+<div id="payslip" class="card hidden">
+
+<h3>Generate Pay Slip</h3>
+
+<select id="payslipEmpSelect"></select>
+<select id="payslipMonthSelect">
+<option>January</option><option>February</option><option>March</option>
+<option>April</option><option>May</option><option>June</option>
+<option>July</option><option>August</option><option>September</option>
+<option>October</option><option>November</option><option>December</option>
+</select>
+<select id="payslipYearSelect"></select>
+<button class="action" id="generatePayslipBtn">Generate Pay Slip</button>
+
+<div id="payslipPopup" class="hidden" style="
+position:fixed;
+top:0;
+left:0;
+right:0;
+margin:auto;
+width:800px;
+height:650px;
+overflow:auto;
+background:white;
+padding:0px;
+border:4px double #0b3d91;
+border-radius:6px;
+box-shadow:0 10px 30px rgba(0,0,0,0.25);
+z-index:6000;
+text-align:center;
+">
+
+
+
+<p><strong>Employee Name:</strong> <span id="psEmpName"></span></p>
+<p><strong>Month & Year:</strong> <span id="psMonthYear"></span></p>
+<p><strong>Total Days Worked:</strong> <span id="psDaysWorked"></span></p>
+<table>
+<thead><tr><th>Description</th><th>Amount</th></tr></thead>
+<tbody>
+<tr><td>Gross</td><td id="psGross"></td></tr>
+<tr><td>PhilHealth</td><td id="psPhilhealth"></td></tr>
+<tr><td>SSS</td><td id="psSSS"></td></tr>
+<tr><td>Pagibig Savings</td><td id="psPagibigSavings"></td></tr>
+<tr><td>Pagibig MP2</td><td id="psPagibigMP2"></td></tr>
+<tr><td>Pagibig MPL</td><td id="psPagibigMPL"></td></tr>
+<tr><td>Tax</td><td id="psTax"></td></tr>
+<tr><td>Tardiness</td><td id="psTardiness"></td></tr>
+<tr><th>Total Deduction</th><th id="psTotalDeduction"></th></tr>
+<tr><th>Net Pay</th><th id="psNet"></th></tr>
+</tbody>
+</table>
+
+<br>
+
+<div id="qrCode" style="
+position:absolute;
+top:20px;
+right:20px;
+"></div>
+
+<br>
+
+<button class="action no-print" id="requestSignatureBtn">
+Request Admin Signature
+</button>
+
+
+
+<button class="action no-print" onclick="printPayslip()">
+Print Payslip
+</button>
+
+<button class="action no-print" style="background:#e53935"
+onclick="closePayslipPopup()">
+Close
+</button>
+
+
+
+</div>
+</div>
+
+<div id="notifications" class="card hidden">
+
+<h3>Notifications</h3>
+
+<table>
+<thead>
+<tr>
+<th>Employee</th>
+<th>Month</th>
+<th>Year</th>
+<th>Status</th>
+
+<th>Message</th>
+<th>Action</th>
+
+
+</tr>
+</thead>
+
+<tbody id="requestTable"></tbody>
+
+</table>
+
+
+
+
+
+
+
+</div>
+
+
+
+<!-- SERVICE RECORD -->
+
+<div id="servicerecord" class="card hidden">
+
+<h3>Service Record</h3>
+
+<button class="action" onclick="openServiceRecordForm()">
+Add Employee Record
+</button>
+
+<br><br>
+
+<input type="text" id="searchServiceRecord" placeholder="Search Employee...">
+
+<table>
+<thead>
+<tr>
+<th>Employee Name</th>
+<th>Position</th>
+<th>Division</th>
+<th>Date From</th>
+<th>Date To</th>
+<th>Status</th>
+<th>Action</th>
+</tr>
+</thead>
+
+<tbody id="serviceRecordTable"></tbody>
+
+</table>
+
+</div>
+
+
+<!-- SERVICE RECORD POPUP -->
+
+<div id="serviceRecordForm" class="popup-form" style="
+display:none;
+position:fixed;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+width:480px;
+z-index:9999;
+background:white;
+border:4px double #0b3d91;
+border-radius:6px;
+padding:20px;
+box-shadow:0 10px 30px rgba(0,0,0,0.25);
+">
+
+<h3 style="text-align:center;">SERVICE RECORD ENTRY</h3>
+
+<div class="form-row">
+<label>Employee:</label>
+<select id="srEmployee"></select>
+</div>
+
+<div class="form-row">
+<label>Position:</label>
+<input type="text" id="srPosition">
+</div>
+
+<div class="form-row">
+<label>Division:</label>
+<input type="text" id="srDivision">
+</div>
+
+<div class="form-row">
+<label>Date From:</label>
+<input type="date" id="srDateFrom">
+</div>
+
+<div class="form-row">
+<label>Date To:</label>
+<input type="date" id="srDateTo">
+</div>
+
+<div class="form-row">
+<label>Status:</label>
+<select id="srStatus">
+<option>Permanent</option>
+<option>Contractual</option>
+<option>Temporary</option>
+</select>
+</div>
+
+
+<div class="form-row">
+<label>Salary:</label>
+<input type="number" id="srSalary">
+</div>
+
+<div class="form-row">
+<label>Leave W/O Pay:</label>
+<input type="text" id="srLeave">
+</div>
+
+<div class="form-row">
+<label>Separation Date:</label>
+<input type="date" id="srSepDate">
+</div>
+
+<div class="form-row">
+<label>Cause:</label>
+<input type="text" id="srSepCause">
+</div>
+
+
+
+
+
+
+
+
+
+
+<button class="action" id="saveServiceRecordBtn">Save</button>
+
+<button class="action" style="background:#e53935"
+onclick="closeServiceRecordForm()">Close</button>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+<!-- CHANGE PASSWORD FORM -->
+
+<div id="passwordForm" class="popup-form" style="
+display:none;
+position:fixed;
+top:50%;
+left:50%;
+transform:translate(-50%, -50%);
+width:400px;
+z-index:5000;
+background:white;
+border:4px double #0b3d91;
+border-radius:6px;
+box-shadow:0 10px 30px rgba(0,0,0,0.25);
+padding:15px;
+font-size:13px;">
+
+<div style="
+text-align:center;
+font-weight:bold;
+font-size:16px;
+border-bottom:2px solid #0b3d91;
+padding-bottom:6px;
+margin-bottom:10px;
+color:#0b3d91;">
+CHANGE PASSWORD
+</div>
+
+<div class="form-row">
+<label>New Password:</label>
+<input type="password" id="newPassword">
+</div>
+
+<div class="form-row">
+<label>Confirm Password:</label>
+<input type="password" id="confirmPassword">
+</div>
+
+<button class="action" onclick="changePassword()">Update Password</button>
+
+<button class="action" style="background:#e53935" onclick="closePasswordForm()">Close</button>
+
+</div>
+
+
+<!-- EMPLOYEE DETAILS POPUP -->
+<div id="employeeDetailsPopup" class="popup-form" style="
+display:none;
+position:fixed;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+width:900px;
+max-height:85vh;
+overflow:auto;
+z-index:6000;
+background:white;
+border:4px double #0b3d91;
+border-radius:6px;
+padding:20px;
+">
+
+<h3 style="text-align:center;">EMPLOYEE DETAILS</h3>
+
+<div style="display:flex; gap:20px;">
+
+<!-- LEFT SIDE FORM -->
+
+<div style="flex:1">
+
+<div class="form-row">
+<label>Name:</label>
+<select id="detailName"></select>
+</div>
+
+<div class="form-row">
+<label>Position:</label>
+<input type="text" id="detailPosition" readonly>
+</div>
+
+<div class="form-row">
+<label>Division:</label>
+<input type="text" id="detailDivision">
+</div>
+
+<div class="form-row">
+<label>Birthday:</label>
+<input type="date" id="detailBirthday">
+</div>
+
+<div class="form-row">
+<label>Address:</label>
+<input type="text" id="detailAddress">
+</div>
+
+<div class="form-row">
+<label>Course:</label>
+<input type="text" id="detailCourse">
+</div>
+
+<div class="form-row">
+<label>Date of Employment:</label>
+<input type="date" id="detailEmployment">
+</div>
+
+<button class="action" onclick="saveEmployeeDetails()">
+Save Details
+</button>
+<button class="action" style="background:#e53935"
+onclick="closeEmployeeDetails()">Close</button>
+
+</div>
+
+
+
+
+
+</div>
+
+
+<!-- RIGHT SIDE TABLE -->
+
+<div style="flex:1" id="employeeDetailsTableSection">
+
+<table border="1" style="width:100%;border-collapse:collapse;">
+
+<thead>
+<tr>
+<th>Name</th>
+<th>Division</th>
+<th>Course</th>
+<th>Action</th>
+</tr>
+</thead>
+
+<tbody id="employeeDetailsTable"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+<br>
+
+
+
+
+
+
+
+
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+
+import { 
+  getFirestore, 
+  collection, 
+  addDoc, 
+  getDocs, 
+  doc, 
+  getDoc,
+  updateDoc,
+  deleteDoc,
+  serverTimestamp,
+  query,
+  where
+} from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey:"AIzaSyCDhTfNVO5jTqredgHe9t7emxOlvGMczxM",
+  authDomain:"enterprise-payroll-2026.firebaseapp.com",
+  projectId:"enterprise-payroll-2026",
+  storageBucket:"enterprise-payroll-2026.appspot.com",
+  messagingSenderId:"877928180953",
+  appId:"1:877928180953:web:3b09060848347031c1e2c8"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+window.openServiceRecordForm = function(){
+  document.getElementById("serviceRecordForm").style.display = "block";
+}
+
+window.closeServiceRecordForm = function(){
+  document.getElementById("serviceRecordForm").style.display = "none";
+}
+
+
+/* DOM Elements */
+const loginSection=document.getElementById("loginSection");
+const appSection=document.getElementById("appSection");
+const email=document.getElementById("email");
+const password=document.getElementById("password");
+const loginBtn=document.getElementById("loginBtn");
+const logoutBtn=document.getElementById("logoutBtn");
+const loggedUser = document.getElementById("loggedUser");
+
+const empName=document.getElementById("empName");
+const empPosition=document.getElementById("empPosition");
+const empSalary=document.getElementById("empSalary");
+
+
+
+const empSSS=document.getElementById("empSSS");
+const empPagibigSavings=document.getElementById("empPagibigSavings");
+const empPagibigMPL=document.getElementById("empPagibigMPL");
+const empPagibigMP2=document.getElementById("empPagibigMP2");
+const empPhilhealth=document.getElementById("empPhilhealth");
+
+/* EMPLOYEE DETAILS VARIABLES */
+
+const detailName = document.getElementById("detailName");
+const detailPosition = document.getElementById("detailPosition");
+
+const saveEmployeeBtn=document.getElementById("saveEmployeeBtn");
+const employeeTable = document.getElementById("employeeTable");
+const searchEmployee = document.getElementById("searchEmployee");
+
+searchEmployee.addEventListener("input", function(){
+  const filter = this.value.toLowerCase();
+  const rows = employeeTable.querySelectorAll("tr");
+
+  rows.forEach(row => {
+    const name = row.children[0].textContent.toLowerCase();
+    row.style.display = name.includes(filter) ? "" : "none";
+  });
+});
+
+
+const newUserName=document.getElementById("newUserName");
+const newUserEmail=document.getElementById("newUserEmail");
+const newUserPassword=document.getElementById("newUserPassword");
+const newUserRole=document.getElementById("newUserRole");
+const createUserBtn=document.getElementById("createUserBtn");
+const userTable=document.getElementById("userTable");
+
+const empSelect=document.getElementById("empSelect");
+const positionEl=document.getElementById("position");
+const salaryEl=document.getElementById("salary");
+const daysWorked=document.getElementById("daysWorked");
+const cutoffSelect=document.getElementById("cutoffSelect");
+cutoffSelect.onchange = () => {
+    const cutoff = cutoffSelect.value;
+
+    if(cutoff === "1"){
+        sss.parentElement.style.display = "block";
+        philhealth.parentElement.style.display = "block";
+        pagibig.parentElement.style.display = "none";
+    } else if(cutoff === "2"){
+        sss.parentElement.style.display = "none";
+        philhealth.parentElement.style.display = "none";
+        pagibig.parentElement.style.display = "block";
+    } else {
+        sss.parentElement.style.display = "block";
+        philhealth.parentElement.style.display = "block";
+        pagibig.parentElement.style.display = "block";
+    }
+
+    computePayroll(); // auto recalc
+};
+
+
+const tardiness=document.getElementById("tardiness");
+const taxPercent=document.getElementById("taxPercent");
+const philhealth=document.getElementById("philhealth");
+const sss=document.getElementById("sss");
+const pagibig=document.getElementById("pagibig");
+const grossPay=document.getElementById("grossPay");
+const deduction=document.getElementById("deduction");
+const netPay=document.getElementById("netPay");
+const savePayrollBtn=document.getElementById("savePayrollBtn");
+const payrollTable=document.getElementById("payrollTable");
+const monthSelect=document.getElementById("monthSelect");
+const yearSelect=document.getElementById("yearSelect");
+
+const payslipEmpSelect=document.getElementById("payslipEmpSelect");
+const payslipMonthSelect=document.getElementById("payslipMonthSelect");
+const payslipYearSelect=document.getElementById("payslipYearSelect");
+const generatePayslipBtn=document.getElementById("generatePayslipBtn");
+const payslipPopup=document.getElementById("payslipPopup");
+const psEmpName=document.getElementById("psEmpName");
+const psMonthYear=document.getElementById("psMonthYear");
+const psDaysWorked=document.getElementById("psDaysWorked");
+const psGross=document.getElementById("psGross");
+const psPhilhealth=document.getElementById("psPhilhealth");
+const psSSS=document.getElementById("psSSS");
+const psPagibigSavings=document.getElementById("psPagibigSavings");
+const psPagibigMP2=document.getElementById("psPagibigMP2");
+const psPagibigMPL=document.getElementById("psPagibigMPL");
+const psTax=document.getElementById("psTax");
+const psTardiness=document.getElementById("psTardiness");
+const psTotalDeduction=document.getElementById("psTotalDeduction");
+const psNet=document.getElementById("psNet");
+const requestSignatureBtn = document.getElementById("requestSignatureBtn");
+const requestTable = document.getElementById("requestTable");
+
+const totalEmployees=document.getElementById("totalEmployees");
+const totalPayroll=document.getElementById("totalPayroll");
+const totalNetPay=document.getElementById("totalNetPay");
+
+// SERVICE RECORD VARIABLES
+const srEmployee = document.getElementById("srEmployee");
+const srPosition = document.getElementById("srPosition");
+const srDivision = document.getElementById("srDivision");
+const srDateFrom = document.getElementById("srDateFrom");
+const srDateTo = document.getElementById("srDateTo");
+const srStatus = document.getElementById("srStatus");
+
+
+let selectedEmployeeData = null;
+
+let role = "admin";
+let empNameLogin = "";
+let empIdLogin = "";
+let editingPayrollId = null;
+let editingEmployeeId = null;
+let editingUserId = null;
+
+
+/* --- LOGIN / LOGOUT --- */
+loginBtn.onclick=async()=>{try{await signInWithEmailAndPassword(auth,email.value,password.value);loginError.textContent="";}catch(e){loginError.textContent="Invalid Email or Password";}};
+logoutBtn.onclick=async()=>{await signOut(auth);};
+
+/* --- AUTH STATE --- */
+
+
+onAuthStateChanged(auth, async user => {
+  try {
+    if (user) {
+
+      loginSection.classList.add("hidden");
+      appSection.classList.remove("hidden");
+
+await loadEmployees();
+await loadUsers();
+await loadPayrollTable();
+await loadDashboardAnalytics();
+await loadServiceRecords();
+await loadServiceRecordEmployees();
+
+loadYearSelect();
+
+/* GET USER ROLE FIRST */
+
+
+/* GET USER ROLE */
+const userSnap = await getDocs(collection(db, "users"));
+
+userSnap.forEach(doc => {
+  const d = doc.data();
+
+ if (d.uid === user.uid) {
+  role = d.role;
+  empNameLogin = d.employeeName;
+  empIdLogin = d.employeeId;
+
+  loggedUser.textContent = "👤 " + empNameLogin;
+}
+
+
+});
+
+/* LOAD REQUESTS */
+await loadRequests();
+//await updateNotifBadge();
+
+
+
+      // ✅ RESET SIDEBAR FIRST
+      document.querySelectorAll(".sidebar button")
+        .forEach(btn => btn.style.display = "block");
+    
+// STAFF RESTRICTION
+
+
+
+if (role === "staff") {
+
+  document.querySelectorAll(".sidebar button").forEach(btn => {
+    if (
+      btn.textContent !== "Generate Pay Slip" &&
+      btn.textContent !== "Notifications"
+    ) {
+      btn.style.display = "none";
+    }
+  });
+
+  showSection("payslip");
+
+  payslipEmpSelect.innerHTML =
+    `<option value="${empIdLogin}">${empNameLogin}</option>`;
+
+  payslipEmpSelect.value = empIdLogin;
+  payslipEmpSelect.disabled = true;
+
+} else {
+
+  showSection("dashboard");
+
+}
+
+    } else {
+      loginSection.classList.remove("hidden");
+      appSection.classList.add("hidden");
+    }
+
+  } catch (error) {
+    console.log("Auth error:", error);
+  }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+/* --- SHOW SECTION --- */
+function showSection(section){
+  document.querySelectorAll(".content > div").forEach(d=>d.classList.add("hidden"));
+  document.getElementById(section).classList.remove("hidden");
+
+}
+
+window.showSection = showSection;
+/* --- AUTO PHILHEALTH --- */
+empSalary.addEventListener("input",()=>{empPhilhealth.value=(parseFloat(empSalary.value)*0.05||0).toFixed(2);});
+
+/* --- ADD EMPLOYEE --- */
+
+saveEmployeeBtn.onclick = async () => {
+if(editingEmployeeId){
+
+  await updateDoc(doc(db,"employees",editingEmployeeId),{
+
+    name: empName.value,
+    position: empPosition.value,
+    salary: parseFloat(empSalary.value),
+    sss: parseFloat(empSSS.value)||0,
+    pagibigSavings: parseFloat(empPagibigSavings.value)||0,
+    pagibigMPL: parseFloat(empPagibigMPL.value)||0,
+    pagibigMP2: parseFloat(empPagibigMP2.value)||0,
+    philhealth: parseFloat(empPhilhealth.value)||0
+
+  });
+
+  showToast("Employee updated successfully", "success");
+
+  editingEmployeeId = null;
+
+  await loadEmployees();
+
+  closeEmployeeForm();
+
+  return;
+}
+
+
+
+
+  try {
+
+    if(!empName.value || !empPosition.value || !empSalary.value){
+      showToast("Fill all fields", "warning");
+      return;
+    }
+
+    await addDoc(collection(db,"employees"),{
+      name: empName.value,
+      position: empPosition.value,
+      salary: parseFloat(empSalary.value),
+      sss: parseFloat(empSSS.value)||0,
+      pagibigSavings: parseFloat(empPagibigSavings.value)||0,
+      pagibigMPL: parseFloat(empPagibigMPL.value)||0,
+      pagibigMP2: parseFloat(empPagibigMP2.value)||0,
+      philhealth: parseFloat(empPhilhealth.value)||0
+    });
+
+    showToast("Employee added successfully", "success");
+await loadEmployees();
+
+closeEmployeeForm();
+
+empName.value="";
+empPosition.value="";
+empSalary.value="";
+empSSS.value="";
+empPagibigSavings.value="";
+empPagibigMPL.value="";
+empPagibigMP2.value="";
+empPhilhealth.value="";
+
+
+  } catch(error){
+    console.error(error);
+    alert(error.message);
+  }
+};
+
+
+
+/* --- LOAD EMPLOYEES --- */
+async function loadEmployees(){
+  const snap = await getDocs(collection(db,"employees"));
+  employeeTable.innerHTML=""; empSelect.innerHTML='<option disabled selected>Select Employee</option>';
+  newUserName.innerHTML='<option disabled selected>Select Employee</option>';
+ if (!payslipEmpSelect.disabled) {
+  payslipEmpSelect.innerHTML='<option disabled selected>Select Employee</option>';
+}
+  let total=0;
+  snap.forEach(doc=>{
+    const e=doc.data();
+
+  employeeTable.innerHTML+=`
+<tr>
+<td>${e.name}</td>
+<td>${e.position}</td>
+<td>${e.salary}</td>
+<td>${e.sss}</td>
+<td>${e.pagibigSavings}</td>
+<td>${e.pagibigMPL}</td>
+<td>${e.pagibigMP2}</td>
+<td>${e.philhealth}</td>
+
+<td>
+<button class="action" onclick="editEmployee('${doc.id}')">Edit</button>
+<button class="action" style="background:#e53935" onclick="deleteEmployee('${doc.id}')">Delete</button>
+</td>
+
+</tr>
+`;
+
+    empSelect.innerHTML+=`<option value="${doc.id}">${e.name}</option>`;
+    newUserName.innerHTML+=`<option value="${doc.id}">${e.name}</option>`;
+    payslipEmpSelect.innerHTML+=`<option value="${doc.id}">${e.name}</option>`;
+    total++;
+  });
+  totalEmployees.textContent=total;
+}
+
+/* --- CREATE USER --- */
+
+createUserBtn.onclick = async () => {
+
+
+/* EDIT USER MODE */
+if(editingUserId){
+
+  await updateDoc(doc(db,"users",editingUserId),{
+
+    email: newUserEmail.value,
+    role: newUserRole.value
+
+  });
+
+ showToast("User updated successfully", "success");
+
+  editingUserId = null;
+
+  await loadUsers();
+
+  closeUserForm();
+
+  return;
+}
+
+
+
+ if(!newUserName.value || !newUserEmail.value || !newUserPassword.value || !newUserRole.value){
+  showToast("Please fill all fields and select role", "warning");
+  return;
+}
+
+  try {
+    const adminUser = auth.currentUser;
+
+   const currentUser = auth.currentUser;
+
+const cred = await createUserWithEmailAndPassword(
+  auth,
+  newUserEmail.value,
+  newUserPassword.value
+);
+
+// ibalik ang admin login
+await auth.updateCurrentUser(currentUser);
+
+
+
+    await addDoc(collection(db,"users"),{
+      uid: cred.user.uid,
+      employeeId: newUserName.value,
+      employeeName: newUserName.options[newUserName.selectedIndex].text,
+      email: newUserEmail.value,
+      role: newUserRole.value
+    });
+
+   
+
+showToast("User created successfully", "success");
+
+
+    newUserEmail.value="";
+    newUserPassword.value="";
+    newUserName.selectedIndex=0;
+await loadUsers();
+closeUserForm();
+    
+
+  } catch(error){
+    alert(error.message);
+  }
+};
+
+
+
+
+/* --- LOAD USERS --- */
+async function loadUsers(){
+  try{
+    const snap = await getDocs(collection(db,"users"));
+    userTable.innerHTML="";
+
+    snap.forEach(doc=>{
+      const u = doc.data();
+
+     userTable.innerHTML += `
+<tr>
+<td>${u.employeeName || ""}</td>
+<td>${u.email || ""}</td>
+<td>${u.role || ""}</td>
+
+<td>
+<button class="action" onclick="editUser('${doc.id}')">Edit</button>
+<button class="action" style="background:#e53935" onclick="deleteUser('${doc.id}')">Delete</button>
+</td>
+
+</tr>
+`;
+
+
+    });
+
+  }catch(error){
+    console.log("Error loading users:", error);
+  }
+}
+
+
+
+
+
+
+
+/* --- PAYROLL --- */
+
+empSelect.onchange = async () => {
+  const id = empSelect.value;
+  if (!id) return;
+
+  const docRef = doc(db, "employees", id);
+  const docSnap = await getDoc(docRef);
+
+  if (docSnap.exists()) {
+    const e = docSnap.data();
+    selectedEmployeeData = e;
+
+    positionEl.value = e.position;
+    salaryEl.value = e.salary;
+    philhealth.value = (e.salary * 0.05).toFixed(2);
+    sss.value = e.sss;
+    pagibig.value = (e.pagibigSavings + e.pagibigMPL + e.pagibigMP2).toFixed(2);
+
+    computePayroll();
+  }
+};
+
+function computePayroll(){
+
+  const sal = parseFloat(salaryEl.value) || 0;
+  const days = parseFloat(daysWorked.value) || 0;
+
+  const tardDeduction = parseFloat(tardiness.value) || 0;
+  const tax = parseFloat(taxPercent.value) || 0;
+
+  const ph = parseFloat(philhealth.value) || 0;
+  const s = parseFloat(sss.value) || 0;
+
+  const pagibigSavings = selectedEmployeeData?.pagibigSavings || 0;
+  const pagibigMP2 = selectedEmployeeData?.pagibigMP2 || 0;
+  const pagibigMPL = selectedEmployeeData?.pagibigMPL || 0;
+
+  const dailyRate = sal / 22;
+  const gross = dailyRate * days;
+
+  const taxDeduction = gross * (tax / 100);
+
+  let totalDed = 0;
+
+  if (cutoffSelect.value === "1") {
+
+    // 1st cutoff → PhilHealth + SSS
+    totalDed =
+      ph +
+      s +
+      taxDeduction +
+      tardDeduction;
+
+  } 
+  else if (cutoffSelect.value === "2") {
+
+    // 2nd cutoff → Pag-IBIG only
+    totalDed =
+      pagibigSavings +
+      pagibigMP2 +
+      pagibigMPL +
+      taxDeduction +
+      tardDeduction;
+
+  } 
+  else {
+
+    // fallback if no cutoff selected
+    totalDed =
+      ph +
+      s +
+      pagibigSavings +
+      pagibigMP2 +
+      pagibigMPL +
+      taxDeduction +
+      tardDeduction;
+
+  }
+
+  grossPay.value = gross.toFixed(2);
+  deduction.value = totalDed.toFixed(2);
+
+  netPay.value = (gross - totalDed).toFixed(2);
+  netPay.style.fontWeight = "bold";
+  netPay.style.color = "#0b3d91";
+
+}
+
+[daysWorked,tardiness,taxPercent].forEach(el=>el.addEventListener("input",computePayroll));
+
+savePayrollBtn.onclick = async () => {
+
+  try{
+
+    
+if(!empSelect.value){
+ showToast("Please select an employee.", "warning");
+  return;
+}
+
+if(!cutoffSelect.value){
+showToast("Please select a cutoff (1st or 2nd) before saving payroll.", "warning");
+  return;
+}
+
+if(editingPayrollId){
+
+  await updateDoc(doc(db,"payrolls",editingPayrollId),{
+
+    daysWorked: parseFloat(daysWorked.value),
+    tardiness: parseFloat(tardiness.value),
+    taxPercent: parseFloat(taxPercent.value),
+    grossPay: parseFloat(grossPay.value),
+    totalDeduction: parseFloat(deduction.value),
+    netPay: parseFloat(netPay.value)
+
+  });
+
+showToast("Payroll updated successfully", "success");
+
+  editingPayrollId = null;
+
+  await loadPayrollTable();
+  await loadDashboardAnalytics();
+
+  return;
+}
+
+
+
+let ph = parseFloat(philhealth.value) || 0;
+let s = parseFloat(sss.value) || 0;
+
+let pagibigSavings = selectedEmployeeData?.pagibigSavings || 0;
+let pagibigMP2 = selectedEmployeeData?.pagibigMP2 || 0;
+let pagibigMPL = selectedEmployeeData?.pagibigMPL || 0;
+
+/* CUTOFF LOGIC */
+
+if(cutoffSelect.value === "1"){
+  // 1st cutoff → remove Pagibig
+  pagibigSavings = 0;
+  pagibigMP2 = 0;
+  pagibigMPL = 0;
+}
+
+if(cutoffSelect.value === "2"){
+  // 2nd cutoff → remove SSS & Philhealth
+  ph = 0;
+  s = 0;
+}
+
+
+const q = query(
+  collection(db,"payrolls"),
+  where("empId","==",empSelect.value),
+  where("month","==",monthSelect.value),
+  where("year","==",yearSelect.value),
+  where("cutoff","==",cutoffSelect.value)
+);
+
+const existingPayroll = await getDocs(q);
+
+if(!existingPayroll.empty){
+  showToast("Payroll already exists for this employee for the selected month and cutoff.", "error");
+  return;
+}
+
+
+
+
+    await addDoc(collection(db,"payrolls"),{
+      empId:empSelect.value,
+      empName:empSelect.options[empSelect.selectedIndex].text,
+      position:positionEl.value,
+      salary:parseFloat(salaryEl.value),
+      month:monthSelect.value,
+      year:yearSelect.value,
+      daysWorked:parseFloat(daysWorked.value),
+      cutoff:cutoffSelect.value,
+      tardiness:parseFloat(tardiness.value),
+      taxPercent:parseFloat(taxPercent.value),
+      philhealth: ph,
+sss: s,
+
+pagibigSavings: pagibigSavings,
+pagibigMP2: pagibigMP2,
+pagibigMPL: pagibigMPL,
+
+      grossPay:parseFloat(grossPay.value),
+      totalDeduction:parseFloat(deduction.value),
+      netPay:parseFloat(netPay.value)
+    });
+
+    alert("Payroll saved!");
+
+    await loadPayrollTable();
+    await loadDashboardAnalytics();
+
+empSelect.selectedIndex=0;
+positionEl.value="";
+salaryEl.value="";
+daysWorked.value=22;
+cutoffSelect.selectedIndex=0;
+tardiness.value=0;
+taxPercent.value=0;
+philhealth.value="";
+sss.value="";
+pagibig.value="";
+grossPay.value="";
+deduction.value="";
+netPay.value="";
+
+
+
+
+  }catch(error){
+    console.error(error);
+    alert(error.message);
+  }
+};
+
+/* --- LOAD PAYROLL TABLE --- */
+async function loadPayrollTable(){
+
+  const snap = await getDocs(query(collection(db,"payrolls")));
+  payrollTable.innerHTML="";
+
+  let totalPay=0;
+
+  snap.forEach(doc=>{
+
+    const p = doc.data();
+
+    payrollTable.innerHTML += `
+    <tr>
+      <td>${p.empName}</td>
+      <td>${p.month}</td>
+      <td>${p.year}</td>
+      <td>${p.position}</td>
+      <td>${p.salary}</td>
+      <td>${p.daysWorked}</td>
+      <td>${p.grossPay}</td>
+      <td>${p.totalDeduction}</td>
+      <td>${p.netPay}</td>
+
+      <td>
+        <button class="action" onclick="editPayroll('${doc.id}')">Edit</button>
+        <button class="action" style="background:#e53935" onclick="deletePayroll('${doc.id}')">Delete</button>
+      </td>
+    </tr>
+    `;
+
+    totalPay += p.netPay;
+
+  });
+
+  totalPayroll.textContent = snap.size;
+  totalNetPay.textContent = totalPay.toFixed(2);
+}
+/* --- YEAR SELECT --- */
+
+
+function loadYearSelect(){
+  const y = new Date().getFullYear();
+
+  yearSelect.innerHTML = "";
+  payslipYearSelect.innerHTML = "";
+
+  for(let i = y; i >= y-5; i--){
+    yearSelect.innerHTML += `<option>${i}</option>`;
+    payslipYearSelect.innerHTML += `<option>${i}</option>`;
+  }
+}
+
+/* --- PAYSLIP --- */
+generatePayslipBtn.onclick = async () => {
+
+const emp = payslipEmpSelect.value;
+const month = payslipMonthSelect.value;
+const year = payslipYearSelect.value;
+
+const q = query(
+  collection(db,"payrolls"),
+  where("empId","==",emp),
+  where("month","==",month),
+  where("year","==",String(year))
+);
+
+const snap = await getDocs(q);
+
+if(snap.empty){
+  alert("No payroll found for this employee.");
+  payslipPrint.classList.add("hidden");
+  return;
+}
+
+let totalGross = 0;
+let totalDeduction = 0;
+let totalNet = 0;
+let totalDays = 0;
+
+let totalPhilhealth = 0;
+let totalSSS = 0;
+let totalPagibigSavings = 0;
+let totalPagibigMP2 = 0;
+let totalPagibigMPL = 0;
+let totalTax = 0;
+let totalTardiness = 0;
+
+let empName = "";
+
+snap.forEach(doc=>{
+const p = doc.data();
+
+empName = p.empName;
+
+totalGross += p.grossPay || 0;
+totalDeduction += p.totalDeduction || 0;
+totalNet += p.netPay || 0;
+totalDays += p.daysWorked || 0;
+
+totalPhilhealth += p.philhealth || 0;
+totalSSS += p.sss || 0;
+totalPagibigSavings += p.pagibigSavings || 0;
+totalPagibigMP2 += p.pagibigMP2 || 0;
+totalPagibigMPL += p.pagibigMPL || 0;
+
+totalTax += (p.grossPay * (p.taxPercent/100)) || 0;
+totalTardiness += p.tardiness || 0;
+
+});
+
+/* DISPLAY */
+
+psEmpName.textContent = empName;
+psMonthYear.textContent = month + " " + year;
+
+psDaysWorked.textContent = totalDays;
+
+psGross.textContent = totalGross.toFixed(2);
+psPhilhealth.textContent = totalPhilhealth.toFixed(2);
+psSSS.textContent = totalSSS.toFixed(2);
+
+psPagibigSavings.textContent = totalPagibigSavings.toFixed(2);
+psPagibigMP2.textContent = totalPagibigMP2.toFixed(2);
+psPagibigMPL.textContent = totalPagibigMPL.toFixed(2);
+
+psTax.textContent = totalTax.toFixed(2);
+psTardiness.textContent = totalTardiness.toFixed(2);
+
+psTotalDeduction.textContent = totalDeduction.toFixed(2);
+psNet.textContent = totalNet.toFixed(2);
+
+payslipPopup.classList.remove("hidden");
+
+/* QR CODE */
+
+document.getElementById("qrCode").innerHTML = "";
+
+const qrData = `
+Employee: ${empName}
+Month: ${month}
+Year: ${year}
+Net Pay: ${totalNet.toFixed(2)}
+`;
+
+new QRCode(document.getElementById("qrCode"),{
+text: qrData,
+width:120,
+height:120
+});
+
+
+
+
+
+};
+
+// ------------------- EXISTING CODE -------------------
+// Firebase config
+// Auth state
+// Load employees
+// Payroll functions
+// Payslip functions
+// ------------------- END EXISTING CODE -------------------
+
+// ------------------- STEP 4: DASHBOARD ANALYTICS -------------------
+
+// Variables for analytics
+const avgSalary = document.getElementById("avgSalary");
+let payrollChart;
+let deductionChart;
+
+// Load Dashboard Analytics
+async function loadDashboardAnalytics(){
+  const payrollSnap = await getDocs(collection(db,"payrolls"));
+
+  let totalSalary = 0;
+  let count = 0;
+
+  let monthData = {
+    January:0, February:0, March:0, April:0,
+    May:0, June:0, July:0, August:0,
+    September:0, October:0, November:0, December:0
+  };
+
+  let deductionTotals = {
+    philhealth:0,
+    sss:0,
+    pagibig:0,
+    tax:0
+  };
+
+  payrollSnap.forEach(doc=>{
+    const p = doc.data();
+
+    //totalSalary += p.salary;
+    totalSalary += p.netPay;
+    count++;
+
+    monthData[p.month] += p.netPay;
+
+    deductionTotals.philhealth += p.philhealth;
+    deductionTotals.sss += p.sss;
+    deductionTotals.pagibig += (p.pagibigSavings || 0) + (p.pagibigMP2 || 0) + (p.pagibigMPL || 0);
+    deductionTotals.tax += p.grossPay * (p.taxPercent/100);
+  });
+
+  avgSalary.textContent = count > 0 ? (totalSalary/count).toFixed(2) : "0.00";
+
+  renderPayrollChart(monthData);
+  renderDeductionChart(deductionTotals);
+}
+
+// Chart rendering functions
+function renderPayrollChart(data){
+  const ctx = document.getElementById("payrollChart");
+  if(payrollChart) payrollChart.destroy();
+
+  payrollChart = new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels:Object.keys(data),
+      datasets:[{
+        label:'Monthly Net Payroll',
+        data:Object.values(data),
+        backgroundColor:'#1565c0'
+      }]
+    },
+    options:{
+      responsive:true,
+      plugins:{legend:{display:false}}
+    }
+  });
+}
+
+function renderDeductionChart(data){
+  const ctx = document.getElementById("deductionChart");
+  if(deductionChart) deductionChart.destroy();
+
+  deductionChart = new Chart(ctx,{
+    type:'pie',
+    data:{
+      labels:['Philhealth','SSS','Pagibig','Tax'],
+      datasets:[{
+        data:[data.philhealth,data.sss,data.pagibig,data.tax],
+        backgroundColor:['#1e88e5','#43a047','#fb8c00','#e53935']
+      }]
+    },
+    options:{responsive:true}
+  });
+}
+
+// ------------------- END STEP 4 -------------------
+
+requestSignatureBtn.onclick = async () => {
+
+  if (!payslipMonthSelect.value || !payslipYearSelect.value) {
+    alert("Please select Month and Year first.");
+    return;
+  }
+
+  try {
+
+    // CHECK EXISTING REQUEST - FIXED
+if(!empIdLogin || empIdLogin.trim() === ""){
+  alert("Employee ID is missing. Please contact admin.");
+  return;
+}
+
+const q = query(
+  collection(db,"payslip_requests"),
+  where("empId","==",empIdLogin),
+  where("month","==",payslipMonthSelect.value),
+  where("year","==",payslipYearSelect.value)
+);
+
+const snap = await getDocs(q);
+
+let hasPendingRequest = false;
+
+snap.forEach(doc => {
+  const data = doc.data();
+  // Only consider requests with actual pending status
+  if(data.status && data.status === "Pending"){
+    hasPendingRequest = true;
+  }
+});
+
+if(hasPendingRequest){
+  alert("You already sent a request for this payslip.");
+  return;
+}
+
+    await addDoc(collection(db,"payslip_requests"),{
+      empId: empIdLogin,
+      empName: empNameLogin,
+      month: payslipMonthSelect.value,
+      year: payslipYearSelect.value,
+      status: "Pending",
+      message: "Waiting for admin signature",
+      createdAt: serverTimestamp()
+    });
+
+    alert("Request sent to admin successfully.");
+
+    loadRequests();
+    updateNotifBadge();
+
+  } catch(error) {
+
+    console.error(error);
+    alert("Failed to send request.");
+
+  }
+
+};
+
+//const requestTable = document.getElementById("requestTable");
+
+
+async function loadRequests() {
+
+  const snap = await getDocs(collection(db,"payslip_requests"));
+  requestTable.innerHTML = "";
+
+  for (const docSnap of snap.docs) {
+
+    const r = docSnap.data();
+    const id = docSnap.id;
+
+    if(role === "staff" && r.empId !== empIdLogin){
+      continue;
+    }
+
+    let actions = "";
+
+    if(role === "admin" && r.status === "Pending"){
+      actions = `
+        <button class="action" onclick="approveRequest('${id}')">Approve</button>
+        <button class="action" onclick="rejectRequest('${id}')">Reject</button>
+      `;
+    }
+
+    if(role === "staff"){
+      actions = r.status;
+    }
+
+    const empName = r.empName || "Unknown Employee";
+
+    requestTable.innerHTML += `
+    <tr>
+      <td>${empName}</td>
+      <td>${r.month}</td>
+      <td>${r.year}</td>
+      <td>${r.status}</td>
+      <td>${r.message}</td>
+      <td>${actions}</td>
+    </tr>
+    `;
+  }
+
+  updateNotifBadge();
+}
+
+
+
+window.approveRequest = async function(id){
+  try {
+    const ref = doc(db,"payslip_requests",id);
+
+    await updateDoc(ref,{
+      status:"Approved",
+      message:"Signed by Admin"
+    });
+
+    alert("Payslip approved and signed.");
+    await loadRequests(); // reload table + update badge
+  } catch(error) {
+    console.error("Error approving request:", error);
+    alert("Failed to approve request. Try again.");
+  }
+}
+
+window.rejectRequest = async function(id){
+  try {
+    const ref = doc(db,"payslip_requests",id);
+
+    await updateDoc(ref,{
+      status:"Rejected",
+      message:"Rejected by Admin"
+    });
+
+    alert("Request rejected.");
+    await loadRequests(); // reload table + update badge
+  } catch(error) {
+    console.error("Error rejecting request:", error);
+    alert("Failed to reject request. Try again.");
+  }
+}
+
+async function updateNotifBadge(){
+
+  const snap = await getDocs(collection(db,"payslip_requests"));
+  let pending = 0;
+
+  snap.forEach(doc=>{
+    const d = doc.data();
+
+    // ADMIN sees all pending
+    if(role === "admin"){
+      if(d.status === "Pending"){
+        pending++;
+      }
+    }
+
+    // STAFF sees only their pending request
+    if(role === "staff"){
+      if(d.status === "Pending" && d.empId === empIdLogin){
+        pending++;
+      }
+    }
+
+  });
+
+  const badge = document.getElementById("notifBadge");
+
+  if(pending > 0){
+    badge.style.display = "inline-block";
+    badge.textContent = pending;
+  }else{
+    badge.style.display = "none";
+  }
+
+}
+
+window.updateNotifBadge = updateNotifBadge;
+window.loadRequests = loadRequests;
+
+
+async function getEmployeeName(empId){
+  const ref = doc(db,"employees",empId);
+  const snap = await getDoc(ref);
+
+  if(snap.exists()){
+    return snap.data().name;
+  }
+
+  return "Unknown Employee";
+}
+
+function printPayslip() {
+
+  const element = document.getElementById("payslipPopup");
+
+  if (!element.classList.contains("hidden")) {
+
+    const printWindow = window.open('', '', 'height=800,width=800');
+
+    printWindow.document.write('<html><head><title>Payslip</title>');
+
+    printWindow.document.write(`
+      <style>
+        body { font-family: Arial, sans-serif; margin:0px; }
+        h3, h4 { text-align:center; margin:0; }
+        table { width:100%; border-collapse:collapse; margin-top:15px; }
+        th, td { border:1px solid #000; padding:8px; text-align:left; }
+        .signature { margin-top:50px; display:flex; justify-content:space-between; }
+        .signature div { text-align:center; }
+        img { display:block; margin:0 auto 10px; height:60px; }
+
+
+@media print{
+button{
+display:none;
+}
+}
+
+
+      </style>
+    `);
+
+    printWindow.document.write('</head><body>');
+
+printWindow.document.write(`
+  <h3>DEPARTMENT OF SCIENCE AND TECHNOLOGY</h3>
+  <h4>REGIONAL OFFICE NO. 02</h4>
+  <h2 style="text-align:center; margin-top:10px;">PAY SLIP</h2>
+  <br>
+`);
+    
+
+    printWindow.document.write(element.innerHTML);
+
+    printWindow.document.write(`
+      <div class="signature">
+        <div>
+          <hr style="width:200px;">
+          <p>Employee Signature</p>
+        </div>
+        <div>
+          <hr style="width:200px;">
+          <p>Accounting Head</p>
+        </div>
+      </div>
+    `);
+
+
+
+
+
+
+
+
+    printWindow.document.write('</body></html>');
+
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    printWindow.close();
+
+  } else {
+
+    alert("Please generate the payslip first!");
+
+  }
+}
+
+
+
+/* IMPORTANT FIX */
+window.printPayslip = printPayslip;
+
+window.deletePayroll = async function(id){
+
+  if(!confirm("Delete this payroll record?")) return;
+
+  try{
+
+    await deleteDoc(doc(db,"payrolls",id));
+
+    alert("Payroll deleted successfully");
+
+    loadPayrollTable();
+    loadDashboardAnalytics();
+
+  }catch(error){
+
+    console.error(error);
+    alert("Failed to delete payroll");
+
+  }
+
+}
+
+window.editPayroll = async function(id){
+
+  try{
+
+    const ref = doc(db,"payrolls",id);
+    const snap = await getDoc(ref);
+
+    if(!snap.exists()){
+      alert("Payroll not found");
+      return;
+    }
+
+    const p = snap.data();
+
+    editingPayrollId = id;
+
+    empSelect.value = p.empId;
+    positionEl.value = p.position;
+    salaryEl.value = p.salary;
+    monthSelect.value = p.month;
+    yearSelect.value = p.year;
+    daysWorked.value = p.daysWorked;
+    cutoffSelect.value = p.cutoff;
+    tardiness.value = p.tardiness;
+    taxPercent.value = p.taxPercent;
+
+    philhealth.value = p.philhealth;
+    sss.value = p.sss;
+
+    pagibig.value =
+      (p.pagibigSavings || 0) +
+      (p.pagibigMP2 || 0) +
+      (p.pagibigMPL || 0);
+
+    grossPay.value = p.grossPay;
+    deduction.value = p.totalDeduction;
+    netPay.value = p.netPay;
+
+    showSection("payroll");
+
+  }catch(error){
+    console.error(error);
+    alert("Failed to load payroll for editing.");
+  }
+
+}
+
+function openPayrollForm(){
+  document.getElementById("payrollForm").classList.remove("hidden");
+}
+
+function closePayrollForm(){
+  document.getElementById("payrollForm").classList.add("hidden");
+}
+
+window.openPayrollForm = openPayrollForm;
+window.closePayrollForm = closePayrollForm;
+
+
+/* EMPLOYEE POPUP FUNCTIONS */
+
+function openEmployeeForm(){
+  document.getElementById("employeeForm").style.display = "block";
+}
+
+function closeEmployeeForm(){
+  document.getElementById("employeeForm").style.display = "none";
+}
+
+
+window.openEmployeeForm = openEmployeeForm;
+window.closeEmployeeForm = closeEmployeeForm;
+
+function openEmployeeDetails(){
+
+document.getElementById("employeeDetailsPopup").style.display="block";
+
+if(role === "staff"){
+
+detailName.innerHTML =
+`<option value="${empIdLogin}">${empNameLogin}</option>`;
+
+detailName.value = empIdLogin;
+detailName.disabled = true;
+
+document.getElementById("employeeDetailsTableSection").style.display="none";
+
+loadMyDetails();
+
+}else{
+
+detailName.disabled = false;
+
+loadEmployeeSelect();
+loadEmployeeDetails();
+
+}
+
+}
+
+function closeEmployeeDetails(){
+document.getElementById("employeeDetailsPopup").style.display="none";
+}
+
+window.openEmployeeDetails = openEmployeeDetails;
+window.closeEmployeeDetails = closeEmployeeDetails;
+
+async function loadEmployeeSelect(){
+
+const snap = await getDocs(collection(db,"employees"));
+
+detailName.innerHTML = `<option disabled selected>Select Employee</option>`;
+
+snap.forEach(doc=>{
+
+const e = doc.data();
+
+detailName.innerHTML +=
+`<option value="${doc.id}">${e.name}</option>`;
+
+});
+
+}
+
+window.openEmployeeDetails = openEmployeeDetails;
+window.closeEmployeeDetails = closeEmployeeDetails;
+
+
+/* STEP 6 AUTO POSITION */
+
+detailName.onchange = async ()=>{
+
+const ref = doc(db,"employees",detailName.value);
+
+const snap = await getDoc(ref);
+
+if(snap.exists()){
+
+const e = snap.data();
+
+detailPosition.value = e.position;
+
+}
+
+};
+
+
+/* STEP 7 SAVE EMPLOYEE DETAILS */
+
+async function saveEmployeeDetails(){
+
+if(!detailName.value){
+alert("Select employee first");
+return;
+}
+
+try{
+
+const q = query(
+collection(db,"employee_details"),
+where("empId","==",detailName.value)
+);
+
+const snap = await getDocs(q);
+
+if(!snap.empty){
+
+// UPDATE EXISTING
+const docId = snap.docs[0].id;
+
+await updateDoc(doc(db,"employee_details",docId),{
+
+division: document.getElementById("detailDivision").value,
+birthday: document.getElementById("detailBirthday").value,
+address: document.getElementById("detailAddress").value,
+course: document.getElementById("detailCourse").value,
+employmentDate: document.getElementById("detailEmployment").value
+
+});
+
+alert("Employee details updated successfully!");
+
+}else{
+
+// ADD NEW
+await addDoc(collection(db,"employee_details"),{
+
+empId: detailName.value,
+empName: detailName.options[detailName.selectedIndex].text,
+position: detailPosition.value,
+
+division: document.getElementById("detailDivision").value,
+birthday: document.getElementById("detailBirthday").value,
+address: document.getElementById("detailAddress").value,
+course: document.getElementById("detailCourse").value,
+employmentDate: document.getElementById("detailEmployment").value
+
+});
+
+alert("Employee details saved successfully!");
+
+}
+
+loadEmployeeDetails();
+
+}catch(error){
+
+console.error(error);
+alert("Error saving employee details");
+
+}
+
+}
+
+window.saveEmployeeDetails = saveEmployeeDetails;
+
+/* STEP 8 LOAD TABLE */
+
+async function loadEmployeeDetails(){
+
+const snap = await getDocs(collection(db,"employee_details"));
+
+const table = document.getElementById("employeeDetailsTable");
+
+table.innerHTML="";
+
+snap.forEach(doc=>{
+
+const d = doc.data();
+
+table.innerHTML += `
+
+<tr>
+
+<td>${d.empName}</td>
+<td>${d.division}</td>
+<td>${d.course}</td>
+
+<td>
+
+<button class="action"
+onclick="viewEmployeeDetails('${doc.id}')">
+View
+</button>
+
+<button class="action"
+onclick="editEmployeeDetails('${doc.id}')">
+Edit
+</button>
+
+<button class="action"
+style="background:#e53935"
+onclick="deleteEmployeeDetails('${doc.id}')">
+Delete
+</button>
+
+</td>
+
+</tr>
+
+`;
+
+});
+
+}
+
+/* STEP 9 STAFF OWN DETAILS */
+
+async function loadMyDetails(){
+
+const q = query(
+collection(db,"employee_details"),
+where("empId","==",empIdLogin)
+);
+
+const snap = await getDocs(q);
+
+snap.forEach(doc=>{
+
+const d = doc.data();
+
+document.getElementById("detailDivision").value = d.division || "";
+document.getElementById("detailBirthday").value = d.birthday || "";
+document.getElementById("detailAddress").value = d.address || "";
+document.getElementById("detailCourse").value = d.course || "";
+document.getElementById("detailEmployment").value = d.employmentDate || "";
+
+});
+
+}
+
+
+/* STEP 9.5 EDIT FUNCTION */
+
+window.editEmployeeDetails = async function(id){
+
+try{
+
+const ref = doc(db,"employee_details",id);
+const snap = await getDoc(ref);
+
+if(!snap.exists()){
+alert("Employee details not found");
+return;
+}
+
+const d = snap.data();
+
+// AUTO SELECT EMPLOYEE
+detailName.value = d.empId;
+
+// LOAD POSITION
+detailPosition.value = d.position;
+
+// LOAD OTHER FIELDS
+document.getElementById("detailDivision").value = d.division || "";
+document.getElementById("detailBirthday").value = d.birthday || "";
+document.getElementById("detailAddress").value = d.address || "";
+document.getElementById("detailCourse").value = d.course || "";
+document.getElementById("detailEmployment").value = d.employmentDate || "";
+
+}catch(error){
+
+console.error(error);
+alert("Failed to load employee details");
+
+}
+
+};
+
+
+// ⭐ ILAGAY MO DITO ANG VIEW FUNCTION
+
+window.viewEmployeeDetails = async function(id){
+
+try{
+
+// GET EMPLOYEE DETAILS
+const ref = doc(db,"employee_details",id);
+const snap = await getDoc(ref);
+
+if(!snap.exists()){
+alert("Employee details not found");
+return;
+}
+
+const d = snap.data();
+
+// DEFAULT SALARY
+let salary = "";
+
+// CHECK IF empId EXISTS
+if(d.empId){
+
+const empRef = doc(db,"employees",d.empId);
+const empSnap = await getDoc(empRef);
+
+if(empSnap.exists()){
+salary = empSnap.data().salary;
+}
+
+}
+
+// DISPLAY DATA
+document.getElementById("viewName").innerText = d.empName || "";
+document.getElementById("viewPosition").innerText = d.position || "";
+document.getElementById("viewDivision").innerText = d.division || "";
+document.getElementById("viewSalary").innerText = salary || "";
+document.getElementById("viewBirthday").innerText = d.birthday || "";
+document.getElementById("viewAddress").innerText = d.address || "";
+document.getElementById("viewCourse").innerText = d.course || "";
+document.getElementById("viewEmployment").innerText = d.employmentDate || "";
+
+// SHOW POPUP
+document.getElementById("viewEmployeePopup").style.display="block";
+
+}catch(error){
+
+console.error("VIEW ERROR:", error);
+alert("Failed to load employee profile");
+
+}
+
+};
+
+
+
+
+
+function closeViewEmployee(){
+document.getElementById("viewEmployeePopup").style.display="none";
+}
+
+window.closeViewEmployee = closeViewEmployee;
+
+
+
+
+/* STEP 10 DELETE */
+
+window.deleteEmployeeDetails = async function(id){
+
+if(!confirm("Delete employee details?")) return;
+
+await deleteDoc(doc(db,"employee_details",id));
+
+loadEmployeeDetails();
+
+};
+
+
+
+
+function updateClock() {
+    const now = new Date();
+
+    // Format ng date: March 13, 2026
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    const formattedDate = now.toLocaleDateString('en-US', options);
+
+    // Format ng time: 12:34:56 PM
+    const formattedTime = now.toLocaleTimeString('en-US', { hour12: true });
+
+    // I-display sa clock div
+    document.getElementById("clock").innerHTML =
+        `Philippine Standard Time<br>${formattedDate} - ${formattedTime}`;
+}
+
+// Auto-update every second
+setInterval(updateClock, 1000);
+updateClock(); // initial call
+/* USER POPUP FUNCTIONS */
+
+function openUserForm(){
+  document.getElementById("userForm").style.display = "block";
+}
+
+function closeUserForm(){
+  document.getElementById("userForm").style.display = "none";
+}
+
+window.openUserForm = openUserForm;
+window.closeUserForm = closeUserForm;
+
+window.editEmployee = async function(id){
+
+  try{
+
+    const ref = doc(db,"employees",id);
+    const snap = await getDoc(ref);
+
+    if(!snap.exists()){
+      alert("Employee not found");
+      return;
+    }
+
+    const e = snap.data();
+
+    editingEmployeeId = id;
+
+    empName.value = e.name;
+    empPosition.value = e.position;
+    empSalary.value = e.salary;
+    empSSS.value = e.sss;
+    empPagibigSavings.value = e.pagibigSavings;
+    empPagibigMPL.value = e.pagibigMPL;
+    empPagibigMP2.value = e.pagibigMP2;
+    empPhilhealth.value = e.philhealth;
+
+    openEmployeeForm();
+
+  }catch(error){
+    console.error(error);
+    alert("Failed to load employee.");
+  }
+
+}
+window.deleteEmployee = async function(id){
+
+  if(!confirm("Delete this employee?")) return;
+
+  try{
+
+    await deleteDoc(doc(db,"employees",id));
+
+    alert("Employee deleted successfully");
+
+    loadEmployees();
+
+  }catch(error){
+
+    console.error(error);
+    alert("Failed to delete employee");
+
+  }
+
+}
+
+window.editUser = async function(id){
+
+  try{
+
+    const ref = doc(db,"users",id);
+    const snap = await getDoc(ref);
+
+    if(!snap.exists()){
+      alert("User not found");
+      return;
+    }
+
+    const u = snap.data();
+
+    editingUserId = id;
+
+    newUserEmail.value = u.email;
+    newUserRole.value = u.role;
+
+    openUserForm();
+
+  }catch(error){
+    console.error(error);
+    alert("Failed to load user.");
+  }
+
+}
+
+window.deleteUser = async function(id){
+
+  if(!confirm("Delete this user?")) return;
+
+  try{
+
+    await deleteDoc(doc(db,"users",id));
+
+    alert("User deleted successfully");
+
+    loadUsers();
+
+  }catch(error){
+
+    console.error(error);
+    alert("Failed to delete user");
+
+  }
+
+}
+
+function openPasswordForm(){
+  document.getElementById("passwordForm").style.display = "block";
+}
+
+function closePasswordForm(){
+  document.getElementById("passwordForm").style.display = "none";
+}
+
+window.openPasswordForm = openPasswordForm;
+window.closePasswordForm = closePasswordForm;
+
+import { updatePassword } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+
+window.changePassword = async function(){
+
+  const newPass = document.getElementById("newPassword").value;
+  const confirmPass = document.getElementById("confirmPassword").value;
+
+  if(newPass !== confirmPass){
+    alert("Passwords do not match");
+    return;
+  }
+
+  try{
+
+    const user = auth.currentUser;
+
+    await updatePassword(user, newPass);
+
+    alert("Password updated successfully");
+
+    closePasswordForm();
+
+  }catch(error){
+
+    console.error(error);
+    alert("Failed to update password. Please login again.");
+
+  }
+
+}
+
+function closePayslipPopup(){
+  document.getElementById("payslipPopup").classList.add("hidden");
+}
+
+window.closePayslipPopup = closePayslipPopup;
+
+let excelRows = [];
+
+/* PREVIEW EXCEL */
+window.previewExcel = function(){
+
+const file = document.getElementById("excelFile").files[0];
+
+if(!file){
+alert("Upload Excel first");
+return;
+}
+
+const reader = new FileReader();
+
+reader.onload = function(e){
+
+const data = new Uint8Array(e.target.result);
+
+const workbook = XLSX.read(data,{type:'array'});
+
+const sheet = workbook.Sheets[workbook.SheetNames[0]];
+
+excelRows = XLSX.utils.sheet_to_json(sheet);
+
+let html = `
+<table border="1" style="width:100%;border-collapse:collapse;">
+<tr>
+<th>Employee Name</th>
+<th>Month</th>
+<th>Year</th>
+<th>Gross Pay</th>
+<th>Net Pay</th>
+</tr>
+`;
+
+excelRows.forEach(r=>{
+
+const gross = Number(r["Gross Pay"]) || 0;
+
+const totalDeduction =
+
+(Number(r["SSS"])||0) +
+(Number(r["Pagibig Savings"])||0) +
+(Number(r["Pagibig MPL"])||0) +
+(Number(r["Pagibig MP2"])||0) +
+(Number(r["Tax"])||0) +
+(Number(r["Tardiness"])||0);
+
+const net = gross - totalDeduction;
+
+html += `
+<tr>
+<td>${r["Employee Name"]}</td>
+<td>${r["Month"]}</td>
+<td>${r["Year"]}</td>
+<td>${gross}</td>
+<td>${net}</td>
+</tr>
+`;
+
+});
+
+html += "</table>";
+
+document.getElementById("excelPreview").innerHTML = html;
+
+};
+
+reader.readAsArrayBuffer(file);
+
+}
+
+
+
+/* IMPORT PAYROLL */
+
+
+window.importPayroll = async function(){
+
+if(excelRows.length === 0){
+alert("Preview Excel first");
+return;
+}
+
+for(const row of excelRows){
+console.log("Excel row:", row);
+const q = query(
+collection(db,"employees"),
+where("name","==",row["Employee Name"])
+);
+
+const snap = await getDocs(q);
+
+if(snap.empty){
+console.log("Employee not found:",row["Employee Name"]);
+continue;
+}
+
+const empDoc = snap.docs[0];
+const empId = empDoc.id;
+
+const gross = Number(row["Gross Pay"] || row["Gross"]) || 0;
+
+const philhealth = Number(row["Philhealth"] || row["PhilHealth"]) || 0;
+const sss = Number(row["SSS"]) || 0;
+
+const pagibigSavings = Number(row["Pagibig Savings"] || row["Pag-IBIG Savings"]) || 0;
+const pagibigMPL = Number(row["Pagibig MPL"] || row["Pag-IBIG MPL"]) || 0;
+const pagibigMP2 = Number(row["Pagibig MP2"] || row["Pag-IBIG MP2"]) || 0;
+
+const tax = Number(row["Tax"] || row["Tax %"]) || 0;
+
+const tardiness = Number(row["Tardiness"]) || 0;
+
+
+const totalDeduction =
+philhealth +
+sss +
+pagibigSavings +
+pagibigMPL +
+pagibigMP2 +
+tax +
+tardiness;
+
+const netPay = gross - totalDeduction;
+
+
+
+
+console.log("Saving payroll for:", row["Employee Name"]);
+await addDoc(collection(db,"payrolls"),{
+
+empId: empId,
+empName: row["Employee Name"],
+month: row["Month"],
+year: String(row["Year"]),
+cutoff: "1",   // ADD THIS LINE
+
+position: empDoc.data().position || "",
+salary: empDoc.data().salary || 0,
+
+daysWorked: Number(row["Days Worked"] || row["Days"]) || 0,
+
+grossPay: gross || 0,
+
+philhealth: philhealth || 0,
+sss: sss || 0,
+
+pagibigSavings: pagibigSavings || 0,
+pagibigMPL: pagibigMPL || 0,
+pagibigMP2: pagibigMP2 || 0,
+
+taxPercent: tax || 0,
+tardiness: tardiness || 0,
+
+totalDeduction: totalDeduction || 0,
+netPay: netPay || 0
+
+});
+
+
+}
+
+alert("Payroll imported successfully!");
+
+loadPayrollTable();
+loadDashboardAnalytics();
+
+}
+function showToast(message,type="success"){
+
+const toast = document.getElementById("toast");
+
+toast.className="";
+toast.classList.add("show");
+
+if(type==="error"){
+toast.classList.add("error");
+}
+
+if(type==="warning"){
+toast.classList.add("warning");
+}
+
+toast.innerText = message;
+
+setTimeout(()=>{
+toast.classList.remove("show");
+},3000);
+
+}
+
+
+function saveDetails() {
+    // Kunin ang values mula sa input fields
+    const name = document.querySelector('select[name="name"]').value;
+    const position = document.querySelector('input[name="position"]').value;
+    const division = document.querySelector('input[name="division"]').value;
+    const birthday = document.querySelector('input[name="birthday"]').value;
+    const address = document.querySelector('input[name="address"]').value;
+    const course = document.querySelector('input[name="course"]').value;
+    const employmentDate = document.querySelector('input[name="employmentDate"]').value;
+
+    // Example: Ilagay sa console para ma-check muna
+    console.log({name, position, division, birthday, address, course, employmentDate});
+
+    // TODO: Dito mo ilagay ang code para i-save sa database or i-update ang UI
+  }
+
+  // Event listener sa Save Details button para tawagin ang function
+
+
+
+
+
+async function saveServiceRecord(){
+
+  // ✅ VALIDATION (ILAGAY SA TAAS)
+  if(!srEmployee.value){
+    alert("Please select employee");
+    return;
+  }
+
+  if(!srPosition.value || !srDivision.value || !srDateFrom.value){
+    alert("Please fill all required fields");
+    return;
+  }
+
+  try{
+
+    await addDoc(collection(db,"service_records"),{
+
+      empId: srEmployee.value,
+      empName: srEmployee.options[srEmployee.selectedIndex].text,
+
+      designation: srPosition.value,
+      status: srStatus.value,
+      salary: Number(document.getElementById("srSalary").value || 0),
+
+      station: "DOST RO2",
+      branch: srDivision.value,
+
+      dateFrom: srDateFrom.value,
+      dateTo: srDateTo.value,
+
+      leaveWithoutPay: document.getElementById("srLeave").value || "None",
+
+      separationDate: document.getElementById("srSepDate").value || "",
+      separationCause: document.getElementById("srSepCause").value || "",
+
+      createdAt: serverTimestamp()
+
+    });
+
+    alert("Service record saved successfully");
+
+    loadServiceRecords();
+    closeServiceRecordForm();
+
+  }catch(error){
+
+    console.error(error);
+    alert("Failed to save record");
+
+  }
+
+}
+
+
+
+
+
+
+
+document.getElementById("saveServiceRecordBtn").onclick = saveServiceRecord;
+
+
+window.saveServiceRecord = saveServiceRecord;
+
+
+async function loadServiceRecords(){
+
+  const snap = await getDocs(collection(db,"service_records"));
+
+  const table = document.getElementById("serviceRecordTable");
+
+  table.innerHTML="";
+
+  snap.forEach(doc=>{
+
+    const s = doc.data();
+
+ table.innerHTML += `
+
+<td>${s.empName}</td>
+<td>${s.designation}</td>
+<td>${s.branch}</td>
+<td>${s.dateFrom}</td>
+<td>${s.dateTo}</td>
+<td>${s.status}</td>
+<td>${s.salary}</td>
+
+<td>
+  <button class="action" onclick="deleteServiceRecord('${doc.id}')">Delete</button>
+</td>
+
+`;
+
+  });
+
+}
+
+window.loadServiceRecords = loadServiceRecords;
+
+window.deleteServiceRecord = async function(id){
+
+  if(!confirm("Delete this service record?")) return;
+
+  try{
+
+    await deleteDoc(doc(db,"service_records",id));
+
+    alert("Service record deleted");
+
+    loadServiceRecords();
+
+  }catch(error){
+
+    console.error(error);
+    alert("Failed to delete");
+
+  }
+
+}
+
+async function loadServiceRecordEmployees(){
+
+const snap = await getDocs(collection(db,"employees"));
+
+const select = document.getElementById("srEmployee");
+
+select.innerHTML = `<option disabled selected>Select Employee</option>`;
+
+snap.forEach(doc=>{
+
+const e = doc.data();
+
+select.innerHTML += `
+<option value="${doc.id}">${e.name}</option>
+`;
+
+});
+
+}
+
+// AUTO LOAD POSITION
+srEmployee.onchange = async ()=>{
+
+const ref = doc(db,"employees",srEmployee.value);
+
+const snap = await getDoc(ref);
+
+if(snap.exists()){
+
+const e = snap.data();
+
+srPosition.value = e.position;
+
+}
+
+};
+
+
+
+const searchSR = document.getElementById("searchServiceRecord");
+
+if(searchSR){
+searchSR.addEventListener("input", function(){
+
+const filter = this.value.toLowerCase();
+
+const rows = document
+.getElementById("serviceRecordTable")
+.querySelectorAll("tr");
+
+rows.forEach(row=>{
+const name = row.children[0].textContent.toLowerCase();
+row.style.display = name.includes(filter) ? "" : "none";
+});
+
+});
+}
+
+
+</script>
+
+
+
+<div id="viewEmployeePopup" style="
+display:none;
+position:fixed;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+background:white;
+padding:25px;
+width:420px;
+border:3px solid #0b3d91;
+border-radius:8px;
+box-shadow:0 10px 25px rgba(0,0,0,0.3);
+z-index:9999;
+">
+
+<h3 style="text-align:center;margin-bottom:15px;">
+EMPLOYEE PROFILE
+</h3>
+
+<p><b>Name:</b> <span id="viewName"></span></p>
+<p><b>Position:</b> <span id="viewPosition"></span></p>
+<p><b>Division:</b> <span id="viewDivision"></span></p>
+<p><b>Salary:</b> <span id="viewSalary"></span></p>
+<p><b>Birthday:</b> <span id="viewBirthday"></span></p>
+<p><b>Address:</b> <span id="viewAddress"></span></p>
+<p><b>Course:</b> <span id="viewCourse"></span></p>
+<p><b>Date Employed:</b> <span id="viewEmployment"></span></p>
+
+<br>
+
+<button class="action" onclick="closeViewEmployee()" style="background:#e53935;">
+Close
+</button>
+
+</div>
+
+
+<div id="toast"></div>
+
+
+
+
+</body>
+</html>
