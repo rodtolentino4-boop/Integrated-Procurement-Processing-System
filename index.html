@@ -132,7 +132,15 @@ td {
 <option value="ADMINISTRATIVE">ADMINISTRATIVE</option>
 </select>
 
-<textarea id="purpose" placeholder="Purpose"></textarea>
+<div class="row">
+  <div class="col">
+    <textarea id="purpose" placeholder="Purpose"></textarea>
+  </div>
+  <div class="col">
+    <label>📎 Supporting Document</label>
+    <input type="file" id="supportFile">
+  </div>
+</div>
 
 <table id="itemsTable">
 <tr>
@@ -318,6 +326,10 @@ import {
   onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+import { getStorage, ref, uploadBytes, getDownloadURL } 
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+
+
 import { deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 
@@ -333,6 +345,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app); 
+const storage = getStorage(app);
 
 onAuthStateChanged(auth, async (user) => {
 
@@ -574,6 +587,19 @@ if(!nameField.value.trim() || !positionField.value.trim() || !divisionField.valu
 }
 
 
+let fileInput = document.getElementById("supportFile");
+let fileURL = "";
+
+if(fileInput.files.length > 0){
+  let file = fileInput.files[0];
+
+  let storageRef = ref(storage, "supportDocs/" + Date.now() + "_" + file.name);
+
+  await uploadBytes(storageRef, file);
+  fileURL = await getDownloadURL(storageRef);
+}
+
+
 
  let data={
   name: nameField.value.trim() || "NO NAME",
@@ -584,7 +610,8 @@ username: currentUser.email,
     type:reqType.value,
     purpose:purpose.value,
     status:"PENDING_ORD",
-    items:[]
+  items:[],
+supportFile: fileURL // ✅ tama
   };
 
   document.querySelectorAll("#itemsTable tr").forEach((r,i)=>{
@@ -601,10 +628,12 @@ username: currentUser.email,
   });
 
   await addDoc(collection(db, "requests"), data);
+document.getElementById("supportFile").value = "";
 
 alert("Submitted!");
 loadStaff();
 }
+
 
 // STAFF VIEW
 
@@ -747,10 +776,17 @@ let approvedHTML = `
     <td>${r.name || ""}</td>
     <td>${r.position || ""}</td>
     <td>${r.purpose || ""}</td>
-    <td>
-      <button onclick="viewRequestById('${r.id}')">View</button>
-      <button onclick="printPR('${r.id}')">Print</button>
-    </td>
+    
+<td>
+  <button onclick="viewRequestById('${r.id}')">View</button>
+  <button onclick="printPR('${r.id}')">Print</button>
+  
+  ${r.supportFile 
+    ? `<button onclick="window.open('${r.supportFile}', '_blank')">📎 File</button>` 
+    : ''
+  }
+</td>
+
   </tr>
   `;
 }
@@ -885,6 +921,12 @@ return `
 
 <p><b>Type:</b> ${r.type}</p>
 <p><b>Purpose:</b> ${r.purpose}</p>
+<p><b>Supporting Document:</b> ${
+  r.supportFile 
+  ? `<a href="${r.supportFile}" target="_blank">View File</a>` 
+  : "None"
+}</p>
+
 <p><b>Status:</b> ${r.status}</p>
 <p><b>Remarks:</b> ${r.remarks || "-"}</p>
 ${table}
