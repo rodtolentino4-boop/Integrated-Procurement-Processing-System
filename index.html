@@ -62,7 +62,7 @@ th, td {
 
 table {
   width:100%;
-  table-layout: fixed;
+  table-layout: auto;
 }
 
 td {
@@ -600,8 +600,8 @@ async function logout() {
     adminPO.innerHTML = "";
     adminRecords.innerHTML = "";
     userList.innerHTML = "";
-    reviewList.innerHTML = "";
-
+    reviewPending.innerHTML = "";
+reviewApproved.innerHTML = "";
     // Clear login inputs
     username.value = "";
     password.value = "";
@@ -701,6 +701,18 @@ document.getElementById("supportFile").value = "";
 
 alert("Submitted!");
 loadStaff();
+
+document.getElementById("position").value = "";
+document.getElementById("division").value = "";
+document.getElementById("purpose").value = "";
+itemsTable.innerHTML = `
+<tr>
+<th>Unit</th><th>Description</th><th>Qty</th><th>Cost</th><th>Total</th>
+</tr>`;
+initTable();
+
+
+
 }
 
 
@@ -787,7 +799,7 @@ async function generatePR(){
     r.prNo && r.prNo.startsWith(`${year}-${month}`)
   ).length + 1;
 
-  return `${year}-${month}-${String(count).padStart(3,'0')}`;
+return `${year}-${month}-${String(count).padStart(3,'0')}`;
 }
 
 
@@ -1246,7 +1258,6 @@ async function sendTo(i){
 }
 
 
-
 async function printPR(id){
   let list = await getRequests();
   let r = list.find(x => x.id === id);
@@ -1256,159 +1267,7 @@ async function printPR(id){
     return;
   }
 
-  if (!r.prNo) {
-    alert("PR Number not assigned yet.");
-    return;
-  }
-
-  let rows = "";
-  let total = 0;
-
-  r.items.forEach(item => {
-    let t = (item.qty * item.cost) || 0;
-    total += t;
-
-    rows += `
-    <tr>
-      <td></td>
-      <td>${item.unit || ''}</td>
-      <td style="text-align:left;">
-        ${item.desc || ''}
-      </td>
-      <td>${item.qty || ''}</td>
-      <td>₱${Number(item.cost).toLocaleString(undefined,{minimumFractionDigits:2})}</td>
-      <td>₱${t.toLocaleString(undefined,{minimumFractionDigits:2})}</td>
-    </tr>`;
-  });
-
-  const html = `
-  <html>
-  <head>
-  <title>PR ${r.prNo}</title>
-
-  <style>
-    body{font-family:Arial;font-size:12px;margin:40px;}
-    .center{text-align:center;}
-    .right{text-align:right;}
-    .left{text-align:left;}
-
-    table{width:100%;border-collapse:collapse;margin-top:10px;}
-    th,td{border:1px solid black;padding:6px;}
-
-    th{background:#eee;}
-
-    .no-border td{border:none;}
-
-    .header-box{
-      position:absolute;
-      top:30px;
-      right:40px;
-      border:1px solid black;
-      padding:6px;
-      font-size:10px;
-    }
-  </style>
-  </head>
-
-  <body>
-
-  <div class="header-box">
-    FASS-PUR 07-05<br>
-    Rev. 5 | 10 November 2017
-  </div>
-
-  <div class="center">
-    <b>Republic of the Philippines</b><br>
-    Department of Science and Technology<br>
-    Regional Office No. 02<br>
-    Dalan na Paccorofun, Corner Matunung St.<br>
-    Regional Government Center, Carig Sur, Tuguegarao City, Cagayan
-    <h3 style="margin-top:10px;">PURCHASE REQUEST</h3>
-  </div>
-
-  <table class="no-border">
-    <tr>
-      <td><b>Entity Name:</b> DOST-R02</td>
-      <td class="right"><b>Fund Cluster:</b> ________</td>
-    </tr>
-  </table>
-
-  <table class="no-border">
-    <tr>
-      <td><b>Office/Section:</b> ${r.division || ''}</td>
-      <td><b>PR No.:</b> ${r.prNo}</td>
-      <td><b>Date:</b> ${new Date().toLocaleDateString()}</td>
-    </tr>
-    <tr>
-      <td colspan="3"><b>Responsibility Center Code:</b> __________</td>
-    </tr>
-  </table>
-
-  <table>
-    <tr>
-      <th style="width:15%;">Stock/Property No.</th>
-      <th style="width:10%;">Unit</th>
-      <th style="width:35%;">Item Description</th>
-      <th style="width:10%;">Quantity</th>
-      <th style="width:15%;">Unit Cost</th>
-      <th style="width:15%;">Total Cost</th>
-    </tr>
-
-    <tr>
-      <td></td>
-      <td><b>Lot</b></td>
-      <td style="text-align:left;"><b>Items</b></td>
-      <td></td>
-      <td></td>
-      <td></td>
-    </tr>
-
-    ${rows}
-
-  </table>
-
-  <h3 class="right">Total: ₱${total.toLocaleString(undefined,{minimumFractionDigits:2})}</h3>
-
-  <table class="no-border">
-    <tr>
-      <td><b>Purpose:</b> ${r.purpose}</td>
-    </tr>
-  </table>
-
-  <br><br>
-
-  <table class="no-border">
-    <tr>
-      <td>
-        Requested by:<br><br><br>
-        <b>${r.name}</b><br>
-        ${r.position}
-      </td>
-
-      <td class="right">
-        Approved by:<br><br><br>
-        <b>VIRGINIA G. BILGERA</b><br>
-        Regional Director
-      </td>
-    </tr>
-  </table>
-
-  </body>
-  </html>
-  `;
-
- let printWindow = window.open("", "_blank");
-
-printWindow.document.open();
-printWindow.document.write(html);
-printWindow.document.close();
-
-printWindow.onload = function(){
-  printWindow.focus();
-  printWindow.print();
-};
-
-
+  printPRDirect(r);
 }
 
 
@@ -2042,16 +1901,10 @@ async function viewRequest(i){
   let list = await getRequests();
   let r = list[i];
 
-  // 👉 reuse print layout directly
-  printPR(r.id);
+  if(r){
+    printPRDirect(r);
+  }
 }
-
-
-
-
-
-
-
 
 
 
@@ -2097,7 +1950,7 @@ let users = await getUsers();
 <td>${u.email}</td>
 <td>${u.role}</td>
         <td>
-          ${u.username !== "admin" ? `<button onclick="deleteUser(${i})">Delete</button>` : '---'}
+         ${u.email !== "admin@email.com" ? `<button onclick="deleteUser(${i})">Delete</button>` : '---'}
         </td>
       </tr>
     `;
@@ -2410,8 +2263,8 @@ function printPRDirect(r) {
         <div class="line" style="height: 25px;"></div>
         <div class="sig-label">Signature:</div>
         <div class="line" style="width: 200px;"></div>
-        <div><b>Printed Name:</b> ${r.requestedBy || ''}</div>
-        <div><b>Designation:</b> ${r.designation || ''}</div>
+        <div><b>Printed Name:</b> ${r.name || ''}</div>
+<div><b>Designation:</b> ${r.position || ''}</div>
       </div>
 
       <div class="sig-box" style="text-align:right;">
