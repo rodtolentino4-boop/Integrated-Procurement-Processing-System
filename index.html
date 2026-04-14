@@ -384,6 +384,7 @@ from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
 import { deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+let cachedRequests = [];
 
 const firebaseConfig = {
   apiKey: "AIzaSyAnYmfXYy4HU1rafn2wzHahBNnlSh4GbMg",
@@ -1287,8 +1288,8 @@ async function sendTo(i){
 });
 
   alert("📤 Sent for approval!");
- let list = await getRequests();
-loadAdmin(list);
+let refreshed = await getRequests();
+loadAdmin(refreshed);
 }
 
 
@@ -2139,6 +2140,7 @@ function printPRDirect(r) {
  if (!r.prNo) {
   r.prNo = "N/A";
 }
+if (!r.items) r.items = [];   
   // Compute total cost and build rows
   let rows = "";
   let total = 0;
