@@ -742,10 +742,12 @@ else if(r.status === "REJECTED"){
   remarks = "Rejected: " + (r.rejectReason || "No reason");
 }
 
+else if(r.status === "CANCELLED"){
+  remarks = "Cancelled by user";
+}
 else{
   remarks = "-";
 }
-
 
    html += `
 <tr>
@@ -757,12 +759,27 @@ else{
      <td>${r.status}</td>
 <td>${remarks}</td>
 
+<td style="white-space:nowrap;">
+
+  ${r.status !== "CANCELLED" ? `
+    <button class="action-btn" onclick="viewRequest(${i})">View</button>
+    <button class="action-btn" onclick="printPR('${r.id}')">Print</button>
+  ` : ''}
+
+  ${r.status === "PENDING_ORD" 
+    ? `<button class="action-btn" onclick="cancelRequest('${r.id}')">Cancel</button>` 
+    : ''
+  }
+
+</td>
+
+
+
+
+
+
 
       
-<td style="white-space:nowrap;">
-  <button class="action-btn" onclick="viewRequest(${i})">View</button>
- <button class="action-btn" onclick="printPR('${r.id}')">Print</button>
-</td>
 
     </tr>
     `;
@@ -2412,6 +2429,31 @@ window.changePassword = async function(){
   }
 }
 
+async function cancelRequest(id){
+  try{
+
+    let confirmCancel = confirm("Are you sure you want to cancel this request?");
+    if(!confirmCancel) return;
+
+    await updateDoc(doc(db, "requests", id), {
+      status: "CANCELLED"
+    });
+
+    alert("❌ Request Cancelled!");
+
+    loadStaff();
+
+  }catch(err){
+    console.error(err);
+    alert("Error cancelling request");
+  }
+}
+
+
+
+
+
+
 
 
 
@@ -2423,7 +2465,7 @@ window.printCanvassById = printCanvassById;
 window.viewRequestById = viewRequestById;
 window.printPR = printPR;
 window.printPRDirect = printPRDirect;
-
+window.cancelRequest = cancelRequest;
 
 
 </script>
