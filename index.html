@@ -12,8 +12,23 @@ header{background:#1e3a5f;color:white;padding:15px;text-align:center;font-size:2
 .row{display:flex;gap:15px;}
 .col{flex:1;}
 
-.card{background:white;border-radius:10px;padding:15px;margin-bottom:15px;box-shadow:0 2px 5px rgba(0,0,0,0.1);}
+.card{
+  background:white;
+  border-radius:12px;
+  padding:20px;
+  margin-bottom:20px;
 
+  border:1px solid #d1d5db; /* 🔥 border */
+  border-left:6px solid #1e3a5f; /* 🔥 accent line */
+
+  box-shadow:0 4px 10px rgba(0,0,0,0.08);
+  transition:0.2s;
+}
+
+.card:hover{
+  transform:translateY(-2px);
+  box-shadow:0 6px 15px rgba(0,0,0,0.12);
+}
 
 
 
@@ -102,12 +117,36 @@ td {
   margin:10px 0;
 }
 
-
-.action-btn {
-  background:#1e3a5f;
+.action-btn{
   color:white;
   font-weight:bold;
+  border:none;
 }
+
+/* 👁 VIEW */
+.btn-view{
+  background:#2563eb; /* blue */
+}
+.btn-view:hover{
+  background:#1d4ed8;
+}
+
+/* 🖨 PRINT */
+.btn-print{
+  background:#16a34a; /* green */
+}
+.btn-print:hover{
+  background:#15803d;
+}
+
+/* ❌ CANCEL */
+.btn-cancel{
+  background:#dc2626; /* red */
+}
+.btn-cancel:hover{
+  background:#b91c1c;
+}
+
 
 #prModal {
   display: none;
@@ -762,12 +801,16 @@ else{
 <td style="white-space:nowrap;">
 
   ${r.status !== "CANCELLED" ? `
-    <button class="action-btn" onclick="viewRequest(${i})">View</button>
-    <button class="action-btn" onclick="printPR('${r.id}')">Print</button>
+    <button class="action-btn btn-view" onclick="viewRequest(${i})">👁 View</button>
+<button class="action-btn btn-print" onclick="printPR('${r.id}')">🖨 Print</button>
   ` : ''}
 
   ${r.status === "PENDING_ORD" 
-    ? `<button class="action-btn" onclick="cancelRequest('${r.id}')">Cancel</button>` 
+    ? `
+
+
+
+<button class="action-btn btn-cancel" onclick="cancelRequest('${r.id}')">❌ Cancel</button>` 
     : ''
   }
 
