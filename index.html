@@ -527,7 +527,6 @@ window.login = async function(){
     // GET USERS SA FIRESTORE
     let users = await getUsers();
 
-    // 🔥 FIX: mas safe match
     let found = users.find(u => 
       u.email && u.email.toLowerCase().trim() === user.email.toLowerCase().trim()
     );
@@ -596,8 +595,6 @@ listenRequests((list)=>{
     }
   }
 }
-
-
 
 
 import { signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
@@ -704,7 +701,6 @@ if(fileInput.files.length > 0){
   items:[],
   supportFile: fileURL,
 
-  // ✅ ADD THIS (ETO LANG KAPALIT)
   dateRequested: new Date().toISOString()
 
 };
@@ -1150,7 +1146,6 @@ ${actions}
 function loadAdmin(list, isSearch = false){
 
 
-// 🔥 PRIORITY SORT
 list.sort((a,b)=>{
 
   function getPriority(r){
@@ -1252,7 +1247,6 @@ poHTML += buildCard(r,i,`
 `);
 }
 
-// ✅ RECORDS SECTION (APPROVED BY ORD)
 // ✅ RECORDS SECTION (APPROVED BY ORD + FLOW)
 if(
   r.status === "APPROVED_ORD" ||
@@ -1263,7 +1257,7 @@ if(
   r.status === "DONE"
 ){
 
-  // 👉 Header (isang beses lang)
+  //  Header (isang beses lang)
 if(!recordsHTML.includes("<table>")){
     recordsHTML += `
     <table>
@@ -1279,7 +1273,7 @@ if(!recordsHTML.includes("<table>")){
     `;
   }
 
-  // 👉 Rows (append)
+  //  Rows (append)
   recordsHTML += `
     <tr>
      <td>
@@ -1659,11 +1653,6 @@ r.items.forEach((it,idx)=>{
 }
 
 
-
-
-
-
-
 function closeAbstract(){
 abstractModal.classList.add("hidden");
 }
@@ -1688,7 +1677,7 @@ r.items.forEach((it,idx)=>{
 
   let checkbox = document.getElementById(`sel_${idx}`);
 
-  // ⛔ SKIP kung hindi naka-check
+  //  SKIP kung hindi naka-check
   if(!checkbox || !checkbox.checked) return;
 
   let raw = [
@@ -1949,10 +1938,6 @@ async function markCanvassed(i){
 }
 
 
-
-
-
-
 function showAdminSection(section){
 
   // itago lahat
@@ -2188,7 +2173,7 @@ async function viewRequestById(id){
     return;
   }
 
-  printPRDirect(r); // 🔥 eto ang bago
+  printPRDirect(r); 
 }
 
 
@@ -2403,7 +2388,7 @@ async function printCanvassById(id){
     return;
   }
 
-  printCanvass(i); // reuse mo existing function mo 💯
+  printCanvass(i); 
 }
 
 
@@ -2490,12 +2475,6 @@ async function cancelRequest(id){
     alert("Error cancelling request");
   }
 }
-
-
-
-
-
-
 
 
 
