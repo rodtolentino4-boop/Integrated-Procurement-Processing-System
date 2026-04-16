@@ -719,6 +719,12 @@ if(fileInput.files.length > 0){
     }
   });
 
+if(window.retrievedId){
+  await deleteDoc(doc(db, "requests", window.retrievedId));
+  window.retrievedId = null;
+}
+
+
   await addDoc(collection(db, "requests"), data);
 document.getElementById("supportFile").value = "";
 
@@ -744,6 +750,24 @@ initTable();
 
 async function loadStaff(){
   let list = await getRequests();
+
+list.sort((a, b) => {
+
+  // 🔥 PRIMARY: Date (latest first)
+  let dateA = new Date(a.dateRequested || 0);
+  let dateB = new Date(b.dateRequested || 0);
+
+  if(dateB - dateA !== 0){
+    return dateB - dateA;
+  }
+
+  // 🔥 SECONDARY: PR No. (latest first)
+  let prA = a.prNo || "";
+  let prB = b.prNo || "";
+
+  return prB.localeCompare(prA, undefined, { numeric: true });
+});
+
 
   let html = `
   <table>
@@ -800,24 +824,25 @@ else{
    <button class="action-btn btn-print" onclick="printPR('${r.id}')">🖨 Print</button>
   ` : ''}
 
-  ${r.status === "PENDING_ORD" 
-    ? `
 
-
-
+${r.status === "PENDING_ORD" 
+  ? `
 <button class="action-btn btn-cancel" onclick="cancelRequest('${r.id}')">❌ Cancel</button>` 
-    : ''
-  }
+  : ''
+}
+
+
+${r.status === "CANCELLED"
+  ? `
+<button class="action-btn btn-view" onclick="retrieveRequest('${r.id}')">♻️ Retrieve</button>
+<button class="action-btn btn-cancel" onclick="deleteRequest('${r.id}')">🗑 Delete</button>
+`
+  : ''
+}
+
 
 </td>
-
-
-
-
-
-
-
-      
+  
 
     </tr>
     `;
@@ -2190,10 +2215,20 @@ if (!r.items) r.items = [];
   let total = 0;
 
   r.items.forEach(item => {
-    const qty = item.qty || 0;
-    const cost = item.cost || 0;
-    const lineTotal = qty * cost;
-    total += lineTotal;
+    
+
+const qty = item.qty ? Number(item.qty) : '';
+const cost = item.cost ? Number(item.cost) : '';
+
+const hasValue = qty && cost;
+
+const lineTotal = hasValue ? qty * cost : '';
+
+
+
+   if(lineTotal !== '') {
+  total += lineTotal;
+}
 
     // Special: Description can be multiline, handle line breaks
     const descLines = (item.desc || "").split('\n').map(line => line.trim()).filter(line => line.length > 0);
@@ -2208,8 +2243,9 @@ if (!r.items) r.items = [];
           ).join('<br>')}
         </td>
         <td style="border:1px solid black; vertical-align:top; width:60px; text-align:center;">${qty || ''}</td>
-        <td style="border:1px solid black; vertical-align:top; width:90px; text-align:right;">₱${Number(cost).toLocaleString(undefined,{minimumFractionDigits:2})}</td>
-        <td style="border:1px solid black; vertical-align:top; width:90px; text-align:right;">₱${lineTotal.toLocaleString(undefined,{minimumFractionDigits:2})}</td>
+        <td style="border:1px solid black; vertical-align:top; width:90px; text-align:right;">${cost ? '₱' + Number(cost).toLocaleString(undefined,{minimumFractionDigits:2}) : ''}
+</td>
+        <td style="border:1px solid black; vertical-align:top; width:90px; text-align:right;">${lineTotal ? '₱' + lineTotal.toLocaleString(undefined,{minimumFractionDigits:2}) : ''} </td>
       </tr>
     `;
   });
@@ -2223,11 +2259,26 @@ if (!r.items) r.items = [];
   <head>
     <title>Purchase Request ${r.prNo}</title>
     <style>
-      body {
-        font-family: Arial, sans-serif;
-        font-size: 11pt;
-        margin: 20px 40px;
-      }
+     
+
+
+@page {
+  size: A4;
+  margin: 10mm; /* 🔥 mas maliit margin = mas malapad content */
+}
+
+body {
+  font-family: Arial, sans-serif;
+  font-size: 10pt;
+  margin: 10px; /* 🔥 bawas space */
+}
+
+
+
+
+
+
+
       h2, h3 {
         text-align: center;
         margin: 5px 0;
@@ -2237,11 +2288,16 @@ if (!r.items) r.items = [];
         border-collapse: collapse;
         margin-top: 8px;
       }
-      th, td {
-        border: 1px solid black;
-        padding: 5px 8px;
-        vertical-align: top;
-      }
+     
+th, td {
+  border: 1px solid black;
+  padding: 3px 5px; /* 🔥 mas compact */
+  font-size: 9pt;   /* 🔥 mas maliit text */
+  vertical-align: top;
+}
+
+
+
       th {
         font-weight: bold;
         text-align: center;
@@ -2281,6 +2337,16 @@ if (!r.items) r.items = [];
       .small-text {
         font-size: 9pt;
       }
+
+
+.signature-section {
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+  gap: 40px;
+}
+
+
     </style>
   </head>
 
@@ -2303,7 +2369,7 @@ if (!r.items) r.items = [];
 
     <table>
       <tr>
-        <td style="width:60%"><b>Office/Section:</b> ${r.officeSection || ''}</td>
+       <td style="width:60%"><b>Office/Section:</b> ${r.division || ''}</td>
         <td style="width:40%">
           <div><b>PR No.:</b> <span style="border-bottom: 1px solid black; padding:0 40px;">${r.prNo}</span></div>
           <div><b>Date:</b> ${prDate}</div>
@@ -2347,14 +2413,19 @@ if (!r.items) r.items = [];
 <div><b>Designation:</b> ${r.position || ''}</div>
       </div>
 
-      <div class="sig-box" style="text-align:right;">
-        <div><b>Approved by:</b></div>
-        <div class="line" style="height: 25px; margin-left:auto;"></div>
-        <div class="sig-label">Signature:</div>
-        <div class="line" style="width: 200px; margin-left:auto;"></div>
-        <div><b>${r.approverName || 'VIRGINIA G. BILGERA'}</b></div>
-        <div>${r.approverTitle || 'Regional Director'}</div>
-      </div>
+     
+<div class="sig-box">
+  <div><b>Approved by:</b></div>
+  <div class="line" style="height: 25px;"></div>
+
+  <div class="sig-label">Signature:</div>
+  <div class="line" style="width: 200px;"></div>
+
+  <div><b>${r.approverName || 'VIRGINIA G. BILGERA'}</b></div>
+  <div>${r.approverTitle || 'Regional Director'}</div>
+</div>
+
+
     </div>
 
   </body>
@@ -2477,6 +2548,87 @@ async function cancelRequest(id){
 }
 
 
+async function deleteRequest(id){
+  try{
+
+    let confirmDelete = confirm("⚠️ This will permanently delete this request. Continue?");
+    if(!confirmDelete) return;
+
+    await deleteDoc(doc(db, "requests", id));
+
+    alert("🗑 Request deleted permanently!");
+
+    loadStaff();
+
+  }catch(err){
+    console.error(err);
+    alert("Error deleting request");
+  }
+}
+
+
+async function retrieveRequest(id){
+  try{
+
+    let list = await getRequests();
+    let r = list.find(x => x.id === id);
+
+    if(!r){
+      alert("Request not found");
+      return;
+    }
+
+    // 🔥 OPEN MODAL
+    openPRModal();
+
+    // 🔥 FILL BASIC INFO
+    document.getElementById("name").value = r.name || "";
+    document.getElementById("position").value = r.position || "";
+    document.getElementById("division").value = r.division || "";
+    document.getElementById("reqType").value = r.type || "TECHNICAL";
+    document.getElementById("purpose").value = r.purpose || "";
+
+    // 🔥 RESET TABLE
+    itemsTable.innerHTML = `
+      <tr>
+        <th>Unit</th><th>Description</th><th>Qty</th><th>Cost</th><th>Total</th>
+      </tr>
+    `;
+
+    // 🔥 LOAD ITEMS
+    if(r.items && r.items.length > 0){
+      r.items.forEach(item => {
+        let row = itemsTable.insertRow();
+
+        row.innerHTML = `
+          <td><input value="${item.unit || ''}"></td>
+          <td><input value="${item.desc || ''}"></td>
+          <td><input type="number" value="${item.qty || 0}"></td>
+          <td><input type="number" value="${item.cost || 0}"></td>
+          <td>₱0</td>
+        `;
+
+        let qtyInput = row.cells[2].children[0];
+        let costInput = row.cells[3].children[0];
+
+        qtyInput.addEventListener("input", () => calcRow(row));
+        costInput.addEventListener("input", () => calcRow(row));
+
+        calcRow(row); // auto compute
+      });
+    } else {
+      initTable();
+    }
+
+    // 🔥 OPTIONAL: store original ID (para pwede delete later)
+    window.retrievedId = id;
+
+  }catch(err){
+    console.error(err);
+    alert("Error retrieving request");
+  }
+}
+
 
 
 window.printCanvassById = printCanvassById;
@@ -2487,7 +2639,8 @@ window.viewRequestById = viewRequestById;
 window.printPR = printPR;
 window.printPRDirect = printPRDirect;
 window.cancelRequest = cancelRequest;
-
+window.retrieveRequest = retrieveRequest;
+window.deleteRequest = deleteRequest;
 
 </script>
 
