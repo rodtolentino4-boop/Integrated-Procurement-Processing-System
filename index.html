@@ -2556,7 +2556,15 @@ table {
 .print-header h2 {
   margin-top: 8px;
 }
-
+.form-box {
+  position: absolute;
+  top: 10px;   /* 🔥 i-align sa "Regional Office No. 02" */
+  right: 20px;
+  border: 1px solid black;
+  padding: 6px 10px;
+  font-size: 10px;
+  background: white;
+}
 
 
     </style>
@@ -2568,21 +2576,30 @@ table {
 
 <div class="print-page">
 
-<table class="print-table">
-  <thead class="header-repeat">
-    <tr>
-      <td>
-        <div class="print-header">
-          <div>Republic of the Philippines</div>
-          <div><b>Department of Science and Technology</b></div>
-          <div>Regional Office No.02</div>
-          <div>Dalan na Paccorofun, Corner Matunung St.</div>
-          <div>Regional Government Center, Carig Sur, Tuguegarao City, Cagayan</div>
-          <h2>PURCHASE REQUEST</h2>
-        </div>
-      </td>
-    </tr>
-  </thead>
+  <table class="print-table">
+    <thead class="header-repeat">
+      <tr>
+        <td style="position: relative; text-align: center;">
+
+          <!-- 🔴 FORM BOX -->
+          <div class="form-box">
+            FASS-PUR 07-05<br>
+            Rev. 5 | 10 November 2017
+          </div>
+
+          <!-- 🔵 HEADER -->
+          <div class="print-header">
+            <div>Republic of the Philippines</div>
+            <div><b>Department of Science and Technology</b></div>
+            <div>Regional Office No.02</div>
+            <div>Dalan na Paccorofun, Corner Matunung St.</div>
+            <div>Regional Government Center, Carig Sur, Tuguegarao City, Cagayan</div>
+            <h2>PURCHASE REQUEST</h2>
+          </div>
+
+        </td>
+      </tr>
+    </thead>
 
   <tbody>
     <tr>
