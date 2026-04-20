@@ -1548,7 +1548,7 @@ async function printCanvass(i){
 
   <br><br>
 
-  <p style="text-align:center;">
+  <p style="text-align:left;">
     This office desire to place order for the above items with the minimum delay. Your quotation will help very much in placing the order.
   </p>
 
@@ -2212,10 +2212,9 @@ function printPRDirect(r) {
 if (!r.items) r.items = [];   
   // Compute total cost and build rows
   let rows = "";
-  let total = 0;
+let runningTotal = 0;
 
   r.items.forEach(item => {
-    
 
 const qty = item.qty ? Number(item.qty) : '';
 const cost = item.cost ? Number(item.cost) : '';
@@ -2227,7 +2226,7 @@ const lineTotal = hasValue ? qty * cost : '';
 
 
    if(lineTotal !== '') {
-  total += lineTotal;
+  runningTotal += lineTotal;
 }
 
     // Special: Description can be multiline, handle line breaks
@@ -2254,7 +2253,8 @@ const lineTotal = hasValue ? qty * cost : '';
   const prDate = r.dateRequested
   ? new Date(r.dateRequested).toLocaleDateString('en-PH')
   : new Date().toLocaleDateString('en-PH');
-  const html = `
+ 
+ const html = `
   <html>
   <head>
     <title>Purchase Request ${r.prNo}</title>
@@ -2262,19 +2262,63 @@ const lineTotal = hasValue ? qty * cost : '';
      
 
 
+@media print {
+
+  body {
+    margin: 0;
+  }
+
+  
+
+ 
+
+ .print-body {
+  margin: 0; /* 👈 FIX */
+}
+
+}
+
 @page {
   size: A4;
-  margin: 10mm; /* 🔥 mas maliit margin = mas malapad content */
+  margin: 10mm;
 }
 
 body {
   font-family: Arial, sans-serif;
   font-size: 10pt;
-  margin: 10px; /* 🔥 bawas space */
+  margin: 0;
 }
 
+/* 🔥 MAIN BORDER FIX */
+@media print {
 
+  body {
+    margin: 0;
+  }
 
+  .print-page {
+    border: 2px solid black;
+    padding: 10px;
+    box-sizing: border-box;
+
+    min-height: 100vh;
+      page-break-after: auto; /* 👈 FIX */
+
+  }
+
+  table {
+    page-break-inside: auto;
+  }
+
+  tr {
+    page-break-inside: avoid;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+}
 
 
 
@@ -2346,19 +2390,211 @@ th, td {
   gap: 40px;
 }
 
+.print-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  padding: 5px 10px;
+}
+
+
+tfoot {
+  display: table-footer-group;
+}
+
+
+
+.purpose-section {
+  border: 1px solid black;
+  padding: 5px;
+  height: 60px;
+  margin-bottom: 10px;
+  font-size: 9pt;
+}
+
+.page-border {
+  border: 2px solid black;
+  padding: 10px;
+  min-height: 100%;
+  box-sizing: border-box;
+}
+
+.page-border {
+  border: 2px solid black;
+  padding: 8px;
+}
+
+table {
+  border: 1px solid black;
+}
+
+
+
+.page-border {
+  border: 2px solid black;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+@page {
+  size: A4;
+  margin: 10mm;
+}
+
+body {
+  margin: 0;
+  font-family: Arial;
+}
+
+
+
+
+/* 🔥 EACH PAGE */
+
+.print-page {
+  border: 2px solid black;
+  padding: 10px;
+  box-sizing: border-box;
+
+  min-height: auto;
+  display: block;
+
+  page-break-after: auto; /* 👈 important */
+}
+
+.print-body {
+  margin: 0;
+}
+
+
+
+
+/* 🔥 avoid breaking inside table rows */
+tr {
+  page-break-inside: avoid;
+}
+
+table {
+  page-break-inside: auto;
+}
+
+
+@media print {
+
+  .header-repeat {
+    display: table-header-group;
+  }
+
+}
+
+@media print {
+
+  .print-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+ thead {
+  display: table-header-group;
+}
+
+.header-repeat {
+  display: table-header-group;
+}
+
+
+  tfoot {
+    display: table-footer-group;
+  }
+
+  tr {
+    page-break-inside: avoid;
+  }
+
+}
+
+
+@media print {
+
+  @page {
+    size: A4;
+    margin: 10mm;
+  }
+
+  body {
+    margin: 0;
+  }
+
+  .print-page {
+    border: 2px solid black;
+    padding: 10px;
+    box-sizing: border-box;
+
+       min-height: 100%;
+
+      page-break-after: auto; /* 👈 FIX */
+
+    display: flex;
+    flex-direction: column;
+  }
+
+  .content {
+    flex: 1;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  tr {
+    page-break-inside: avoid;
+  }
+
+}
+
+
+
+
+
+
 
     </style>
   </head>
 
-  <body>
-    <div style="text-align:center;">
-      <div>Republic of the Philippines</div>
-      <div><b>Department of Science and Technology</b></div>
-      <div>Regional Office No.02</div>
-      <div>Dalan na Paccorofun, Corner Matunung St.</div>
-      <div>Regional Government Center, Carig Sur, Tuguegarao City, Cagayan</div>
-      <h2>PURCHASE REQUEST</h2>
-    </div>
+<body>
+
+<body>
+
+<div class="print-page">
+
+<table class="print-table">
+  <thead class="header-repeat">
+    <tr>
+      <td>
+        <div class="print-header">
+          <div>Republic of the Philippines</div>
+          <div><b>Department of Science and Technology</b></div>
+          <div>Regional Office No.02</div>
+          <div>Dalan na Paccorofun, Corner Matunung St.</div>
+          <div>Regional Government Center, Carig Sur, Tuguegarao City, Cagayan</div>
+          <h2>PURCHASE REQUEST</h2>
+        </div>
+      </td>
+    </tr>
+  </thead>
+
+  <tbody>
+    <tr>
+      <td>
+
+        <!-- 🔽 START NG LUMANG print-body MO -->
+
+
+<div class="print-body">
+ 
 
     <table>
       <tr>
@@ -2393,41 +2629,58 @@ th, td {
         ${rows}
         <tr>
           <td colspan="5" style="text-align:right; font-weight:bold;">ABC:</td>
-          <td style="text-align:right; font-weight:bold;">₱${total.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+        <td style="text-align:right; font-weight:bold;">
+₱${runningTotal.toLocaleString(undefined,{minimumFractionDigits:2})}
+</td>
         </tr>
       </tbody>
+
     </table>
 
-    <div class="purpose-section">
-      <b>Purpose:</b> ${r.purpose || ''}
-      <br><br><br>
+<tfoot>
+<tr>
+<td colspan="6">
+
+  <div class="purpose-section">
+    <b>Purpose:</b> ${r.purpose || ''}
+  </div>
+
+  <div class="signature-section">
+
+    <div class="sig-box">
+      <b>Requested by:</b><br><br>
+      ___________________________<br>
+      ${r.name || ''}<br>
+      ${r.position || ''}
     </div>
 
-    <div class="signature-section">
-      <div class="sig-box">
-        <div><b>Requested by:</b></div>
-        <div class="line" style="height: 25px;"></div>
-        <div class="sig-label">Signature:</div>
-        <div class="line" style="width: 200px;"></div>
-        <div><b>Printed Name:</b> ${r.name || ''}</div>
-<div><b>Designation:</b> ${r.position || ''}</div>
-      </div>
+    <div class="sig-box">
+      <b>Approved by:</b><br><br>
+      ___________________________<br>
+      ${r.approverName || 'VIRGINIA G. BILGERA'}<br>
+      ${r.approverTitle || 'Regional Director'}
+    </div>
 
-     
-<div class="sig-box">
-  <div><b>Approved by:</b></div>
-  <div class="line" style="height: 25px;"></div>
+  </div>
 
-  <div class="sig-label">Signature:</div>
-  <div class="line" style="width: 200px;"></div>
+  <div style="text-align:right; font-size:10px; margin-top:10px;">
+    Page <span class="pageNumber"></span>
+  </div>
 
-  <div><b>${r.approverName || 'VIRGINIA G. BILGERA'}</b></div>
-  <div>${r.approverTitle || 'Regional Director'}</div>
-</div>
+</td>
+</tr>
+</tfoot>
+
+
+
+
+
+
+
 
 
     </div>
-
+ </div>
   </body>
   </html>
   `;
@@ -2441,10 +2694,20 @@ th, td {
   w.document.write(html);
   w.document.close();
 
-  w.onload = function () {
-    w.focus();
-    w.print();
-  };
+ w.onload = function () {
+
+  // 🔥 PAGE COUNT CALCULATION (ILAGAY DITO)
+  let totalPages = Math.ceil(w.document.body.scrollHeight / 1120);
+
+  let pages = w.document.querySelectorAll('.pageNumber');
+  pages.forEach((el, i) => {
+    el.innerText = (i + 1) + " of " + totalPages;
+  });
+
+  // 🔥 PRINT AFTER MA-SET ANG PAGE NUMBER
+  w.focus();
+  w.print();
+};
 }
 
 
@@ -2597,6 +2860,7 @@ async function retrieveRequest(id){
 
     // 🔥 LOAD ITEMS
     if(r.items && r.items.length > 0){
+
       r.items.forEach(item => {
         let row = itemsTable.insertRow();
 
@@ -2753,6 +3017,8 @@ window.deleteRequest = deleteRequest;
     <button onclick="closeChangePass()">Cancel</button>
   </div>
 </div>
+
+
 
 
 
