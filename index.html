@@ -793,9 +793,16 @@ if(r.status === "APPROVED_ORD"){
 else if(r.status === "CANVASSED"){
   remarks = "Forwarded to TOS/FASS for Canvass Signature";
 }
-else if(r.status === "APPROVED_CANVASS"){
+
+
+else if(
+  r.status === "APPROVED_CANVASS_TOS" ||
+  r.status === "APPROVED_CANVASS_FASS"
+){
   remarks = "Approved Canvass - Processed";
 }
+
+
 
 else if(r.status === "REJECTED"){
   remarks = "Rejected: " + (r.rejectReason || "No reason");
@@ -907,81 +914,134 @@ let approvedHTML = `
   <th>Requestor</th>
   <th>Designation</th>
   <th>Purpose</th>
+<th>Remarks</th>
   <th>Actions</th>
 </tr>
 `;
 
 
-    list.forEach((r,i)=>{
+list.forEach((r,i)=>{
 
-      if(r.status==="PENDING_ORD"){
-  pendingCount++;
-        pending += buildCard(r, i, `
-          <button onclick="approveORD('${r.id}')">Approve</button>
-         <textarea id="rejectReason_${r.id}" placeholder="Reason for rejection"></textarea>
-<button onclick="reject('${r.id}')">Reject</button>
-        `);
-      }
+  // ✅ PENDING
+  if(r.status==="PENDING_ORD"){
+    pendingCount++;
 
-      if(
-  r.status==="APPROVED_ORD" ||
-  r.status==="CANVASSED" ||
-  r.status==="FOR_TOS_CANVASS" ||
-  r.status==="FOR_FASS_CANVASS" ||
-  r.status==="APPROVED_CANVASS" ||
-  r.status==="DONE"
-){
-  approvedHTML += `
-  <tr>
-   
-<td>
-  ${r.dateRequested 
-    ? new Date(r.dateRequested).toLocaleDateString('en-PH', {
-        year: 'numeric',
-        month: 'short',
-        day: '2-digit'
-      }) 
-    : "-"
+    if(!pending.includes("<table>")){
+      pending += `
+      <table>
+        <tr>
+          <th>Date</th>
+          <th>PR No.</th>
+          <th>Division</th>
+          <th>Requestor</th>
+          <th>Designation</th>
+          <th>Purpose</th>
+          <th>Actions</th>
+        </tr>
+      `;
+    }
+
+    pending += `
+    <tr>
+      <td>${r.dateRequested ? new Date(r.dateRequested).toLocaleDateString('en-PH') : "-"}</td>
+      <td>${r.prNo || "N/A"}</td>
+      <td>${r.division || ""}</td>
+      <td>${r.name || ""}</td>
+      <td>${r.position || ""}</td>
+      <td>${r.purpose || ""}</td>
+      <td>
+        <button onclick="viewPending('${r.id}')">👁 View</button>
+        <button onclick="openApproveModal('${r.id}')">✅ Approve</button>
+      </td>
+    </tr>
+    `;
   }
-</td>
 
+  // ✅ APPROVED / ALL OTHER STATUS
+  if(
+    r.status==="APPROVED_ORD" ||
+    r.status==="CANVASSED" ||
+    r.status==="FOR_TOS_CANVASS" ||
+    r.status==="FOR_FASS_CANVASS" ||
+    r.status==="APPROVED_CANVASS_TOS" ||
+    r.status==="APPROVED_CANVASS_FASS" ||
+    r.status==="DONE" ||
+    r.status==="REJECTED"
+  ){
 
-    <td>${r.prNo || ""}</td>
-    <td>${r.division || ""}</td>
-    <td>${r.name || ""}</td>
-    <td>${r.position || ""}</td>
-    <td>${r.purpose || ""}</td>
-    
-<td>
-  <button onclick="viewRequestById('${r.id}')">View</button>
-  <button onclick="printPR('${r.id}')">Print</button>
-  
-  ${r.supportFile 
-    ? `<button onclick="window.open('${r.supportFile}', '_blank')">📎 File</button>` 
-    : ''
+    let label = "";
+    let color = "green";
+
+   if(r.status === "REJECTED"){
+  if(r.rejectedBy === "TOS"){
+    label = "❌ REJECTED BY TOS";
+  } else if(r.rejectedBy === "FASS"){
+    label = "❌ REJECTED BY FASS";
+  } else {
+    label = "❌ REJECTED";
   }
-</td>
-
-  </tr>
-  `;
+  color = "red";
 }
 
-    });
 
-   
+
+else if(r.status === "FOR_TOS_CANVASS"){
+      label = "⏳ FOR TOS APPROVAL"; color = "orange";
+    } else if(r.status === "FOR_FASS_CANVASS"){
+      label = "⏳ FOR FASS APPROVAL"; color = "orange";
+    } else if(r.status === "CANVASSED"){
+      label = "📑 CANVASSED";
+    } else if(
+      r.status === "APPROVED_CANVASS_TOS" ||
+      r.status === "APPROVED_CANVASS_FASS"
+    ){
+      label = "✅ CANVASS APPROVED";
+    } else if(r.status === "DONE"){
+      label = "🏁 COMPLETED";
+    } else {
+      label = "✅ APPROVED";
+    }
+
+    approvedHTML += `
+    <tr>
+      <td>${r.dateRequested ? new Date(r.dateRequested).toLocaleDateString('en-PH') : "-"}</td>
+      <td>${r.prNo || ""}</td>
+      <td>${r.division || ""}</td>
+      <td>${r.name || ""}</td>
+      <td>${r.position || ""}</td>
+      <td>${r.purpose || ""}</td>
+      <td><b style="color:${color};">${label}</b></td>
+      <td>
+        <button onclick="viewRequestById('${r.id}')">View</button>
+        <button onclick="printPR('${r.id}')">Print</button>
+      </td>
+    </tr>
+    `;
+  }
+
+});
+
+
+
+
 if(pendingCount === 0){
   ordPending.innerHTML = `
     <p style="text-align:center; color:gray;">
       No Pending Request
     </p>
   `;
+
 }else{
+  pending += "</table>";
+
   ordPending.innerHTML = `
     <h4 style="margin-bottom:10px; color:#b91c1c;">
       ${pendingCount} Pending Request${pendingCount > 1 ? 's' : ''} for Approval
     </h4>
   ` + pending;
 }
+
+
 
     approvedHTML += "</table>";
 ordApproved.innerHTML = approvedHTML;
@@ -1047,7 +1107,14 @@ async function loadReview(){
     }
 
     // ✅ APPROVED CANVASS (LEFT SIDE)
-    if(r.status==="APPROVED_CANVASS"){
+   
+if(
+  (currentUser.role==="TOS" && r.status==="APPROVED_CANVASS_TOS") ||
+  (currentUser.role==="FASS" && r.status==="APPROVED_CANVASS_FASS")
+){
+
+
+
       approvedHTML += `
       <tr>
        <td>
@@ -1097,10 +1164,13 @@ async function reject(id){
       return;
     }
 
-    await updateDoc(doc(db, "requests", id), {
-      status: "REJECTED",
-      rejectReason: reason
-    });
+   let rejectedBy = currentUser.role; // TOS or FASS
+
+await updateDoc(doc(db, "requests", id), {
+  status: "REJECTED",
+  rejectReason: reason,
+  rejectedBy: rejectedBy
+});
 
     alert("❌ Rejected with reason!");
 
@@ -1211,9 +1281,6 @@ if(isSearch && keyword){
 
 
 
-
-
-
 // ✅ SECTION 1: APPROVED BY ORD (FOR CANVASS)
 if(
   r.status === "APPROVED_ORD" ||
@@ -1221,6 +1288,15 @@ if(
   r.status === "FOR_TOS_CANVASS" ||
   r.status === "FOR_FASS_CANVASS"
 ){
+
+  // 🔥 HARD FILTER — alisin agad kapag approved na
+  if(
+    r.status === "APPROVED_CANVASS_TOS" ||
+    r.status === "APPROVED_CANVASS_FASS"
+  ){
+    return;
+  }
+
 
   let actions = "";
 
@@ -1257,9 +1333,13 @@ if(
 }
 
 
-
 // ✅ SECTION 2: FOR ABSTRACT (AFTER REVIEW)
-if(r.status==="APPROVED_CANVASS"){
+
+if(
+  r.status === "APPROVED_CANVASS_TOS" ||
+  r.status === "APPROVED_CANVASS_FASS"
+){
+
 abstractHTML += buildCard(r,i,`
 <button onclick="openAbstract(${i})">Create Abstract</button>
 `);
@@ -1273,13 +1353,16 @@ poHTML += buildCard(r,i,`
 }
 
 // ✅ RECORDS SECTION (APPROVED BY ORD + FLOW)
+
 if(
   r.status === "APPROVED_ORD" ||
   r.status === "CANVASSED" ||
   r.status === "FOR_TOS_CANVASS" ||
   r.status === "FOR_FASS_CANVASS" ||
-  r.status === "APPROVED_CANVASS" ||
-  r.status === "DONE"
+  r.status === "APPROVED_CANVASS_TOS" ||
+  r.status === "APPROVED_CANVASS_FASS" ||
+    r.status === "DONE" 
+
 ){
 
   //  Header (isang beses lang)
@@ -1351,10 +1434,12 @@ async function sendTo(i){
   let list = await getRequests();
   let r = list[i];
 
-  if(r.status !== "APPROVED_ORD" && r.status !== "CANVASSED"){
-    alert("Invalid action");
-    return;
-  }
+ if(r.status !== "APPROVED_ORD"){
+  alert("Only ORD approved requests can be sent for canvass");
+  return;
+}
+
+r.status = "FOR_CANVASS";
 
   let newStatus = r.type === "TECHNICAL"
     ? "FOR_TOS_CANVASS"
@@ -2018,14 +2103,27 @@ async function approveCanvass(i){
 
   let remarks = document.getElementById("remarks"+i)?.value || "";
 
+  // 🔥 ROLE-SPECIFIC STATUS FIX
+  let newStatus = "";
+
+  if(currentUser.role === "TOS"){
+    newStatus = "APPROVED_CANVASS_TOS";
+  } else if(currentUser.role === "FASS"){
+    newStatus = "APPROVED_CANVASS_FASS";
+  }
+
   await updateDoc(doc(db, "requests", r.id), {
-    status: "APPROVED_CANVASS",
+    status: newStatus,
     remarks
   });
 
   alert("✅ Canvass Approved!");
   loadReview();
 }
+
+
+
+
 
 function extractNumber(val){
   if(!val) return 0;
@@ -2572,7 +2670,7 @@ table {
 
 <body>
 
-<body>
+
 
 <div class="print-page">
 
@@ -2908,12 +3006,83 @@ async function retrieveRequest(id){
   }
 }
 
+window.viewPending = async function(id){
+  let list = await getRequests();
+  let r = list.find(x => x.id === id);
+
+  if(!r){
+    alert("Request not found");
+    return;
+  }
+
+  // for now placeholder
+  if(r.supportFile){
+    window.open(r.supportFile, "_blank");
+  } else {
+    alert("No supporting document uploaded.");
+  }
+}
+
+window.openApproveModal = async function(id){
+  let list = await getRequests();
+  let r = list.find(x => x.id === id);
+
+  if(!r){
+    alert("Request not found");
+    return;
+  }
+
+  window.currentApproveId = id;
+
+  let html = buildCard(r, 0, `
+    <button onclick="confirmApprove()">Approve</button>
+    <textarea id="modalRejectReason" placeholder="Reason for rejection"></textarea>
+    <button onclick="confirmReject()">Reject</button>
+  `);
+
+  document.getElementById("approveContent").innerHTML = html;
+  document.getElementById("approveModal").classList.remove("hidden");
+}
+
+window.confirmApprove = async function(){
+  if(!window.currentApproveId) return;
+
+  let prNumber = await generatePR();
+
+  await updateDoc(doc(db, "requests", window.currentApproveId), {
+    status: "APPROVED_ORD",
+    prNo: prNumber
+  });
+
+  alert("✅ Approved!");
+  closeApproveModal();
+}
+
+window.confirmReject = async function(){
+  let reason = document.getElementById("modalRejectReason").value.trim();
+
+  if(!reason){
+    alert("Provide reason");
+    return;
+  }
+
+  await updateDoc(doc(db, "requests", window.currentApproveId), {
+    status: "REJECTED",
+    rejectReason: reason
+  });
+
+  alert("❌ Rejected!");
+  closeApproveModal();
+}
+
+window.closeApproveModal = function(){
+  document.getElementById("approveModal").classList.add("hidden");
+}
+
+
 
 
 window.printCanvassById = printCanvassById;
-
-
-
 window.viewRequestById = viewRequestById;
 window.printPR = printPR;
 window.printPRDirect = printPRDirect;
@@ -3032,6 +3201,37 @@ window.deleteRequest = deleteRequest;
     <button onclick="closeChangePass()">Cancel</button>
   </div>
 </div>
+
+
+<div id="approveModal" class="hidden" style="
+  position:fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  background:rgba(0,0,0,0.5);
+  justify-content:center;
+  align-items:center;
+  z-index:1000;
+">
+
+
+  <div style="
+    background:white;
+    width:80%;
+    max-height:90%;
+    overflow:auto;
+    padding:20px;
+    border-radius:10px;
+  ">
+
+    <h3>Approve Request</h3>
+
+    <div id="approveContent"></div>
+
+    <button onclick="closeApproveModal()">Close</button>
+
+  </div>
+</div>
+
 
 
 
