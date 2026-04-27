@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>PR System</title>
+<title>Government Purchase Request System</title>
 
 <style>
 
@@ -313,6 +313,22 @@ body::after{
   from{transform:translateY(0);}
   to{transform:translateY(-100px);}
 }
+
+.hidden {
+  display: none !important;
+}
+
+
+
+
+
+
+.text-rejected {
+  color: red;
+  font-weight: bold;
+}
+
+
 
 
 </style>
@@ -1020,13 +1036,27 @@ function loadStaff(){
       }
 
       html += `
-      <tr>
+      <tr class="${isRejected(r.status) ? 'rejected-row' : ''}">
+
+
         <td>${r.dateRequested ? new Date(r.dateRequested).toLocaleDateString() : "-"}</td>
+
         <td>${r.prNo || "N/A"}</td>
-        <td>${r.name}</td>
-        <td>${r.purpose}</td>
-        <td>${r.status}</td>
-        <td>${remarks}</td>
+
+<td>${r.name}</td>
+    
+<td>${r.purpose}</td>
+
+     
+       
+<td class="${isRejected(r.status) ? 'text-rejected' : ''}">
+  ${r.status}
+
+</td>
+
+       <td class="${isRejected(r.status) ? 'text-rejected' : ''}">
+  ${remarks}
+</td>
 
         <td style="white-space:nowrap;">
 
@@ -1424,7 +1454,12 @@ return `
 }</p>
 
 <p><b>Status:</b> ${r.status}</p>
+
+
 <p><b>Remarks:</b> ${r.remarks || "-"}</p>
+
+
+
 ${table}
 
 <h4>Total: ₱${total}</h4>
@@ -3345,6 +3380,16 @@ window.closeApproveModal = function(){
 
 
 
+function isRejected(status){
+  return status === "REJECTED" ||
+         status === "REJECTED_ORD" ||
+         status === "REJECTED_TOS" ||
+         status === "REJECTED_FASS";
+}
+
+
+
+
 window.printCanvassById = printCanvassById;
 window.viewRequestById = viewRequestById;
 window.printPR = printPR;
@@ -3352,6 +3397,11 @@ window.printPRDirect = printPRDirect;
 window.cancelRequest = cancelRequest;
 window.retrieveRequest = retrieveRequest;
 window.deleteRequest = deleteRequest;
+
+
+
+
+
 
 </script>
 
@@ -3444,6 +3494,11 @@ window.deleteRequest = deleteRequest;
   top:0; left:0;
   width:100%; height:100%;
   background:rgba(0,0,0,0.5);
+
+ display: flex;              /* 🔥 ADD THIS */
+  justify-content: center;    /* horizontal center */
+  align-items: center;
+
   justify-content:center;
   align-items:center;
   z-index:1000;
@@ -3494,7 +3549,6 @@ window.deleteRequest = deleteRequest;
 
   </div>
 </div>
-
 
 
 <div class="animated-bg"></div>
