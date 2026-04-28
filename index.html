@@ -329,6 +329,100 @@ body::after{
 }
 
 
+.signatories {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 40px;
+}
+
+.sig {
+  width: 30%;
+  text-align: center;
+}
+
+.name {
+  font-weight: bold;
+  border-bottom: 1px solid black;
+  padding-bottom: 3px;
+
+  white-space: nowrap; /* 🔥 para hindi mag break apelyido */
+}
+
+.pos {
+  font-size: 10px;
+  margin-top: 5px;
+}
+
+@media print {
+  .signatories {
+    page-break-inside: avoid;
+  }
+}
+
+.signatories {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: flex-start;
+  margin-top: 50px;
+  width: 100%;
+}
+
+.sig {
+  width: 22%;
+  text-align: center;
+  display: inline-block;
+}
+
+.name {
+  font-weight: bold;
+  border-bottom: 1px solid black;
+  padding-bottom: 4px;
+
+  white-space: nowrap;   /* 🔥 FIX: di na bababa apelyido */
+}
+
+.pos {
+  font-size: 11px;
+  margin-top: 6px;
+}
+
+
+html, body {
+  width: 100%;
+  overflow: hidden; /* 🔥 prevents overflow */
+}
+
+
+table, th, td {
+  box-sizing: border-box;
+}
+
+/* 🔥 VERTICAL DIVIDER BEFORE BIDDERS */
+th:nth-child(5),
+td:nth-child(5) {
+  border-left: 2px solid black !important;
+}
+
+/* 🔥 vertical line before bidders */
+.bidder-col {
+  border-left: 2px solid black !important;
+}
+
+th.bidder-col {
+  position: relative;
+}
+
+th.bidder-col::after {
+  content: "";
+  position: absolute;
+  left: 5%;      /* 🔥 may gap sa left */
+  right: 5%;     /* 🔥 may gap sa right */
+  top: 55%;
+  border-top: 1.5px solid black;
+}
+
+
+
 
 
 </style>
@@ -379,7 +473,7 @@ body::after{
 
 <div class="topbar">
 <h2 style="color:white; letter-spacing:1px;">
-  📊 Staff Dashboard
+  📊 Requestor Dashboard
 </h2>
   <div style="display:flex; gap:5px;">
     <button class="action-btn" onclick="openChangePass()">Edit Password</button>
@@ -396,7 +490,7 @@ body::after{
 
   <div style="display:flex; justify-content:space-between; align-items:center;">
     <h3>📋 My Requests</h3>
-    <button onclick="openPRModal()">+ Create Purchase Request</button>
+    <button onclick="openPRModal()">➕ Create Purchase Request</button>
   </div>
 
   <div id="staffList"></div>
@@ -2101,11 +2195,14 @@ r.items.forEach((it,idx)=>{
     <td class="left">${it.desc}</td>
     <td>${it.qty}</td>
     <td>${it.unit}</td>
-    ${raw.map((val,i)=>`
-      <td class="${i===winnerIndex?'winner':''}">
-        ${val || ''}
-      </td>
-    `).join("")}
+
+  ${raw.map((val,i)=>`
+  <td class="${i===winnerIndex?'winner':''}">
+    ${val || ''}
+  </td>
+`).join("")}
+
+
   </tr>
   `;
 });
@@ -2130,7 +2227,7 @@ if(rows === ""){
 
 @page {
   size: A4 landscape;
-  margin: 15mm;
+  margin: 10mm; /* 🔥 mas safe */
 }
 
 @media print {
@@ -2140,14 +2237,28 @@ if(rows === ""){
 }
 
 
-
-    body{font-family:Arial;margin:20px;font-size:12px;}
-    h2,h3,p{text-align:center;margin:2px;}
-  table {
-  width: 100%;
-  border-collapse: collapse;
-  table-layout: fixed;
+* {
+  box-sizing: border-box; 
 }
+
+body{
+  font-family:Arial;
+  margin:0; /* 🔥 FIX */
+  padding:10mm; /* instead of margin */
+  font-size:12px;
+}  
+
+
+
+    h2,h3,p{text-align:center;margin:2px;}
+  
+table {
+  width: 100%;
+  max-width: 100%; /* 🔥 ADD THIS */
+  border-collapse: collapse;
+  table-layout: auto;
+}
+
 
 td, th {
   border: 1px solid black;
@@ -2186,6 +2297,7 @@ td, th {
   width: 30%;
   text-align: center;
   font-size: 11px;
+
 }
 
 .line {
@@ -2223,7 +2335,63 @@ table {
   page-break-inside: auto;
 }
 
+.signatories-wrapper {
+  margin-top: 40px;
+  width: 100%;
+}
 
+.sign-row {
+  display: flex;
+  justify-content: space-evenly;
+  margin-bottom: 40px;
+}
+
+.sig {
+  width: 32%;
+  text-align: center;
+}
+
+.name {
+  font-weight: bold;
+  border-bottom: 1px solid black;
+  padding-bottom: 4px;
+  white-space: nowrap;
+}
+
+.pos {
+  font-size: 11px;
+  margin-top: 5px;
+}
+.signatories {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+  text-align: center;
+}
+
+.signatories > div {
+  width: 23%;
+}
+
+/* 🔥 PARA HINDI DIKIT SA LEFT YUNG BAC SECRETARY */
+.signatories > div:first-child {
+  margin-left: 30px;
+}
+
+
+.header {
+  text-align: center;
+  line-height: 1.3;
+}
+
+.header h2 {
+  margin: 0;
+  font-weight: bold;
+}
+
+.sub-header {
+  font-size: 12px;
+}
 
   </style>
   </head>
@@ -2235,15 +2403,19 @@ table {
     Rev. 28 January 2021
   </div>
 
-  <h2 style="margin-bottom:5px;">ABSTRACT OF BIDS</h2>
-
-<div style="display:flex; justify-content:space-between; font-size:12px;">
-  <div>Date: ${new Date().toLocaleDateString()}</div>
-  <div>Place: DOST RO2, Tuguegarao City, Cagayan</div>
+  
+<div class="header">
+  <h2>ABSTRACT OF BIDS</h2>
+  <div class="sub-header">Date: April 28, 2026</div>
+  <div class="sub-header">Place: DOST RO2, Tuguegarao City, Cagayan</div>
 </div>
 
+
+
+
   <table>
-    <tr>
+
+   <tr>
       <th rowspan="2" style="width:35%;">ITEM AND DESCRIPTION</th>
 <th rowspan="2" style="width:8%;">QTY</th>
 <th rowspan="2" style="width:8%;">UNIT</th>
@@ -2251,53 +2423,92 @@ table {
     </tr>
     <tr>
 
-${bidders.map(b=>`<th style="width:12%;">${b}<br>UNIT PRICE</th>`).join("")}
+
+${bidders.map((b,i)=>`
+  <th class="bidder-col" style="width:12%;">
+    ${b}<br>UNIT PRICE
+  </th>
+`).join("")}
+
+
 
     </tr>
 
     ${rows}
 
     <tr>
-      <th colspan="3">TOTAL</th>
-      ${totals.map(t=>`<th>${t.toFixed(2)}</th>`).join("")}
+     
+<th colspan="3">TOTAL</th>
+${totals.map(t=>`<th>${t.toFixed(2)}</th>`).join("")}
     </tr>
   </table>
 
-  <p style="margin-top:20px;">
-  We hereby certify that we had verified this Abstract of Bids against the Price Quotation submitted by the external providers.
-  </p>
+ <p style="margin-top:20px; text-align:left;">
+We hereby certify that we had verified this Abstract of Bids against the Price Quotation submitted by the external providers.
+</p>
 
-  <p><b>Prepared by:</b></p>
+<p style="text-align:left;"><b>Prepared by:</b></p>
+  
 
-  <div class="sign">
-    <div>
-      <div class="line">CLAUDENCE JOYCE V. BATANG</div>
-      BAC Vice Chairperson
+
+<div class="signatories-wrapper">
+
+  <div class="sign-row">
+
+<div class="sig">
+      <div class="name">JUNIVIE M. LANGCAY</div>
+      <div class="pos">BAC Secretariat</div>
     </div>
-    <div>
-      <div class="line">ROWENA A. GUZMAN</div>
-      BAC Member
+
+
+
+    <div class="sig">
+      <div class="name">CLAUDENCE JOYCE V. BATANG</div>
+      <div class="pos">BAC Vice Chairperson</div>
     </div>
-    <div>
-      <div class="line">MARY ANN D. CARPISO</div>
-      BAC Member
+
+    <div class="sig">
+      <div class="name">ROWENA A. GUZMAN</div>
+      <div class="pos">BAC Member</div>
+    </div>
+
+    <div class="sig">
+      <div class="name">MARY ANN D. CARPISO</div>
+      <div class="pos">BAC Member</div>
     </div>
   </div>
 
-  <div class="sign">
-    <div>
-      <div class="line">RAQUEL B. SANTOS</div>
-      BAC Member
+  <div class="sign-row">
+    <div class="sig">
+      <div class="name">RAQUEL B. SANTOS</div>
+      <div class="pos">BAC Member</div>
     </div>
-    <div>
-      <div class="line">MARY ANN P. MAGLASIN</div>
-      BAC Chairperson
+
+    <div class="sig">
+      <div class="name">MARY ANN P. MAGLASIN</div>
+      <div class="pos">BAC Chairperson</div>
     </div>
-    <div>
-      <div class="line">VIRGINIA G. BUGERA</div>
-      Regional Director
+
+    <div class="sig">
+      <div class="name">VIRGINIA G. BILGERA</div>
+      <div class="pos">Regional Director</div>
     </div>
   </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+</div>
+
+
 
   <h3 style="margin-top:20px;">Lowest Bidder: ${overallWinner}</h3>
 
@@ -2466,8 +2677,12 @@ async function addUser(){
 
   try{
 
+    // 🔥 SECONDARY AUTH
+    const tempApp = initializeApp(firebaseConfig, "Secondary");
+    const tempAuth = getAuth(tempApp);
+
     const userCred = await createUserWithEmailAndPassword(
-      auth,
+      tempAuth,
       email,
       password
     );
@@ -2482,11 +2697,20 @@ async function addUser(){
     alert("✅ User created!");
     loadUsers();
 
+// 🔥 CLEAR INPUT FIELDS
+newFullName.value = "";
+newUsername.value = "";
+newPassword.value = "";
+newRole.value = "STAFF"; // optional default
+
+
+    // 🔥 IMPORTANT
+    await tempAuth.signOut();
+
   }catch(err){
     alert(err.message);
   }
 }
-
 
 
 async function deleteUser(i){
@@ -3356,22 +3580,36 @@ window.confirmApprove = async function(){
   closeApproveModal();
 }
 
-window.confirmReject = async function(){
-  let reason = document.getElementById("modalRejectReason").value.trim();
+window.confirmReject = async function () {
+  try {
+    let reason = document.getElementById("modalRejectReason").value.trim();
 
-  if(!reason){
-    alert("Provide reason");
-    return;
+    if (!reason) {
+      alert("Provide reason");
+      return;
+    }
+
+    await updateDoc(doc(db, "requests", window.currentApproveId), {
+      status: "REJECTED",
+      rejectReason: reason
+    });
+
+    alert("❌ Rejected!");
+
+    // 🔥 AUTO CLOSE MODAL
+    closeApproveModal();
+
+    // optional cleanup
+    window.currentApproveId = null;
+
+  } catch (err) {
+    console.error(err);
+    alert("Error rejecting request");
   }
+};
 
-  await updateDoc(doc(db, "requests", window.currentApproveId), {
-    status: "REJECTED",
-    rejectReason: reason
-  });
 
-  alert("❌ Rejected!");
-  closeApproveModal();
-}
+
 
 window.closeApproveModal = function(){
   document.getElementById("approveModal").classList.add("hidden");
@@ -3549,6 +3787,7 @@ window.deleteRequest = deleteRequest;
 
   </div>
 </div>
+
 
 
 <div class="animated-bg"></div>
