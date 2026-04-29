@@ -389,7 +389,8 @@ body::after{
 
 html, body {
   width: 100%;
-  overflow: hidden; /* 🔥 prevents overflow */
+  overflow-y: auto; /* allow vertical scroll */
+  overflow-x: hidden; /* optional */
 }
 
 
@@ -1703,19 +1704,49 @@ if(
     <td>${r.purpose || ""}</td>
     
 
-<td>
-  <button onclick="openAbstract(${i})">
-    📊 Create Abstract
-  </button>
 
-  ${
-    r.abstractGenerated 
-    ? `<button onclick="printAbstractById('${r.id}')">
-         🖨 Print Abstract
-       </button>`
-    : ""
-  }
+<td>
+
+${
+  r.abstractGenerated
+  ? `
+    <button onclick="printAbstractById('${r.id}')">
+      🖨 Print Abstract
+    </button>
+
+    <button onclick="openAbstract(${i})">
+      🔁 Regenerate Abstract
+    </button>
+
+    <div style="color:green; font-size:11px;">
+      ✔ Abstract has been generated
+    </div>
+  `
+  : `
+    <button onclick="openAbstract(${i})">
+      📊 Create Abstract
+    </button>
+  `
+}
+
 </td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   </tr>
   `;
@@ -2516,7 +2547,8 @@ We hereby certify that we had verified this Abstract of Bids against the Price Q
   </html>
   `;
 
- let w = window.open("", "_blank");
+
+let w = window.open("", "_blank");
 
 w.document.open();
 w.document.write(html);
@@ -2539,6 +2571,11 @@ alert("📊 Abstract generated successfully!");
   closeAbstract();
   loadAdmin();
 }
+
+
+
+
+
 
 
 
@@ -2891,10 +2928,7 @@ const lineTotal = hasValue ? qty * cost : '';
 body {
   margin: 0;
   font-family: Arial;
-
-  background: linear-gradient(-45deg, #0b1b3a, #102a56, #0e3b6f, #071427);
-  background-size: 400% 400%;
-  animation: gradientBG 12s ease infinite;
+  background: white; /* ✅ FIXED: tanggal gradient */
 }
 
 @keyframes gradientBG {
