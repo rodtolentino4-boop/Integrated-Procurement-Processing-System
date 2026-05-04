@@ -1673,7 +1673,8 @@ if(r.status === "APPROVED_ORD" || r.status === "CANVASSED"){
 
 if(
   r.status === "APPROVED_CANVASS_TOS" ||
-  r.status === "APPROVED_CANVASS_FASS"
+  r.status === "APPROVED_CANVASS_FASS" ||
+  r.status === "DONE"
 ){
 
   if(!abstractStarted){
@@ -1691,7 +1692,9 @@ if(
     abstractStarted = true;
   }
 
-  abstractHTML += `
+  
+
+abstractHTML += `
   <tr>
     <td>${
       r.dateRequested 
@@ -1702,68 +1705,104 @@ if(
     <td>${r.division || ""}</td>
     <td>${r.name || ""}</td>
     <td>${r.purpose || ""}</td>
-    
 
+    <td>
+      ${
+        (r.abstractGenerated || (r.abstractItems && r.abstractItems.length > 0))
+        ? `
+          <button onclick="printAbstractById('${r.id}')">
+            🖨 Print Abstract
+          </button>
 
-<td>
+          <button onclick="openAbstract(${i})">
+            🔁 Regenerate Abstract
+          </button>
 
-${
-  r.abstractGenerated
+          <div style="color:green; font-size:11px;">
+            ✔ Abstract has been generated
+          </div>
+        `
+        : `
+         
+${r.abstractGenerated 
   ? `
-    <button onclick="printAbstractById('${r.id}')">
+    <button onclick="printGeneratedAbstract('${r.id}')">
       🖨 Print Abstract
     </button>
-
     <button onclick="openAbstract(${i})">
-      🔁 Regenerate Abstract
+      ✏️ Edit Abstract
     </button>
-
-    <div style="color:green; font-size:11px;">
-      ✔ Abstract has been generated
-    </div>
   `
   : `
     <button onclick="openAbstract(${i})">
-      📊 Create Abstract
+      🧾 Create Abstract
     </button>
   `
 }
 
-</td>
+
+
+        `
+      }
+    </td>
+  </tr>
+`;
+
+
+
+
+
+}
 
 
 
 
 
 
+// ✅ SECTION 3: PURCHASE ORDER TABLE
 
+if(
+  r.status === "APPROVED_CANVASS_TOS" ||
+  r.status === "APPROVED_CANVASS_FASS"
+){
 
+  if(!poHTML.includes("<table>")){
+    poHTML += `
+    <table>
+      <tr>
+        <th>Date</th>
+        <th>PR No.</th>
+        <th>Division</th>
+        <th>Requestor</th>
+        <th>Purpose</th>
+        <th>Action</th>
+      </tr>
+    `;
+  }
 
+  poHTML += `
+  <tr>
+    <td>${
+      r.dateRequested 
+      ? new Date(r.dateRequested).toLocaleDateString('en-PH')
+      : "-"
+    }</td>
 
+    <td>${r.prNo || ""}</td>
+    <td>${r.division || ""}</td>
+    <td>${r.name || ""}</td>
+    <td>${r.purpose || ""}</td>
 
-
-
-
-
-
-
-
+    <td>
+      <button onclick="openPOModal('${r.id}')">
+        🧾 Create PO
+      </button>
+    </td>
+  </tr>
   `;
 }
 
 
-
-
-
-
-
-
-// ✅ SECTION 3: FOR PO
-if(r.status==="DONE"){
-poHTML += buildCard(r,i,`
-<button onclick="createPO(${i})">Create Purchase Order</button>
-`);
-}
 
 // ✅ RECORDS SECTION (APPROVED BY ORD + FLOW)
 
@@ -1836,7 +1875,12 @@ if(abstractStarted){
 
 adminCanvass.innerHTML = canvassHTML;
 adminAbstract.innerHTML = abstractHTML;
-adminPO.innerHTML = poHTML;
+
+if(poHTML !== ""){
+  poHTML += "</table>";
+}
+
+adminPO.innerHTML = poHTML || "<p>No Purchase Orders</p>";
 
 if(recordsHTML !== ""){
   recordsHTML += "</table>";
@@ -2109,28 +2153,57 @@ async function printCanvass(i){
 
 
 
-
-
-
-
-
-async function createAbstract(i){
+async function createPO(id){
   let list = await getRequests();
-  let r = list[i];
+  let r = list.find(x => x.id === id);
 
-alert("Abstract Generator for PR No. " + r.prNo);
+  if(!r){
+    alert("Request not found");
+    return;
+  }
 
-// next step pwede natin lagyan dynamic bidders + auto lowest
+  if(!r.bidders || r.bidders.length === 0){
+    alert("Please generate Abstract first.");
+    return;
+  }
+
+  window.currentPO = r;
+
+  let datalist = document.getElementById("supplierList");
+  datalist.innerHTML = "";
+
+  r.bidders.forEach(b => {
+    if(!b || !b.trim()) return;
+
+    let opt = document.createElement("option");
+    opt.value = b.trim();
+    datalist.appendChild(opt);
+  });
+
+  // auto-select first supplier
+  document.getElementById("poSupplier").value = r.bidders[0];
+
+  document.getElementById("poModal").classList.remove("hidden");
+
+
+
+
+
+
+
+
+
+
+
+
+
+  // 🔥 IMPORTANT: clear table first
+  document.getElementById("poItems").innerHTML = "";
 }
 
-async function createPO(i){
-  let list = await getRequests();
-  let r = list[i];
 
-alert("Generate Purchase Order for PR No. " + r.prNo);
 
-// next step gagawin natin printable PO
-}
+
 
 let currentAbstractIndex = null;
 
@@ -2558,11 +2631,37 @@ w.onload = function(){
   w.print();
 };
 
- await updateDoc(doc(db, "requests", r.id), {
-  status: "DONE",
+
+
+await updateDoc(doc(db, "requests", r.id), {
   winner: overallWinner,
-  abstractGenerated: true // ✅ ADD THIS
+  abstractGenerated: true,
+  bidders: bidders,
+  abstractItems: r.items
+    .map((it, idx) => {
+      let checkbox = document.getElementById(`sel_${idx}`);
+      if(!checkbox || !checkbox.checked) return null;
+
+      let raw = [
+        document.getElementById(`p_${idx}_0`)?.value || "0",
+        document.getElementById(`p_${idx}_1`)?.value || "0",
+        document.getElementById(`p_${idx}_2`)?.value || "0",
+        document.getElementById(`p_${idx}_3`)?.value || "0"
+      ];
+
+      let prices = raw.map(v => extractNumber(v));
+
+      return {
+        desc: it.desc,
+        qty: it.qty,
+        unit: it.unit,
+        prices: prices
+      };
+    })
+    .filter(x => x !== null)
 });
+
+
 
 
 
@@ -3658,11 +3757,612 @@ function isRejected(status){
          status === "REJECTED_FASS";
 }
 
+window.openPOModal = async function(id){
+  let list = await getRequests();
+  let r = list.find(x => x.id === id);
+
+
+let datalist = document.getElementById("supplierList");
+datalist.innerHTML = "";
+
+
+
+
+
+(r.bidders || []).forEach(b => {
+  if(!b || !b.trim()) return;
+
+  let opt = document.createElement("option");
+  opt.value = b.trim();
+  datalist.appendChild(opt);
+});
+
+if(r.bidders && r.bidders.length > 0){
+  document.getElementById("poSupplier").value = r.bidders[0];
+  loadPOItems(r);
+}
+
+
+
+
+
+
+ (r.bidders || []).forEach(b => {
+  if(!b || !b.trim()) return;
+
+  let opt = document.createElement("option");
+  opt.value = b.trim();
+  datalist.appendChild(opt);
+});
+
+// 🔥 optional auto-select first supplier
+if(r.bidders && r.bidders.length > 0){
+  document.getElementById("poSupplier").value = r.bidders[0];
+}
+
+
+  if(!r){
+    alert("Request not found");
+    return;
+  }
+
+  window.currentPO = r;
+window.currentPOIndex = list.findIndex(x => x.id === id);
+
+  let html = `
+    <p><b>PR No:</b> ${r.prNo}</p>
+    <p><b>Requestor:</b> ${r.name}</p>
+    <p><b>Division:</b> ${r.division}</p>
+    <p><b>Purpose:</b> ${r.purpose}</p>
+
+    <h4>Items</h4>
+    <table>
+      <tr>
+        <th>Description</th>
+        <th>Qty</th>
+        <th>Unit</th>
+      </tr>
+      ${r.items.map(it=>`
+        <tr>
+          <td>${it.desc}</td>
+          <td>${it.qty}</td>
+          <td>${it.unit}</td>
+        </tr>
+      `).join("")}
+    </table>
+  `;
+
+  document.getElementById("poContent").innerHTML = html;
+  document.getElementById("poModal").classList.remove("hidden");
+document.getElementById("poNo").innerText = "PO-" + Date.now();
+
+}
+
+document.getElementById("poSupplier").onchange = async function () {
+  let list = await getRequests();
+  let r = list[window.currentPOIndex];
+  loadPOItems(r);
+};
+
+
+window.closePOModal = function(){
+  document.getElementById("poModal").classList.add("hidden");
+}
+
+
+
+
+
+window.printPO = async function(){
+ 
+if(!window.currentPO){
+  alert("No PO data loaded");
+  return;
+}
+
+let r = window.currentPO;
+
+if(!r.abstractItems || r.abstractItems.length === 0){
+  alert("⚠️ Please generate Abstract first.");
+  return;
+}
+
+
+
+if(!r.bidders || r.bidders.length === 0){
+    alert("No bidders found. Generate Abstract first.");
+    return;
+  }
+
+  let supplier = document.getElementById("poSupplier").value.trim();
+if(!supplier){
+  alert("Please select supplier");
+  return;
+}
+
+  let address = document.getElementById("poAddress").value.trim();
+  let poNo = document.getElementById("poNo").innerText.trim();
+  let date = document.getElementById("poDate").value;
+
+  // VALIDATION
+  if(!supplier || !address || !poNo || !date){
+    alert("Please fill all PO fields: Supplier, Address, Date");
+    return;
+  }
+
+ let supplierIndex = (r.bidders || []).findIndex(
+  b => (b || "").trim().toLowerCase() === supplier.trim().toLowerCase()
+);
+
+if(supplierIndex === -1){
+  alert("Supplier not found in bidders list");
+  return;
+}
+
+
+
+  // CALCULATE TOTALS
+  let rows = "";
+  let totalAmount = 0;
+  
+  (r.abstractItems || r.items || []).forEach((it, idx) => {
+    let price = extractNumber(it.prices ? it.prices[supplierIndex] : it.cost);
+    let qty = parseFloat(it.qty) || 0;
+    let amount = price * qty;
+    
+    totalAmount += amount;
+
+    rows += `
+      <tr>
+        <td style="width:8%">${it.stockNo || ''}</td>
+        <td style="width:8%">${it.unit || ''}</td>
+        <td style="width:36%; text-align:left; padding-left:10px;">${it.desc || ''}</td>
+        <td style="width:8%; text-align:center;">${qty}</td>
+        <td style="width:16%; text-align:right;">${price.toLocaleString('en-PH', {minimumFractionDigits: 2})}</td>
+        <td style="width:16%; text-align:right; font-weight:bold;">${amount.toLocaleString('en-PH', {minimumFractionDigits: 2})}</td>
+      </tr>
+    `;
+  });
+
+  // AMOUNT IN WORDS
+  function numberToWords(amount) {
+    const ones = ["", "ONE", "TWO", "THREE", "FOUR", "FIVE", "SIX", "SEVEN", "EIGHT", "NINE"];
+    const teens = ["TEN", "ELEVEN", "TWELVE", "THIRTEEN", "FOURTEEN", "FIFTEEN", "SIXTEEN", "SEVENTEEN", "EIGHTEEN", "NINETEEN"];
+    const tens = ["", "", "TWENTY", "THIRTY", "FORTY", "FIFTY", "SIXTY", "SEVENTY", "EIGHTY", "NINETY"];
+    
+    function convertChunk(num) {
+      if (num < 10) return ones[num];
+      if (num < 20) return teens[num - 10];
+      if (num < 100) return tens[Math.floor(num / 10)] + (num % 10 ? " " + ones[num % 10] : "");
+      return "";
+    }
+    
+    let result = "";
+    let num = Math.floor(amount);
+    
+    if (num >= 1000000) {
+      result += convertChunk(Math.floor(num / 1000000)) + " MILLION ";
+      num %= 1000000;
+    }
+    if (num >= 1000) {
+      result += convertChunk(Math.floor(num / 1000)) + " THOUSAND ";
+      num %= 1000;
+    }
+    if (num > 0) {
+      result += convertChunk(num) + " PESOS";
+    }
+    
+    if (amount % 1 !== 0) {
+      let cents = Math.round((amount % 1) * 100);
+      result += " AND " + cents + "/100 ONLY";
+    } else {
+      result += " ONLY";
+    }
+    
+    return result.toUpperCase();
+  }
+
+  let amountInWords = numberToWords(totalAmount);
+
+  // GENERATE PO
+  let html = `
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <title>Purchase Order ${poNo}</title>
+    <style>
+      @page { size: A4; margin: 15mm; }
+      * { box-sizing: border-box; }
+      body { 
+        font-family: Arial, sans-serif; 
+        font-size: 11px; 
+        margin: 0; 
+        padding: 0;
+        line-height: 1.2;
+      }
+      .header-box {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        border: 1px solid black;
+        padding: 4px 8px;
+        font-size: 9px;
+      }
+      .header { text-align: center; margin-bottom: 15px; }
+      .header h3 { margin: 5px 0; font-size: 16px; }
+      table { 
+        width: 100%; 
+        border-collapse: collapse; 
+        margin-bottom: 10px;
+      }
+      th, td { 
+        border: 1px solid black; 
+        padding: 4px 6px; 
+        text-align: center; 
+      }
+      th { background: #f5f5f5; font-weight: bold; }
+      .left { text-align: left !important; }
+      .right { text-align: right !important; }
+      .no-border td { border: none; }
+      .amount-words { 
+        border: 1px solid black; 
+        padding: 8px; 
+        margin: 15px 0;
+        font-size: 12px;
+        font-weight: bold;
+      }
+      .signatures { 
+        margin-top: 30px; 
+        display: flex; 
+        justify-content: space-between; 
+        gap: 20px;
+      }
+      .sig-box { 
+        width: 48%; 
+        text-align: center; 
+        font-size: 11px;
+      }
+      .sig-line { 
+        border-bottom: 1px solid black; 
+        margin: 50px 0 5px 0; 
+        min-height: 20px;
+      }
+      @media print {
+        body { margin: 0; }
+        .header-box { position: fixed; top: 10px; right: 10px; }
+      }
+    </style>
+  </head>
+  <body>
+    
+    <div class="header-box">
+      FASS-PUR 07-08<br>
+      Rev. 5 | 08 January 2021
+    </div>
+
+    <div class="header">
+      <div>Republic of the Philippines</div>
+      <div><b>DEPARTMENT OF SCIENCE AND TECHNOLOGY</b></div>
+      <div>Regional Office No. 02</div>
+      <div>Tuguegarao City, Cagayan</div>
+      <h3>PURCHASE ORDER</h3>
+    </div>
+
+    <table>
+      <tr>
+        <td style="width:50%; vertical-align:top;">
+          <b>Supplier:</b><br>
+          <span class="left" style="font-weight:bold; font-size:12px;">${supplier}</span><br>
+          <span class="left">${address}</span>
+        </td>
+        <td style="width:50%;">
+          <div><b>PO No.:</b> ${poNo}</div>
+          <div><b>Date:</b> ${new Date(date).toLocaleDateString('en-PH')}</div>
+          <div><b>PR No.:</b> ${r.prNo}</div>
+        </td>
+      </tr>
+    </table>
+
+    <table style="margin-top:15px;">
+      <tr>
+        <th>Stock No.</th>
+        <th>Unit</th>
+        <th style="text-align:left;">Item Description</th>
+        <th>Qty</th>
+        <th>Unit Cost</th>
+        <th>Total Cost</th>
+      </tr>
+      ${rows}
+      <tr style="font-weight:bold; font-size:12px;">
+        <td colspan="5" class="right" style="padding:8px;">TOTAL AMOUNT:</td>
+        <td class="right" style="padding:8px;">₱${totalAmount.toLocaleString('en-PH', {minimumFractionDigits: 2})}</td>
+      </tr>
+    </table>
+
+    <div class="amount-words">
+      <b>${amountInWords}</b>
+    </div>
+
+    <div class="signatures">
+      <div class="sig-box">
+        <div style="text-align:left; margin-bottom:10px;"><b>Very truly yours,</b></div>
+        <div class="sig-line"></div>
+        <div><b>VIRGINIA G. BILGERA</b></div>
+        <div>Regional Director</div>
+      </div>
+      
+      <div class="sig-box">
+        <div style="text-align:left; margin-bottom:10px;"><b>CONFORME:</b></div>
+        <div class="sig-line"></div>
+        <div>___________________________</div>
+        <div style="font-size:10px;">(Signature over Printed Name of Supplier)</div>
+      </div>
+    </div>
+
+  </body>
+  </html>`;
+
+  // PRINT
+  let w = window.open("", "_blank");
+  w.document.write(html);
+  w.document.close();
+  
+  w.onload = () => {
+    w.focus();
+    w.print();
+    w.onafterprint = () => w.close();
+  };
+
+  // SAVE PO DATA
+  await updateDoc(doc(db, "requests", r.id), {
+    poNo: poNo,
+    poDate: date,
+    poSupplier: supplier,
+    poAddress: address,
+    poTotal: totalAmount,
+    status: "PO_GENERATED"
+  });
+
+  alert("✅ PO Generated & Printed Successfully!");
+  document.getElementById("poModal").classList.add("hidden");
+};
+
+
+
+
+function loadPOItems(r) {
+
+  let supplier = document.getElementById("poSupplier").value.trim();
+
+  let idx = (r.bidders || []).findIndex(
+    b => b.trim().toLowerCase() === supplier.toLowerCase()
+  );
+
+  if (idx === -1) {
+    console.warn("Supplier not matched");
+    return;
+  }
+
+  let table = document.getElementById("poItems");
+
+  table.innerHTML = `
+    <tr>
+      <th>Unit</th>
+      <th>Description</th>
+      <th>Qty</th>
+      <th>Unit Cost</th>
+      <th>Amount</th>
+    </tr>
+  `;
+
+  let total = 0;
+
+  (r.abstractItems || []).forEach(it => {
+
+    let price = parseFloat(it.prices?.[idx]) || 0;
+    let amount = price * it.qty;
+
+    total += amount;
+
+    table.innerHTML += `
+      <tr>
+        <td>${it.unit}</td>
+        <td>${it.desc}</td>
+        <td>${it.qty}</td>
+        <td>${price.toLocaleString()}</td>
+        <td>${amount.toLocaleString()}</td>
+      </tr>
+    `;
+  });
+
+  document.getElementById("poTotal").innerText = total.toLocaleString();
+}
+
+
+function loadSuppliers() {
+    const suppliers = JSON.parse(localStorage.getItem("bidders")) || [];
+    const datalist = document.getElementById("supplierList");
+
+    datalist.innerHTML = "";
+
+    suppliers.forEach(supplier => {
+        const option = document.createElement("option");
+        option.value = supplier;
+        datalist.appendChild(option);
+    });
+}
+
+
+async function printGeneratedAbstract(id){
+  let list = await getRequests();
+  let r = list.find(x => x.id === id);
+
+  if(!r){
+    alert("Request not found");
+    return;
+  }
+
+  if(!r.abstractGenerated || !r.abstractItems){
+    alert("⚠️ No generated abstract found.");
+    return;
+  }
+
+  let bidders = r.bidders || [];
+  let items = r.abstractItems || [];
+
+  let rows = "";
+
+  items.forEach((it, idx) => {
+    rows += `
+      <tr>
+        <td>${idx + 1}</td>
+        <td>${it.desc}</td>
+        <td>${it.qty}</td>
+        <td>${it.unit}</td>
+        <td>${it.prices?.[0] || ''}</td>
+        <td>${it.prices?.[1] || ''}</td>
+        <td>${it.prices?.[2] || ''}</td>
+        <td>${it.prices?.[3] || ''}</td>
+      </tr>
+    `;
+  });
+
+  let html = `
+  <html>
+  <head>
+    <title>Abstract of Bids</title>
+    <style>
+      body{
+        font-family: Arial;
+        padding:20px;
+      }
+
+      table{
+        width:100%;
+        border-collapse: collapse;
+        margin-top:20px;
+      }
+
+      th, td{
+        border:1px solid black;
+        padding:5px;
+        text-align:center;
+      }
+
+      h2{
+        text-align:center;
+      }
+    </style>
+  </head>
+  <body>
+
+    <h2>ABSTRACT OF BIDS</h2>
+
+    <p><b>PR No:</b> ${r.prNo || ''}</p>
+
+    <p><b>Bidders:</b><br>
+      ${bidders.join("<br>")}
+    </p>
+
+    <table>
+      <tr>
+        <th>#</th>
+        <th>Description</th>
+        <th>Qty</th>
+        <th>Unit</th>
+        <th>${bidders[0] || 'Bidder 1'}</th>
+        <th>${bidders[1] || 'Bidder 2'}</th>
+        <th>${bidders[2] || 'Bidder 3'}</th>
+        <th>${bidders[3] || 'Bidder 4'}</th>
+      </tr>
+
+      ${rows}
+    </table>
+
+    <br><br>
+
+    <h3>Lowest Bidder: ${r.winner || '-'}</h3>
+
+  </body>
+  </html>
+  `;
+
+  let w = window.open("", "_blank");
+
+  w.document.open();
+  w.document.write(html);
+  w.document.close();
+
+  w.onload = function(){
+    w.focus();
+    w.print();
+  };
+}
+
+
+ window.printGeneratedAbstract = async function(id) {
+    let list = await getRequests();
+    let r = list.find(x => x.id == id);
+
+    if (!r) {
+      alert("No data found.");
+      return;
+    }
+
+    let printWindow = window.open('', '', 'width=900,height=700');
+
+    let html = `
+      <html>
+      <head>
+        <title>Abstract of Bids</title>
+        <style>
+          body { font-family: Arial; padding: 20px; }
+          h2 { text-align: center; }
+          table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+          th, td { border: 1px solid black; padding: 8px; text-align: center; }
+        </style>
+      </head>
+      <body>
+
+        <h2>ABSTRACT OF BIDS</h2>
+
+        <p><b>PR No:</b> ${r.pr_no || ''}</p>
+        <p><b>Requestor:</b> ${r.requestor || ''}</p>
+        <p><b>Purpose:</b> ${r.purpose || ''}</p>
+
+        <table>
+          <tr>
+            <th>Description</th>
+            <th>Qty</th>
+            <th>Unit</th>
+          </tr>
+          ${(r.items || []).map(item => `
+            <tr>
+              <td>${item.description}</td>
+              <td>${item.qty}</td>
+              <td>${item.unit}</td>
+            </tr>
+          `).join('')}
+        </table>
+
+      </body>
+      </html>
+    `;
+
+    printWindow.document.write(html);
+    printWindow.document.close();
+    printWindow.print();
+  };
+
+
+
+
 
 
 
 window.printCanvassById = printCanvassById;
 window.viewRequestById = viewRequestById;
+window.printGeneratedAbstract = printGeneratedAbstract;
 window.printPR = printPR;
 window.printPRDirect = printPRDirect;
 window.cancelRequest = cancelRequest;
@@ -3824,6 +4524,49 @@ window.deleteRequest = deleteRequest;
 
 
 <div class="animated-bg"></div>
+
+
+</div>
+
+
+<div id="poModal" class="hidden" style="position:fixed;top:5%;left:10%;width:80%;height:90%;background:white;overflow:auto;z-index:1000;padding:20px;">
+
+  <div id="poContent"></div> <!-- ✅ ADD THIS -->
+
+  <br>
+
+  PR No: <b id="poPRNo"></b><br>
+  PO No: <b id="poNo"></b><br>
+  Date: <input type="date" id="poDate"><br><br>
+
+  External Provider:
+  <input list="supplierList" id="poSupplier">
+  <datalist id="supplierList"></datalist>
+
+  <br><br>
+
+  Address:
+  <input id="poAddress" style="width:100%"><br><br>
+
+  <table id="poItems"></table>
+
+  <br>
+  Total: ₱<b id="poTotal"></b><br>
+  In Words: <b id="poWords"></b>
+
+  <br><br>
+
+  <button onclick="printPO()">🖨 Print PO</button>
+  <button onclick="document.getElementById('poModal').classList.add('hidden')">Close</button>
+
+</div>
+
+
+
+
+
+
+
 
 
 </body>
