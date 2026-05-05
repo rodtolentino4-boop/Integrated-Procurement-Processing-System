@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -1714,7 +1715,7 @@ abstractHTML += `
             🖨 Print Abstract
           </button>
 
-          <button onclick="openAbstract(${i})">
+          <button onclick="openAbstractById('${r.id}')">
             🔁 Regenerate Abstract
           </button>
 
@@ -1729,12 +1730,12 @@ ${r.abstractGenerated
     <button onclick="printGeneratedAbstract('${r.id}')">
       🖨 Print Abstract
     </button>
-    <button onclick="openAbstract(${i})">
+    <button onclick="openAbstractById('${r.id}')">
       ✏️ Edit Abstract
     </button>
   `
   : `
-    <button onclick="openAbstract(${i})">
+    <button onclick="openAbstractById('${r.id}')">
       🧾 Create Abstract
     </button>
   `
@@ -2191,12 +2192,6 @@ async function createPO(id){
 
 
 
-
-
-
-
-
-
   // 🔥 IMPORTANT: clear table first
   document.getElementById("poItems").innerHTML = "";
 }
@@ -2205,50 +2200,62 @@ async function createPO(id){
 
 
 
-let currentAbstractIndex = null;
+//let currentAbstractIndex = null;
+
+
 
 async function openAbstract(i){
   let list = await getRequests();
   let r = list[i];
 
-  currentAbstractIndex = i;
-  absPR.innerText = r.prNo;
+  if(!r){
+    alert("Request not found");
+    return;
+  }
 
- 
-let html = `
-<table>
-  <tr>
-    <th>Select</th>
-    <th>Description</th>
-    <th>Qty</th>
-    <th>Unit</th>
-    <th>B1</th>
-    <th>B2</th>
-    <th>B3</th>
-    <th>B4</th>
-  </tr>
-`;
+  // ✅ STORE ID
+  window.currentAbstractId = r.id;
 
-r.items.forEach((it,idx)=>{
-  html += `
-  <tr>
-    <td><input type="checkbox" id="sel_${idx}"></td>
-    <td>${it.desc}</td>
-    <td>${it.qty}</td>
-    <td>${it.unit}</td>
-    <td><input id="p_${idx}_0"></td>
-    <td><input id="p_${idx}_1"></td>
-    <td><input id="p_${idx}_2"></td>
-    <td><input id="p_${idx}_3"></td>
-  </tr>
+  // ✅ DISPLAY PR
+  document.getElementById("absPR").innerText = r.prNo || "";
+
+
+  // 🔥 BUILD TABLE (ONLY ONCE)
+  let html = `
+  <table>
+    <tr>
+      <th>Select</th>
+      <th>Description</th>
+      <th>Qty</th>
+      <th>Unit</th>
+      <th>B1</th>
+      <th>B2</th>
+      <th>B3</th>
+      <th>B4</th>
+    </tr>
   `;
-});
 
+  (r.items || []).forEach((it,idx)=>{
+    html += `
+    <tr>
+      <td><input type="checkbox" id="sel_${idx}"></td>
+      <td>${it.desc}</td>
+      <td>${it.qty}</td>
+      <td>${it.unit}</td>
+      <td><input id="p_${idx}_0"></td>
+      <td><input id="p_${idx}_1"></td>
+      <td><input id="p_${idx}_2"></td>
+      <td><input id="p_${idx}_3"></td>
+    </tr>
+    `;
+  });
 
   html += `</table>`;
 
-  absItemsTable.innerHTML = html;
-  abstractModal.classList.remove("hidden");
+  document.getElementById("absItemsTable").innerHTML = html;
+
+  // ✅ OPEN MODAL (once lang)
+  document.getElementById("abstractModal").classList.remove("hidden");
 }
 
 
@@ -2258,7 +2265,7 @@ abstractModal.classList.add("hidden");
 
 async function generateAbstract(){
   let list = await getRequests();
-  let r = list[currentAbstractIndex];
+let r = list.find(x => x.id === window.currentAbstractId);
 
   let bidders = [b1.value, b2.value, b3.value, b4.value];
 
@@ -2632,11 +2639,34 @@ w.onload = function(){
 };
 
 
-
 await updateDoc(doc(db, "requests", r.id), {
   winner: overallWinner,
   abstractGenerated: true,
+
+  // 🔥 SAVE ALL BIDDERS
   bidders: bidders,
+
+  // 🔥 SAVE COMPLETE MATRIX (FOR PO)
+  bidderPrices: r.items.map((it, idx) => {
+
+    let raw = [
+      document.getElementById(`p_${idx}_0`)?.value || "0",
+      document.getElementById(`p_${idx}_1`)?.value || "0",
+      document.getElementById(`p_${idx}_2`)?.value || "0",
+      document.getElementById(`p_${idx}_3`)?.value || "0"
+    ];
+
+    let prices = raw.map(v => extractNumber(v));
+
+    return {
+      desc: it.desc,
+      qty: it.qty,
+      unit: it.unit,
+      prices: prices // 👉 array per bidder
+    };
+  }),
+
+  // 🔥 OPTIONAL: only selected items (existing logic mo)
   abstractItems: r.items
     .map((it, idx) => {
       let checkbox = document.getElementById(`sel_${idx}`);
@@ -2665,15 +2695,14 @@ await updateDoc(doc(db, "requests", r.id), {
 
 
 
+
+
+
+
 alert("📊 Abstract generated successfully!");
   closeAbstract();
   loadAdmin();
 }
-
-
-
-
-
 
 
 
@@ -4354,7 +4383,53 @@ async function printGeneratedAbstract(id){
     printWindow.print();
   };
 
+async function openAbstractById(id){
+  let list = await getRequests();
+  let r = list.find(x => x.id === id);
 
+  if(!r){
+    alert("Request not found");
+    return;
+  }
+
+  window.currentAbstractId = r.id;
+
+  document.getElementById("absPR").innerText = r.prNo || "";
+
+  let html = `
+  <table>
+    <tr>
+      <th>Select</th>
+      <th>Description</th>
+      <th>Qty</th>
+      <th>Unit</th>
+      <th>B1</th>
+      <th>B2</th>
+      <th>B3</th>
+      <th>B4</th>
+    </tr>
+  `;
+
+  (r.items || []).forEach((it,idx)=>{
+    html += `
+    <tr>
+      <td><input type="checkbox" id="sel_${idx}"></td>
+      <td>${it.desc}</td>
+      <td>${it.qty}</td>
+      <td>${it.unit}</td>
+      <td><input id="p_${idx}_0"></td>
+      <td><input id="p_${idx}_1"></td>
+      <td><input id="p_${idx}_2"></td>
+      <td><input id="p_${idx}_3"></td>
+    </tr>
+    `;
+  });
+
+  html += `</table>`;
+
+  document.getElementById("absItemsTable").innerHTML = html;
+  document.getElementById("abstractModal").classList.remove("hidden");
+}
 
 
 
@@ -4368,7 +4443,7 @@ window.printPRDirect = printPRDirect;
 window.cancelRequest = cancelRequest;
 window.retrieveRequest = retrieveRequest;
 window.deleteRequest = deleteRequest;
-
+window.openAbstractById = openAbstractById;
 
 
 
