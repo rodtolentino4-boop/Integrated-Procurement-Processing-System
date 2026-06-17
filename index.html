@@ -497,7 +497,32 @@ th.bidder-col::after {
 }
 
 
+.password-box{
+    position:relative;
+    width:100%;
+    margin-bottom:15px;
+}
 
+.password-box input{
+    width:100%;
+    padding:12px 45px 12px 12px;
+    box-sizing:border-box;
+}
+
+.toggle-password{
+    position:absolute;
+    right:15px;
+    top:50%;
+    transform:translateY(-50%);
+    cursor:pointer;
+    font-size:18px;
+    user-select:none;
+    color:#666;
+}
+
+.toggle-password:hover{
+    color:#0d6efd;
+}
 
 
 
@@ -6127,6 +6152,39 @@ window.retrieveRequest = retrieveRequest;
 window.deleteRequest = deleteRequest;
 window.openAbstractById = openAbstractById;
 
+
+
+
+
+window.togglePassword = function(id, eye){
+
+    const input = document.getElementById(id);
+
+    if(input.type === "password"){
+
+        input.type = "text";
+        eye.textContent = "🙈";
+
+    }else{
+
+        input.type = "password";
+        eye.textContent = "👁";
+
+    }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+  
 </script>
 
 <div id="abstractModal" class="hidden card" style="position:fixed; top:5%; left:10%; width:80%; height:90%; overflow:auto; background:white; z-index:999;">
@@ -6232,20 +6290,20 @@ window.openAbstractById = openAbstractById;
   ">
     <h3>🔑 Change Password</h3>
 
-<input
-    type="password"
-    id="currentPass"
-    placeholder="Current Password">
+<div class="password-box">
+    <input type="password" id="currentPass" placeholder="Current Password">
+    <span class="toggle-password" onclick="togglePassword('currentPass', this)">👁</span>
+</div>
 
-<input
-    type="password"
-    id="newPass"
-    placeholder="New Password">
+<div class="password-box">
+    <input type="password" id="newPass" placeholder="New Password">
+    <span class="toggle-password" onclick="togglePassword('newPass', this)">👁</span>
+</div>
 
-<input
-    type="password"
-    id="confirmPass"
-    placeholder="Confirm New Password">
+<div class="password-box">
+    <input type="password" id="confirmPass" placeholder="Confirm New Password">
+    <span class="toggle-password" onclick="togglePassword('confirmPass', this)">👁</span>
+</div>
     
 
     <button onclick="changePassword()">Save</button>
