@@ -39,6 +39,7 @@ header{
 .container{
   padding:20px;
   max-width:1400px;
+height:1000px;
   margin:auto;
 }
 
@@ -166,24 +167,85 @@ td {
   border:2px solid #1e3a5f;
 }
 
+
 .login-wrapper{
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+
+  background-color:#0458a5;
+
+  background-image:
+  radial-gradient(circle,#4ea4ff 1px,transparent 1px);
+
+  background-size:25px 25px;
+
+  overflow:hidden;
+}
+
+
   display:flex;
   justify-content:center;
   align-items:center;
   height:100vh;
-  background:linear-gradient(135deg,#020617,#1e3a5f);
+
+  background:
+  radial-gradient(circle,#2c82c9 2px,transparent 2px);
+
+  background-size:25px 25px;
+  background-color:#0b5ea8;
+
+  overflow:hidden;
 }
 
 .login-box{
-  background:rgba(255,255,255,0.08);
-  backdrop-filter:blur(20px);
-  padding:40px;
-  border-radius:20px;
-  width:340px;
-  text-align:center;
-  box-shadow:0 20px 60px rgba(0,0,0,0.4);
-  color:white;
+
+width:280px;
+height:170px;
+padding:15px;
+
+border-radius:25px;
+
+background:
+linear-gradient(
+180deg,
+#1d4ed8,
+#3b82f6
+);
+
+box-shadow:
+0 8px 20px rgba(0,0,0,.35);
+
 }
+
+
+
+  width:420px;
+
+  background:
+  linear-gradient(
+    135deg,
+    #2d4fb3,
+    #20c6ff
+  );
+
+  border-radius:30px;
+
+  padding:40px;
+
+  text-align:center;
+
+  box-shadow:
+  inset 0 0 25px rgba(255,255,255,.5),
+  0 15px 40px rgba(0,0,0,.45);
+
+  color:white;
+
+  position:relative;
+}
+
+
 
 .login-box h2{
   margin-bottom:20px;
@@ -584,6 +646,302 @@ td{
 
 
 
+.clock-panel{
+
+position:absolute;
+
+left:40px;
+top:90px;
+
+width:300px;
+height:160px;
+
+padding:15px;
+
+border-radius:20px;
+
+background:linear-gradient(
+180deg,
+#3c4ca7,
+#62d7ff
+);
+
+border:4px solid black;
+
+text-align:center;
+
+display:flex;
+flex-direction:column;
+justify-content:center;
+
+}
+
+
+
+
+#liveDate{
+
+font-size:22px;
+font-weight:bold;
+color:yellow;
+
+margin-bottom:10px;
+
+}
+
+#liveTime{
+
+font-size:64px;
+font-weight:bold;
+color:white;
+
+}
+
+
+.login-side{
+width:320px;
+padding:18px;
+
+border-radius:15px;
+
+background:linear-gradient(
+to bottom,
+#0c4ec9,
+#3fa8ff
+);
+
+border:2px solid #1e3a8a;
+
+box-shadow:
+inset 0 1px 8px rgba(255,255,255,.5),
+0 6px 15px rgba(0,0,0,.4);
+}
+
+
+
+
+padding:20px;
+
+border-radius:30px;
+
+background:
+linear-gradient(
+180deg,
+#1743b5,
+#1d8cff
+);
+
+box-shadow:
+0 10px 20px rgba(0,0,0,.4);
+
+}
+
+
+
+.login-side button{
+
+width:100%;
+
+padding:15px;
+
+font-size:22px;
+
+font-weight:bold;
+
+color:yellow;
+
+border:none;
+
+border-radius:40px;
+
+cursor:pointer;
+
+background:
+linear-gradient(
+180deg,
+#ff2900,
+#b40000
+);
+
+}
+
+.login-side input{
+
+width:92%;
+
+display:block;
+
+margin:10px auto;
+
+box-sizing:border-box;
+
+}
+
+
+
+
+
+.login-side button{
+
+width:220px;
+
+height:58px;
+
+display:block;
+
+margin:15px auto 0;
+
+border:none;
+
+border-radius:35px;
+
+font-size:22px;
+
+font-weight:bold;
+
+color:yellow;
+
+cursor:pointer;
+
+background:
+linear-gradient(
+to bottom,
+#ff2b00,
+#c10000
+);
+
+box-shadow:
+inset 0 2px 5px rgba(255,255,255,.4),
+0 4px 8px rgba(0,0,0,.4);
+
+}
+.dost-watermark{
+position:absolute;
+
+top:50%;
+left:50%;
+
+transform:translate(-75%,-50%);
+
+opacity:.08;
+
+width:120px;
+height:120px;
+
+pointer-events:none;
+}
+
+
+.login-side>*{
+position:relative;
+z-index:2;
+}
+
+.orbit{
+
+position:absolute;
+
+top:50%;
+left:50%;
+
+width:160px;
+height:60px;
+
+margin-left:-80px;
+margin-top:-30px;
+
+border:4px solid white;
+
+border-radius:50%;
+
+}
+
+.orbit1{
+transform:rotate(0deg);
+}
+
+.orbit2{
+transform:rotate(60deg);
+}
+
+.orbit3{
+transform:rotate(120deg);
+}
+
+.nucleus{
+
+position:absolute;
+
+width:24px;
+height:24px;
+
+background:white;
+
+border-radius:50%;
+
+top:50%;
+left:50%;
+
+transform:translate(-50%,-50%);
+
+}
+
+.electron{
+
+position:absolute;
+
+width:12px;
+height:12px;
+
+background:white;
+
+border-radius:50%;
+
+}
+
+.e1{
+top:30px;
+left:105px;
+}
+
+.e2{
+bottom:35px;
+left:45px;
+}
+
+.e3{
+bottom:35px;
+right:45px;
+}
+
+
+
+.dost-watermark{
+
+animation:spinAtom 25s linear infinite;
+
+}
+
+@keyframes spinAtom{
+
+from{
+transform:translate(-50%,-50%) rotate(0deg);
+}
+
+to{
+transform:translate(-50%,-50%) rotate(360deg);
+}
+
+}
+
+
+
+
+
+
+
+
+
 
 
 
@@ -614,16 +972,64 @@ td{
 
   <div class="login-wrapper">
 
-    <div class="login-box">
-      <h2>🔐 Login System</h2>
+   
+<div class="login-box">
 
-      <input id="username" placeholder="Email">
-      <input id="password" type="password" placeholder="Password">
+<div class="login-box">
 
-      <button onclick="login()">Login</button>
-    </div>
+<div class="clock-panel">
 
-  </div>
+<div id="liveDate"></div>
+
+<div id="liveTime"></div>
+
+</div>
+
+
+<div class="login-side">
+
+<div class="dost-watermark">
+    <div class="orbit orbit1"></div>
+    <div class="orbit orbit2"></div>
+    <div class="orbit orbit3"></div>
+
+    <div class="nucleus"></div>
+
+    <div class="electron e1"></div>
+    <div class="electron e2"></div>
+    <div class="electron e3"></div>
+</div>
+
+
+
+<input
+id="username"
+placeholder="USERNAME">
+
+<input
+id="password"
+type="password"
+placeholder="PASSWORD">
+
+<button onclick="login()">
+LOGIN
+</button>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
 
 </div>
 
@@ -3352,7 +3758,7 @@ We hereby certify that we had verified this Abstract of Bids against the Price Q
   <div class="sign-row">
 
 <div class="sig">
-      <div class="name">JUNIVIE M. LANGCAY</div>
+      <div class="name">ALDWIN T. CRUZ</div>
       <div class="pos">BAC Secretariat</div>
     </div>
 
@@ -6406,7 +6812,24 @@ window.togglePassword = function(id, eye){
 
 
 
+setInterval(()=>{
 
+const now = new Date();
+
+document.getElementById("liveDate").innerHTML =
+now.toLocaleDateString(
+'en-US',
+{
+year:'numeric',
+month:'long',
+day:'numeric'
+}
+);
+
+document.getElementById("liveTime").innerHTML =
+now.toLocaleTimeString();
+
+},1000);
 
 
 
@@ -6646,8 +7069,36 @@ document.onkeydown = function(e) {
 
 </script>
 
-</body>
-</html>
+<script>
+
+function updateClock(){
+
+const now=new Date();
+
+document.getElementById("liveDate").innerHTML=
+now.toLocaleDateString(
+'en-US',
+{
+year:'numeric',
+month:'long',
+day:'numeric'
+}
+);
+
+document.getElementById("liveTime").innerHTML=
+now.toLocaleTimeString();
+
+}
+
+updateClock();
+
+setInterval(updateClock,1000);
+
+</script>
+
+
+
+
 
 
 </body>
