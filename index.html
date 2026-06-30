@@ -1731,22 +1731,25 @@ document.getElementById("ordLoggedUser").innerText =
   },200);
 }
 
-  } catch(err){
+  
+
+
+
+
+} catch(err){
+
     console.error("LOGIN ERROR:", err);
 
-    if(err.code === "auth/user-not-found"){
-      alert("User not found in Authentication");
-    }
-    else if(err.code === "auth/wrong-password"){
-      alert("Wrong password");
-    }
-    else if(err.code === "auth/invalid-email"){
-      alert("Invalid email format");
-    }
-    else{
-      alert(err.message);
-    }
-  }
+    alert("INVALID USERNAME OR PASSWORD!");
+
+}
+
+
+
+
+
+
+
 }
 
 
