@@ -169,19 +169,19 @@ td {
 
 
 .login-wrapper{
-  height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
+position:relative;
+    width:100%;
+    height:100vh;
 
-  background-color:#0458a5;
+    display:flex;
+    justify-content:center;
+    align-items:center;
 
-  background-image:
-  radial-gradient(circle,#4ea4ff 1px,transparent 1px);
+    background-color:#0458a5;
+    background-image:radial-gradient(circle,#4ea4ff 1px,transparent 1px);
+    background-size:25px 25px;
 
-  background-size:25px 25px;
-
-  overflow:hidden;
+    overflow:hidden;
 }
 
 
@@ -200,25 +200,16 @@ td {
 }
 
 .login-box{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:40px;
 
-width:280px;
-height:170px;
-padding:15px;
+    width:auto;
+    height:auto;
 
-border-radius:25px;
-
-background:
-linear-gradient(
-180deg,
-#1d4ed8,
-#3b82f6
-);
-
-box-shadow:
-0 8px 20px rgba(0,0,0,.35);
-
+    padding:20px;
 }
-
 
 
   width:420px;
@@ -448,12 +439,14 @@ body::after{
 }
 
 
-html, body {
-  width: 100%;
-  overflow-y: auto; /* allow vertical scroll */
-  overflow-x: hidden; /* optional */
+html,
+body{
+    margin:0;
+    padding:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
 }
-
 
 table, th, td {
   box-sizing: border-box;
@@ -650,15 +643,22 @@ td{
 
 position:absolute;
 
-left:40px;
-top:90px;
+top:20px;
+left:20px;
 
-width:300px;
-height:160px;
+z-index:1000;
 
-padding:15px;
+width:220px;
+height:60px;
 
-border-radius:20px;
+padding:10px 20px;
+
+border-radius:15px;
+
+display:flex;
+justify-content:center;
+align-items:center;
+
 
 background:linear-gradient(
 180deg,
@@ -673,6 +673,8 @@ text-align:center;
 display:flex;
 flex-direction:column;
 justify-content:center;
+
+flex-shrink:0;
 
 }
 
@@ -690,11 +692,11 @@ margin-bottom:10px;
 }
 
 #liveTime{
-
-font-size:64px;
-font-weight:bold;
-color:white;
-
+    font-size:38px;
+    font-weight:bold;
+    color:#fff;
+    line-height:1;
+    margin:0;
 }
 
 
@@ -1015,12 +1017,12 @@ transform:translate(-50%,-50%) rotate(360deg);
 
 <input
 id="username"
-placeholder="USERNAME">
+placeholder="Username">
 
 <input
 id="password"
 type="password"
-placeholder="PASSWORD">
+placeholder="Password">
 
 <button onclick="login()">
 LOGIN
@@ -7114,5 +7116,4 @@ setInterval(updateClock,1000);
 
 </body>
 </html>
-
 
