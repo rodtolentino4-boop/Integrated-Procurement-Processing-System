@@ -939,7 +939,17 @@ transform:translate(-50%,-50%) rotate(360deg);
 
 
 
+.required-error{
+    border:2px solid #ff0000 !important;
+    background:#ffe5e5 !important;
+    animation: blinkField .6s infinite;
+}
 
+@keyframes blinkField{
+    0%{box-shadow:0 0 2px red;}
+    50%{box-shadow:0 0 15px red;}
+    100%{box-shadow:0 0 2px red;}
+}
 
 
 
@@ -2542,7 +2552,45 @@ let abstractStarted = false;
 let searchInput = document.getElementById("searchRecords");
 let keyword = searchInput ? searchInput.value.toLowerCase() : "";
 
-list.forEach((r,i)=>{
+list
+.sort((a,b)=>{
+
+    function poPriority(r){
+
+        // 🟢 Ready to Generate PO
+        if(
+            (r.abstractGenerated || (r.abstractItems && r.abstractItems.length > 0))
+            && !r.poCreated
+        ){
+            return 1;
+        }
+
+        // 🟠 No Abstract Yet
+        if(
+            !(r.abstractGenerated || (r.abstractItems && r.abstractItems.length > 0))
+        ){
+            return 2;
+        }
+
+        // 🔵 PO Already Generated
+        if(r.poCreated){
+            return 3;
+        }
+
+        return 4;
+    }
+
+    let pA = poPriority(a);
+    let pB = poPriority(b);
+
+    if(pA !== pB){
+        return pA - pB;
+    }
+
+    return (b.prNo || "").localeCompare(a.prNo || "", undefined, {numeric:true});
+})
+
+.forEach((r,i)=>{
 
 if(isSearch && keyword){
   let text = `
@@ -2704,13 +2752,17 @@ if(
     poHTML += `
     <table>
       <tr>
-        <th>Date</th>
-        <th>PR No.</th>
- <th>PO No.</th>
-        <th>Division</th>
-        <th>Requestor</th>
-        <th>Purpose</th>
-        <th>Action</th>
+       
+<th>Date</th>
+<th>PR No.</th>
+<th>PO No.</th>
+<th>Division</th>
+<th>Requestor</th>
+<th>Purpose</th>
+<th>Status</th>
+<th>Action</th>
+
+
       </tr>
     `;
   }
@@ -2733,16 +2785,91 @@ poHTML += `
 
 
   <td>${r.name || ""}</td>
-  <td>${r.purpose || ""}</td>
-  <td>
-    ${r.poCreated ? `
-      <button onclick="openPOModal('${r.id}')">🔄 Regenerate PO</button>
-      <div style="color:green; font-size:11px; margin-top:4px; font-weight:bold;">
-        ✔ PO Generated
-      </div>
-    ` : `
-      <button onclick="openPOModal('${r.id}')">🧾 Create PO</button>
-    `}
+ 
+<td>${r.purpose || ""}</td>
+
+<td>
+
+
+${
+r.poCreated
+?
+
+`<span style="color:#2563eb;font-weight:bold;">
+🔵 Purchase Order Already Generated
+</span>`
+
+:
+
+(r.abstractGenerated || (r.abstractItems && r.abstractItems.length > 0))
+
+?
+
+`<span style="color:green;font-weight:bold;">
+🟢 Ready to Generate Purchase Order
+</span>`
+
+:
+
+`<span style="color:#d97706;font-weight:bold;">
+🟠 Abstract Not Yet Generated
+</span>`
+}
+
+
+
+
+
+</td>
+
+<td>
+
+
+   ${r.poCreated ? `
+
+  <button onclick="openPOModal('${r.id}')">
+    🔄 Regenerate PO
+  </button>
+
+  <div style="color:green; font-size:11px; margin-top:4px; font-weight:bold;">
+    ✔ PO Generated
+  </div>
+
+` :
+
+(r.abstractGenerated || (r.abstractItems && r.abstractItems.length > 0))
+
+?
+
+`
+
+<button onclick="openPOModal('${r.id}')">
+🧾 Create PO
+</button>
+
+`
+
+:
+
+`
+
+<button
+disabled
+style="
+background:#bdbdbd;
+cursor:not-allowed;
+opacity:.7;
+color:white;
+">
+🧾 Create PO
+</button>
+
+`
+
+}
+
+
+
   </td>
 </tr>
 `;
@@ -2800,8 +2927,8 @@ if(!recordsHTML.includes("<table>")){
       <td>${r.purpose || ""}</td>
      
 <td>
-  <button onclick="printPR('${r.id}')">PRINT PR</button>
-  <button onclick="printCanvassById('${r.id}')">PRINT CANVASS</button>
+  <button onclick="printPR('${r.id}')">PR</button>
+  <button onclick="printCanvassById('${r.id}')">CANVASS</button>
 </td>
 
     </tr>
@@ -5359,10 +5486,33 @@ if(!supplier){
   let date = document.getElementById("poDate").value;
 
   // VALIDATION
-  if(!supplier || !address || !poNo || !date){
+ let supplierBox = document.getElementById("poSupplier");
+let addressBox  = document.getElementById("poAddress");
+let dateBox     = document.getElementById("poDate");
+
+// alisin muna lahat ng red
+[supplierBox, addressBox, dateBox].forEach(el=>{
+    el.classList.remove("required-error");
+});
+
+// lagyan lang yung kulang
+if(!supplierBox.value.trim())
+    supplierBox.classList.add("required-error");
+
+if(!addressBox.value.trim())
+    addressBox.classList.add("required-error");
+
+if(!dateBox.value)
+    dateBox.classList.add("required-error");
+
+if(
+    !supplierBox.value.trim() ||
+    !addressBox.value.trim() ||
+    !dateBox.value
+){
     alert("Please fill all PO fields: Supplier, Address, Date");
     return;
-  }
+}
 
  let supplierIndex = (r.bidders || []).findIndex(
   b => (b || "").trim().toLowerCase() === supplier.trim().toLowerCase()
@@ -6852,7 +7002,17 @@ now.toLocaleTimeString();
 
 
 
+[supplierBox, addressBox, dateBox].forEach(el=>{
 
+    el.addEventListener("input",function(){
+        this.classList.remove("required-error");
+    });
+
+    el.addEventListener("change",function(){
+        this.classList.remove("required-error");
+    });
+
+});
 
 
   
@@ -7120,4 +7280,3 @@ setInterval(updateClock,1000);
 
 </body>
 </html>
-
