@@ -1645,44 +1645,106 @@ display:block;
 
 
 
-
 <div id="developerSection" class="admin-section" style="display:none;">
 
-    <h2>👨‍💻 Developer</h2>
 
-    <div style="
-        background:#fff;
-        border-radius:10px;
-        padding:25px;
-        text-align:center;
-        box-shadow:0 3px 8px rgba(0,0,0,.15);
-    ">
 
-        <h2 style="margin-bottom:5px;">
-            LEX B. TOLENTINO
-        </h2>
 
-        <h3 style="color:#1d4ed8;">
-            MASTER OF SCIENCE IN INFORMATION TECHNOLOGY
-        </h3>
 
-        <hr style="margin:20px 0;">
+<div style="
+max-width:900px;
+height:620px;
+margin:10px auto;
+padding:20px;
+border-radius:20px;
+background:linear-gradient(135deg,#ffffff,#eef6ff);
+box-shadow:0 10px 25px rgba(0,0,0,.20);
+border-top:6px solid #0b5ed7;
+overflow:hidden;
+box-sizing:border-box;
+text-align:center;
+">
 
-        <p>
-            <strong>Developer of the</strong><br>
-            Integrated Procurement Processing System
-        </p>
+<div style="font-size:48px;">👨‍💻</div>
 
-        <p>
-            Department of Science and Technology – Regional Office No. 02
-        </p>
+<h1 style="
+margin:5px 0;
+font-size:30px;
+color:#0b3d91;
+">
+LEX B. TOLENTINO
+</h1>
 
-        <p style="color:#666;">
-            © 2026 All Rights Reserved
-        </p>
+<h3 style="
+margin:0;
+color:#2563eb;
+font-size:18px;
+">
+Master of Science in Information Technology
+</h3>
 
-    </div>
+<hr style="margin:15px 0;">
 
+<p style="font-size:15px;line-height:1.6;">
+<b>Developer</b><br>
+Integrated Procurement Processing System<br>
+Department of Science and Technology – Regional Office No. 02
+</p>
+
+<table style="
+width:100%;
+margin-top:15px;
+border-collapse:collapse;
+font-size:15px;
+">
+
+<tr>
+<td style="padding:12px;"><b>📧 Email</b><br>rodtolentino4@gmail.com</td>
+<td style="padding:12px;"><b>📱 Mobile</b><br>0965 148 3825</td>
+</tr>
+
+<tr>
+<td colspan="2" style="padding:12px;">
+<b>🌐 Facebook</b><br>
+<a href="https://www.facebook.com/Rolex.Personal/" target="_blank">
+facebook.com/Rolex.Personal
+</a>
+</td>
+</tr>
+
+<tr>
+<td colspan="2" style="padding:12px;">
+<b>💻 Technologies Used</b><br>
+HTML5 • CSS3 • JavaScript • Firebase Firestore • Firebase Authentication • Firebase Storage
+</td>
+</tr>
+
+<tr>
+<td colspan="2" style="padding:12px;">
+<b>🎓 Academic Project</b><br>
+Submitted in partial fulfillment of the requirements for the degree of
+<b>Master of Science in Information Technology (MSIT)</b>.
+</td>
+</tr>
+
+</table>
+
+<div style="
+margin-top:18px;
+padding:12px;
+background:#0f172a;
+color:white;
+border-radius:12px;
+font-size:13px;
+">
+© 2026 LEX B. TOLENTINO | Integrated Procurement Processing System | All Rights Reserved
+</div>
+
+</div>
+
+
+</div>
+</div>
 </div>
 
 
@@ -1691,7 +1753,15 @@ display:block;
 
 
 
-  </div>
+
+
+
+
+
+
+
+
+
 
 </div>
 
@@ -7404,13 +7474,19 @@ now.toLocaleTimeString();
 
 
 
-[supplierBox, addressBox, dateBox].forEach(el=>{
+const supplierBox = document.getElementById("poSupplier");
+const addressBox = document.getElementById("poAddress");
+const dateBox = document.getElementById("poDate");
 
-    el.addEventListener("input",function(){
+[supplierBox, addressBox, dateBox]
+.filter(el => el)
+.forEach(el => {
+
+    el.addEventListener("input", function () {
         this.classList.remove("required-error");
     });
 
-    el.addEventListener("change",function(){
+    el.addEventListener("change", function () {
         this.classList.remove("required-error");
     });
 
