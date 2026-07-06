@@ -953,6 +953,231 @@ transform:translate(-50%,-50%) rotate(360deg);
 
 
 
+.modal{
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.55);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 99999;
+}
+
+.modal-content{
+    background: #fff;
+    width: 90%;
+    max-width: 950px;
+    max-height: 85vh;
+    overflow-y: auto;
+    border-radius: 10px;
+    padding: 20px;
+    position: relative;
+    box-shadow: 0 10px 35px rgba(0,0,0,.35);
+}
+
+.close{
+    position:absolute;
+    top:10px;
+    right:15px;
+    font-size:28px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.close:hover{
+    color:red;
+}
+
+
+
+
+/* ---------- VIEW BIDDERS MODAL ---------- */
+
+.bidders-modal{
+
+width:92%;
+max-width:1150px;
+
+background:white;
+
+border-radius:18px;
+
+overflow:hidden;
+
+box-shadow:0 20px 60px rgba(0,0,0,.35);
+
+animation:popModal .25s;
+}
+
+@keyframes popModal{
+
+from{
+transform:scale(.92);
+opacity:0;
+}
+
+to{
+transform:scale(1);
+opacity:1;
+}
+
+}
+
+.modal-header{
+
+display:flex;
+justify-content:space-between;
+align-items:center;
+
+padding:22px 28px;
+
+border-bottom:1px solid #e5e7eb;
+
+background:white;
+}
+
+.modal-title{
+
+display:flex;
+align-items:center;
+gap:16px;
+}
+
+.modal-icon{
+
+width:58px;
+height:58px;
+
+border-radius:50%;
+
+display:flex;
+justify-content:center;
+align-items:center;
+
+font-size:28px;
+
+background:#eaf2ff;
+}
+
+.modal-title h2{
+
+margin:0;
+
+font-size:20px;
+
+font-weight:700;
+
+color:#111827;
+}
+
+.title-line{
+
+margin-top:8px;
+
+width:55px;
+height:5px;
+
+border-radius:20px;
+
+background:#2563eb;
+}
+
+.close-btn{
+
+background:linear-gradient(180deg,#ff4b4b,#d91f26);
+
+color:white;
+
+border:none;
+
+padding:12px 24px;
+
+border-radius:12px;
+
+font-size:16px;
+
+font-weight:bold;
+
+cursor:pointer;
+
+width:auto;
+}
+
+.close-btn:hover{
+
+background:linear-gradient(180deg,#ff2222,#b30000);
+
+transform:translateY(-2px);
+
+box-shadow:0 8px 18px rgba(255,0,0,.25);
+}
+
+.modal-body{
+
+padding:20px;
+
+max-height:65vh;
+
+overflow:auto;
+}
+
+.modal-footer{
+
+padding:18px 25px;
+
+border-top:1px solid #eee;
+
+display:flex;
+justify-content:space-between;
+align-items:center;
+
+background:#fafafa;
+}
+
+.footer-note{
+
+font-size:14px;
+
+color:#555;
+}
+
+
+
+
+#viewBiddersContent table{
+
+width:100%;
+
+border-collapse:collapse;
+}
+
+#viewBiddersContent th{
+
+background:#0f172a;
+
+color:white;
+
+padding:10px;
+}
+
+#viewBiddersContent td{
+
+padding:8px;
+
+text-align:center;
+}
+
+#viewBiddersContent tr:nth-child(even){
+
+background:#f8fafc;
+}
+
+#viewBiddersContent tr:hover{
+
+background:#eef6ff;
+}
+
+
 
 
 
@@ -1331,6 +1556,7 @@ LOGIN
       <button onclick="showAdminSection('po')">Purchase Orders</button>
 <button onclick="showAdminSection('records')">Records</button>
 <button onclick="showAdminSection('users')">User Management</button>
+<button onclick="showAdminSection('developer')">Developer</button>
     </div>
   </div>
 
@@ -1367,6 +1593,13 @@ LOGIN
 
 <div id="sectionUsers" class="card hidden">
   <h3>👤 User Management</h3>
+
+
+
+
+
+
+
 
   <h4>Add User</h4>
 
@@ -1409,6 +1642,48 @@ display:block;
   <div id="userList"></div>
 </div>
 
+
+
+
+
+<div id="developerSection" class="admin-section" style="display:none;">
+
+    <h2>👨‍💻 Developer</h2>
+
+    <div style="
+        background:#fff;
+        border-radius:10px;
+        padding:25px;
+        text-align:center;
+        box-shadow:0 3px 8px rgba(0,0,0,.15);
+    ">
+
+        <h2 style="margin-bottom:5px;">
+            LEX B. TOLENTINO
+        </h2>
+
+        <h3 style="color:#1d4ed8;">
+            MASTER OF SCIENCE IN INFORMATION TECHNOLOGY
+        </h3>
+
+        <hr style="margin:20px 0;">
+
+        <p>
+            <strong>Developer of the</strong><br>
+            Integrated Procurement Processing System
+        </p>
+
+        <p>
+            Department of Science and Technology – Regional Office No. 02
+        </p>
+
+        <p style="color:#666;">
+            © 2026 All Rights Reserved
+        </p>
+
+    </div>
+
+</div>
 
 
 
@@ -2117,7 +2392,20 @@ list.forEach((r,i)=>{
       <td>${r.position || ""}</td>
       <td>${r.purpose || ""}</td>
       <td>
-        <button onclick="viewPending('${r.id}')">👁 View</button>
+      
+
+${
+    r.supportFile
+    ? `<button onclick="viewSupportingDocument('${r.id}')">
+            📎 View Supporting Documents
+       </button>`
+    : `<button disabled
+            style="opacity:.5;cursor:not-allowed;">
+            📎 No Supporting Document
+       </button>`
+}
+
+
         <button onclick="openApproveModal('${r.id}')">✅ Approve</button>
       </td>
     </tr>
@@ -2633,10 +2921,28 @@ let actions = "";
 
 // 👉 DEFAULT (APPROVED BY ORD)
 if(r.status === "APPROVED_ORD" || r.status === "CANVASSED"){
-  actions = `
-    <button onclick="printCanvass(${i})">Print Canvass</button>
-    <button onclick="sendTo('${r.id}')">Submit Canvass for Approval</button>
-  `;
+ 
+
+actions = `
+    ${
+        r.supportFile
+        ? `<button onclick="viewSupportingDocument('${r.id}')">
+                📎 View Supporting Documents
+           </button>`
+        : `<button disabled
+                style="opacity:.5;cursor:not-allowed;">
+                📎 No Supporting Document
+           </button>`
+    }
+
+    <button onclick="sendTo('${r.id}')">
+        Submit Canvass for Approval
+    </button>
+`;
+
+
+
+
 }
 
 
@@ -2703,9 +3009,9 @@ abstractHTML += `
       ${
         (r.abstractGenerated || (r.abstractItems && r.abstractItems.length > 0))
         ? `
-         <button onclick="printGeneratedAbstract('${r.id}')">
-            🖨 View Bidders
-         </button>
+        <button onclick="viewBiddersModal('${r.id}')">
+    👁 View Bidders
+</button>
 
           <button onclick="openAbstractById('${r.id}')">
             🔁 Regenerate Abstract
@@ -4033,6 +4339,7 @@ function showAdminSection(section){
   document.getElementById("sectionPO").classList.add("hidden");
 document.getElementById("sectionRecords").classList.add("hidden");
 document.getElementById("sectionUsers").classList.add("hidden");
+document.getElementById("developerSection").style.display="none";
 
   // ipakita yung pinili
   if(section === "canvass"){
@@ -4055,6 +4362,11 @@ if(section === "records"){
 if(section === "users"){
   document.getElementById("sectionUsers").classList.remove("hidden");
   loadUsers();
+}
+
+
+if(section=="developer"){
+    document.getElementById("developerSection").style.display="block";
 }
 
 
@@ -5272,7 +5584,7 @@ async function retrieveRequest(id){
   }
 }
 
-window.viewPending = async function(id){
+window.viewSupportingDocument = async function(id){
   let list = await getRequests();
   let r = list.find(x => x.id === id);
 
@@ -6124,6 +6436,96 @@ function loadSuppliers() {
         datalist.appendChild(option);
     });
 }
+
+
+
+
+
+
+
+
+
+
+
+window.viewBiddersModal = async function(id){
+
+    const modal = document.getElementById("viewBiddersModal");
+    const content = document.getElementById("viewBiddersContent");
+
+    let list = await getRequests();
+    let r = list.find(x => x.id === id);
+
+    if(!r){
+        alert("Request not found.");
+        return;
+    }
+
+    
+if(
+    !r.bidders ||
+    !r.bidders.length ||
+    !r.abstractItems ||
+    !r.abstractItems.length
+){
+    alert("No abstract generated yet.");
+    return;
+}
+
+
+
+    let html = `
+    <div style="overflow:auto;max-height:70vh;">
+
+    <table style="width:100%;border-collapse:collapse;">
+        <tr>
+            <th>#</th>
+            <th>Description</th>
+            <th>Qty</th>
+            <th>Unit</th>
+    `;
+
+    (r.bidders || []).forEach(b=>{
+        html += `<th>${b}</th>`;
+    });
+
+    html += `</tr>`;
+
+    (r.abstractItems || []).forEach((item,index)=>{
+
+        html += `
+        <tr>
+            <td>${index+1}</td>
+            <td>${item.desc}</td>
+            <td>${item.qty}</td>
+            <td>${item.unit}</td>
+        `;
+
+        (item.prices || []).forEach(price=>{
+            html += `<td>₱${Number(price || 0).toLocaleString()}</td>`;
+        });
+
+        html += `</tr>`;
+    });
+
+    html += `
+    </table>
+    </div>
+    `;
+
+    content.innerHTML = html;
+
+    modal.style.display = "flex";
+}
+
+
+
+
+
+
+
+
+
+
 
 
 async function printGeneratedAbstract(id){
@@ -7015,6 +7417,50 @@ now.toLocaleTimeString();
 });
 
 
+
+
+
+
+
+
+window.closeViewBidders = function(){
+
+    const modal = document.getElementById("viewBiddersModal");
+
+    if(modal){
+        modal.style.display="none";
+    }
+
+}
+
+
+
+const biddersModal = document.getElementById("viewBiddersModal");
+
+if(biddersModal){
+
+    biddersModal.addEventListener("click",function(e){
+
+        if(e.target===this){
+
+            closeViewBidders();
+
+        }
+
+    });
+
+}
+
+
+window.closeViewBidders = function () {
+    const modal = document.getElementById("viewBiddersModal");
+
+    if (modal) {
+        modal.style.display = "none";
+    }
+};
+
+
   
 </script>
 
@@ -7274,6 +7720,66 @@ updateClock();
 setInterval(updateClock,1000);
 
 </script>
+
+
+
+<!-- View Bidders Modal -->
+
+<div id="viewBiddersModal" class="modal">
+
+<div class="modal-content bidders-modal">
+
+    <div class="modal-header">
+
+        <div class="modal-title">
+
+            <div class="modal-icon">
+                📋
+            </div>
+
+            <div>
+
+                <h2>Abstract of Bids</h2>
+
+                <div class="title-line"></div>
+
+            </div>
+
+        </div>
+
+      
+
+
+<button class="close-btn" onclick="closeViewBidders()">
+    ❌ Close
+</button>
+
+
+
+
+
+
+
+    </div>
+
+    <div
+        id="viewBiddersContent"
+        class="modal-body">
+    </div>
+
+    <div class="modal-footer">
+
+        <span class="footer-note">
+
+            ℹ Summary of all submitted bids.
+
+        </span>
+
+    </div>
+
+</div>
+
+</div>
 
 
 
