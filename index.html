@@ -1563,10 +1563,23 @@ LOGIN
   <!-- RIGHT CONTENT -->
   <div class="col">
 
-    <div id="sectionCanvass" class="card">
-      <h3>📑 Preparation of Request for Quotations</h3>
-      <div id="adminCanvass"></div>
+   <div id="sectionCanvass" class="card">
+
+    <h3>📑 Preparation of Request for Quotations</h3>
+
+    <div style="margin:10px 0;">
+        <input
+            type="text"
+            id="searchCanvass"
+            placeholder="🔍 Search PR No., Requestor, Purpose..."
+            oninput="loadAdmin(cachedRequests,true)"
+            style="width:350px;"
+        >
     </div>
+
+    <div id="adminCanvass"></div>
+
+</div>
 
     <div id="sectionAbstract" class="card hidden">
       <h3>📊 Abstract of Bids Generator</h3>
@@ -1843,6 +1856,40 @@ font-size:13px;
 
 
 </div>
+
+
+
+<!-- ================= CANVASS MODAL ================= -->
+
+<div id="canvassModal" class="modal">
+
+    <div class="modal-content" style="max-width:1100px;">
+
+        <span class="close" onclick="closeCanvassModal()">&times;</span>
+
+        <h2 style="margin-top:0;">
+            📑 Preparation of Request for Quotation
+        </h2>
+
+        <hr>
+
+        <div id="canvassModalBody">
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
 
 <script type="module">
 
@@ -2907,8 +2954,22 @@ let abstractHTML="";
 let poHTML="";
 let recordsHTML="";
 let abstractStarted = false; 
-let searchInput = document.getElementById("searchRecords");
-let keyword = searchInput ? searchInput.value.toLowerCase() : "";
+
+let keyword = "";
+
+const canvassSearch = document.getElementById("searchCanvass");
+const recordsSearch = document.getElementById("searchRecords");
+
+if (canvassSearch && canvassSearch.value.trim() !== "") {
+    keyword = canvassSearch.value.trim().toLowerCase();
+}
+else if (recordsSearch && recordsSearch.value.trim() !== "") {
+    keyword = recordsSearch.value.trim().toLowerCase();
+}
+
+
+
+
 
 list
 .sort((a,b)=>{
@@ -2964,80 +3025,161 @@ if(isSearch && keyword){
 
 
 // ✅ SECTION 1: APPROVED BY ORD (FOR CANVASS)
+
+
+
 if(
-  r.status === "APPROVED_ORD" ||
-  r.status === "CANVASSED" ||
-  r.status === "FOR_TOS_CANVASS" ||
-  r.status === "FOR_FASS_CANVASS"
+    r.status==="APPROVED_ORD" ||
+    r.status==="FOR_TOS_CANVASS" ||
+    r.status==="FOR_FASS_CANVASS"
 ){
 
- // 👉 count muna (simple lang, walang nested)
-if(
-  r.status === "APPROVED_ORD" ||
-  r.status === "CANVASSED"
-){
-  pendingCount++;
-}
 
-// 🔥 HARD FILTER — alisin agad kapag approved na
-if(
-  r.status === "APPROVED_CANVASS_TOS" ||
-  r.status === "APPROVED_CANVASS_FASS"
-){
-  return;
-}
+pendingCount++;
 
-let actions = "";
+    if(!canvassHTML.includes("<table>")){
 
-// 👉 DEFAULT (APPROVED BY ORD)
-if(r.status === "APPROVED_ORD" || r.status === "CANVASSED"){
- 
+        canvassHTML=`
+        <table>
 
-actions = `
-    ${
-        r.supportFile
-        ? `<button onclick="viewSupportingDocument('${r.id}')">
-                📎 View Supporting Documents
-           </button>`
-        : `<button disabled
-                style="opacity:.5;cursor:not-allowed;">
-                📎 No Supporting Document
-           </button>`
+        <tr>
+
+            <th>Date</th>
+
+            <th>PR No.</th>
+
+            <th>Requestor</th>
+
+            <th>Purpose</th>
+
+            <th>Remarks</th>
+
+            <th width="140">Action</th>
+
+        </tr>
+        `;
     }
 
-    <button onclick="sendTo('${r.id}')">
-        Submit Canvass for Approval
-    </button>
-`;
+    
+let remarks = "";
 
+switch(r.status){
 
+    case "APPROVED_ORD":
+        remarks = "🟢 Ready for Canvass";
+        break;
 
+    case "FOR_TOS_CANVASS":
+        remarks = "🟡 Waiting for TOS Approval";
+        break;
+
+    case "FOR_FASS_CANVASS":
+        remarks = "🟡 Waiting for FASS Approval";
+        break;
+
+    case "APPROVED_CANVASS_TOS":
+        remarks = "✅ Approved by TOS";
+        break;
+
+    case "APPROVED_CANVASS_FASS":
+        remarks = "✅ Approved by FASS";
+        break;
+
+    case "DONE":
+        remarks = "✅ Completed";
+        break;
+
+    case "REJECTED":
+        remarks = "❌ Rejected";
+        break;
+
+    default:
+        remarks = "-";
 
 }
 
 
-  // 👉 CANVASSED pero di pa submitted
-  else if(r.status === "CANVASSED"){
-    actions = `
-    <button onclick="sendTo('${r.id}')">Submit Canvass for Approval</button>
-    `;
-  }
 
-  // 👉 NASA TOS / FASS NA
-  else if(
-    r.status === "FOR_TOS_CANVASS" ||
-    r.status === "FOR_FASS_CANVASS"
-  ){
-    actions = `
-      <p style="color:orange; font-weight:bold;">
-        ⏳ Waiting for Approval (${r.status === "FOR_TOS_CANVASS" ? "TOS" : "FASS"})
-      </p>
-    `;
-  }
 
-  // 👉 IMPORTANT: dito mo tatawagin
-  canvassHTML += buildCard(r, i, actions);
+    canvassHTML+=`
+
+    <tr>
+
+        <td>
+
+            ${
+                r.dateRequested
+                ?
+                new Date(r.dateRequested)
+                .toLocaleDateString('en-PH')
+                :
+                "-"
+            }
+
+        </td>
+
+        <td>${r.prNo||""}</td>
+
+        <td>${r.name||""}</td>
+
+        <td>${r.purpose||""}</td>
+
+        <td>${remarks}</td>
+
+       
+
+
+
+
+<td>
+
+${
+    r.status==="APPROVED_ORD"
+
+    ?
+
+    `<button onclick="openCanvassModal('${r.id}')">
+
+        ✏️ Prepare
+
+    </button>`
+
+    :
+
+    `<button
+        style="background:#6c757d;"
+        onclick="openCanvassModal('${r.id}')">
+
+        👁 View
+
+    </button>`
 }
+
+</td>
+
+
+
+
+
+
+
+
+
+
+    </tr>
+
+    `;
+}
+
+
+
+
+
+
+
+
+
+
 
 // ✅ SECTION 2: FOR ABSTRACT (AFTER REVIEW)
 
@@ -3277,6 +3419,7 @@ if(!recordsHTML.includes("<table>")){
       <th>Requestor</th>
       <th>Designation</th>
       <th>Purpose</th>
+<th>Remarks</th>
       <th>Actions</th>
     </tr>
     `;
@@ -3301,7 +3444,56 @@ if(!recordsHTML.includes("<table>")){
       <td>${r.name || ""}</td>
       <td>${r.position || ""}</td>
       <td>${r.purpose || ""}</td>
-     
+   
+
+<td>
+
+${
+(() => {
+
+switch(r.status){
+
+case "APPROVED_ORD":
+    return "🟢 Prepare for Canvass";
+
+case "FOR_TOS_CANVASS":
+    return "🟡 Waiting for TOS Approval";
+
+case "FOR_FASS_CANVASS":
+    return "🟡 Waiting for FASS Approval";
+
+case "APPROVED_CANVASS_TOS":
+    return "✅ Approved by TOS";
+
+case "APPROVED_CANVASS_FASS":
+    return "✅ Approved by FASS";
+
+case "DONE":
+    return "📦 Purchase Order Created";
+
+case "REJECTED":
+    return "❌ Rejected";
+
+default:
+    return "-";
+
+}
+
+})()
+}
+
+</td>
+
+
+
+
+
+
+
+
+
+
+  
 <td>
   <button onclick="printPR('${r.id}')">PR</button>
   <button onclick="printCanvassById('${r.id}')">CANVASS</button>
@@ -3318,6 +3510,12 @@ if(abstractStarted){
 }
 
 if(pendingCount === 0){
+
+
+if(canvassHTML.includes("<table>")){
+    canvassHTML += "</table>";
+}
+
 
   adminCanvass.innerHTML = `
     <p style="
@@ -3410,7 +3608,14 @@ async function sendTo(id){
     canvassSubmittedDate: new Date().toISOString()
   });
 
-  alert("📤 Sent for approval!");
+ 
+alert("📨 Sent for approval!");
+
+closeCanvassModal();
+
+loadAdmin(cachedRequests);
+
+
 }
 
 
@@ -4442,6 +4647,96 @@ if(section=="developer"){
 
 
 }
+
+window.openCanvassModal = async function(id){
+
+    let list = await getRequests();
+
+    let r = list.find(x => x.id === id);
+
+let readOnly =
+    r.status === "FOR_TOS_CANVASS" ||
+    r.status === "FOR_FASS_CANVASS" ||
+    r.status === "APPROVED_CANVASS_TOS" ||
+    r.status === "APPROVED_CANVASS_FASS" ||
+    r.status === "DONE";
+
+
+
+    if(!r){
+        alert("Request not found.");
+        return;
+    }
+
+    let html = buildCard(r,0,`
+
+        ${
+            r.supportFile
+            ? `<button onclick="viewSupportingDocument('${r.id}')">
+                    📎 View Supporting Documents
+               </button>`
+            : `<button disabled
+                    style="opacity:.5;cursor:not-allowed;">
+                    📎 No Supporting Document
+               </button>`
+        }
+
+        <button onclick="sendTo('${r.id}')">
+            📤 Submit Canvass for Approval
+        </button>
+
+    `);
+
+    document.getElementById("canvassModalBody").innerHTML = html;
+
+
+if(readOnly){
+
+    document.querySelectorAll("#canvassModalBody input").forEach(x=>x.disabled=true);
+
+    document.querySelectorAll("#canvassModalBody textarea").forEach(x=>x.disabled=true);
+
+    document.querySelectorAll("#canvassModalBody select").forEach(x=>x.disabled=true);
+
+    document.querySelectorAll("#canvassModalBody button").forEach(btn=>{
+
+        if(btn.textContent.includes("Submit")){
+
+            btn.disabled = true;
+
+            btn.innerHTML = "⏳ Waiting for Approval";
+
+            btn.style.background="#888";
+
+        }
+
+    });
+
+}
+
+
+
+
+
+
+
+
+
+    document.getElementById("canvassModal").style.display="flex";
+
+}
+
+
+window.closeCanvassModal = function(){
+
+    document.getElementById("canvassModal").style.display="none";
+
+}
+
+
+
+
+
 
 async function viewRequest(i){
   let list = await getRequests();
@@ -5780,6 +6075,7 @@ window.currentPO = r;
 window.currentPOIndex = list.findIndex(x => x.id === id);
 
 document.getElementById("poSupplier").value = "";
+ 
 
 loadPOItems(r);
 
@@ -5857,7 +6153,12 @@ if(!r.bidders || r.bidders.length === 0){
     return;
   }
 
-  let supplier = document.getElementById("poSupplier").value.trim();
+  let supplier =
+    window.currentPO.selectedBidder ||
+    document.getElementById("poSupplier").value.trim();
+
+
+
 if(!supplier){
   alert("Please select supplier");
   return;
@@ -6479,6 +6780,7 @@ await updateDoc(doc(db, "requests", r.id), {
   poNo: poNo,
   poDate: date,
   poSupplier: supplier,
+  selectedBidder: supplier,   // <-- IDAGDAG ITO
   poAddress: address,
   poTotal: totalAmount,
 
@@ -7170,27 +7472,29 @@ async function openAbstractById(id){
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 function loadPOItems(r) {
 
-  let supplier = document.getElementById("poSupplier").value.trim();
 
-  let bidderIndex = (r.bidders || []).findIndex(
-    b => String(b || "").trim().toLowerCase() === supplier.toLowerCase()
-  );
 
-  if (bidderIndex === -1) return;
+
+
+let supplier = document.getElementById("poSupplier").value.trim();
+
+let bidderIndex = (r.bidders || []).findIndex(
+  b => String(b || "").trim().toLowerCase() === supplier.toLowerCase()
+);
+
+if (bidderIndex === -1) return;
+
+// ✅ Ito ang kulang
+window.currentPO.selectedBidder = supplier;
+window.currentPO.selectedBidderIndex = bidderIndex;
+
+
+
+
+
+
 
   let table = document.getElementById("poItems");
 
