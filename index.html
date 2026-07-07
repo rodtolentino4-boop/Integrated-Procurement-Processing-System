@@ -2393,8 +2393,35 @@ function loadStaff(){
         <td style="white-space:nowrap;">
 
           ${r.status !== "CANCELLED" ? `
-            <button class="action-btn btn-print" onclick="printPR('${r.id}')">🖨 Print</button>
-          ` : ''}
+    <button class="action-btn btn-print"
+        onclick="printPR('${r.id}')">
+        🖨 Print
+    </button>
+` : ''}
+
+
+${[
+    "APPROVED_ORD",
+    "FOR_TOS_CANVASS",
+    "FOR_FASS_CANVASS",
+    "APPROVED_CANVASS_TOS",
+    "APPROVED_CANVASS_FASS",
+    "DONE",
+ "REJECTED"
+].includes(r.status) ? `
+
+
+
+
+    <button
+        class="action-btn"
+        style="background:#0ea5e9;"
+        onclick="requestAgain('${r.id}')">
+        🔄 Request Again
+    </button>
+` : ''}
+
+
 
           ${r.status === "PENDING_ORD" ? `
             <button class="action-btn btn-cancel" onclick="cancelRequest('${r.id}')">❌ Cancel</button>
@@ -7839,6 +7866,88 @@ window.closeViewBidders = function () {
         modal.style.display = "none";
     }
 };
+
+
+
+window.requestAgain = async function(id){
+
+    let list = await getRequests();
+
+    let old = list.find(r => r.id === id);
+
+    if(!old){
+        alert("Request not found.");
+        return;
+    }
+
+    openPRModal();
+
+    setTimeout(()=>{
+
+        document.getElementById("position").value =
+            old.position || "";
+
+        document.getElementById("division").value =
+            old.division || "";
+
+        document.getElementById("reqType").value =
+            old.type || "";
+
+        document.getElementById("purpose").value =
+            old.purpose || "";
+
+        itemsTable.innerHTML=`
+        <tr>
+            <th>Unit</th>
+            <th>Description</th>
+            <th>Qty</th>
+            <th>Cost</th>
+            <th>Total</th>
+        </tr>`;
+
+        old.items.forEach(item=>{
+
+            let row=itemsTable.insertRow();
+
+            row.innerHTML=`
+            <td><input value="${item.unit||''}"></td>
+
+            <td><input value="${item.desc||''}"></td>
+
+            <td><input type="number" value="${item.qty||0}"></td>
+
+            <td><input type="number" value="${item.cost||0}"></td>
+
+            <td>₱0</td>
+            `;
+
+            let qty=row.cells[2].children[0];
+            let cost=row.cells[3].children[0];
+
+            qty.addEventListener("input",()=>calcRow(row));
+            cost.addEventListener("input",()=>calcRow(row));
+
+            calcRow(row);
+
+        });
+
+    },300);
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
   
