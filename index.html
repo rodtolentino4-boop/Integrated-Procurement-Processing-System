@@ -1178,6 +1178,132 @@ background:#eef6ff;
 }
 
 
+/* ---------- ADMIN MENU ---------- */
+
+.admin-menu-btn{
+
+width:100%;
+margin:7px 0;
+
+display:flex;
+justify-content:space-between;
+align-items:center;
+
+padding:12px 16px;
+
+border:none;
+
+border-radius:12px;
+
+background:linear-gradient(135deg,#3b82f6,#2563eb);
+
+color:white;
+
+font-weight:600;
+
+cursor:pointer;
+
+transition:.25s;
+
+position:relative;
+
+overflow:hidden;
+
+}
+
+.admin-menu-btn:hover{
+
+transform:translateX(6px);
+
+background:linear-gradient(135deg,#2563eb,#1d4ed8);
+
+box-shadow:0 8px 20px rgba(37,99,235,.35);
+
+}
+
+.admin-menu-btn::before{
+
+content:"";
+
+position:absolute;
+
+left:-100%;
+top:0;
+
+width:100%;
+height:100%;
+
+background:linear-gradient(
+90deg,
+transparent,
+rgba(255,255,255,.25),
+transparent
+);
+
+transition:.45s;
+
+}
+
+.admin-menu-btn:hover::before{
+
+left:100%;
+
+}
+
+.menu-badge{
+
+min-width:22px;
+height:22px;
+
+padding:0 7px;
+
+border-radius:50px;
+
+display:flex;
+justify-content:center;
+align-items:center;
+
+background:#ef4444;
+
+color:white;
+
+font-size:11px;
+
+font-weight:bold;
+
+box-shadow:0 0 8px rgba(239,68,68,.45);
+
+animation:pulseBadge 1.5s infinite;
+
+}
+
+@keyframes pulseBadge{
+
+0%{
+transform:scale(1);
+}
+
+50%{
+transform:scale(1.18);
+}
+
+100%{
+transform:scale(1);
+}
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1551,12 +1677,40 @@ LOGIN
     <div class="card">
       <h3>📂 Menu</h3>
 
-      <button onclick="showAdminSection('canvass')">Approved PR for Canvass</button>
-      <button onclick="showAdminSection('abstract')">Abstract of Bids</button>
-      <button onclick="showAdminSection('po')">Purchase Orders</button>
-<button onclick="showAdminSection('records')">Records</button>
-<button onclick="showAdminSection('users')">User Management</button>
-<button onclick="showAdminSection('developer')">Developer</button>
+     
+<button class="admin-menu-btn" onclick="showAdminSection('canvass')">
+    <span>📑 Approved PR for Canvass</span>
+    <span class="menu-badge" id="badgeCanvass">0</span>
+</button>
+
+<button class="admin-menu-btn" onclick="showAdminSection('abstract')">
+    <span>📊 Abstract of Bids</span>
+    <span class="menu-badge" id="badgeAbstract">0</span>
+</button>
+
+<button class="admin-menu-btn" onclick="showAdminSection('po')">
+    <span>🧾 Purchase Orders</span>
+    <span class="menu-badge" id="badgePO">0</span>
+</button>
+
+<button class="admin-menu-btn" onclick="showAdminSection('records')">
+    <span>📁 Records</span>
+    <span class="menu-badge" id="badgeRecords">0</span>
+</button>
+
+<button class="admin-menu-btn" onclick="showAdminSection('users')">
+    <span>👥 User Management</span>
+    <span class="menu-badge" id="badgeUsers">0</span>
+</button>
+
+<button class="admin-menu-btn" onclick="showAdminSection('developer')">
+    <span>💻 Developer</span>
+</button>
+
+
+
+
+
     </div>
   </div>
 
@@ -2956,6 +3110,13 @@ ${actions}
 function loadAdmin(list, isSearch = false){
 let pendingCount = 0;
 
+let canvassCount=0;
+let abstractCount=0;
+let poCount=0;
+let recordsCount=0;
+
+
+
 let adminBadge = document.getElementById("adminBadge");
 
 list.sort((a,b)=>{
@@ -3061,7 +3222,7 @@ if(
     r.status==="FOR_FASS_CANVASS"
 ){
 
-
+canvassCount++;
 pendingCount++;
 
     if(!canvassHTML.includes("<table>")){
@@ -3189,20 +3350,10 @@ ${
 
 
 
-
-
-
-
     </tr>
 
     `;
 }
-
-
-
-
-
-
 
 
 
@@ -3215,6 +3366,14 @@ if(
   r.status === "APPROVED_CANVASS_FASS" ||
   r.status === "DONE"
 ){
+
+if(
+    !r.abstractGenerated &&
+    (!r.abstractItems || r.abstractItems.length===0)
+){
+    abstractCount++;
+}
+
 
   if(!abstractStarted){
     abstractHTML += `
@@ -3292,6 +3451,16 @@ if(
   r.status === "APPROVED_CANVASS_TOS" ||
   r.status === "APPROVED_CANVASS_FASS"
 ){
+
+if(
+    (r.abstractGenerated ||
+    (r.abstractItems && r.abstractItems.length>0))
+    &&
+    !r.poCreated
+){
+    poCount++;
+}
+
 
   if(!poHTML.includes("<table>")){
     poHTML += `
@@ -3434,6 +3603,10 @@ if(
     r.status === "DONE" 
 
 ){
+
+    recordsCount++;
+
+
 
   //  Header (isang beses lang)
 if(!recordsHTML.includes("<table>")){
@@ -3588,6 +3761,13 @@ if(recordsHTML !== ""){
   recordsHTML += "</table>";
 }
 adminRecords.innerHTML = recordsHTML || "<p>No records found</p>";
+document.getElementById("badgeCanvass").innerText = canvassCount;
+document.getElementById("badgeAbstract").innerText = abstractCount;
+document.getElementById("badgePO").innerText = poCount;
+document.getElementById("badgeRecords").innerText = recordsCount;
+
+
+
 
 // ✅ ADMIN BADGE
 if(adminBadge){
