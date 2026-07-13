@@ -1294,7 +1294,75 @@ transform:scale(1);
 }
 
 
+/* ==========================
+   PROCUREMENT PROGRESS
+========================== */
 
+.progress-card{
+    background:#eef3fb;
+    border-radius:18px;
+    padding:20px;
+    margin-bottom:15px;
+}
+
+.progress-title{
+    font-size:22px;
+    font-weight:bold;
+    margin-bottom:25px;
+}
+
+.progress-wrapper{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    position:relative;
+}
+
+.progress-wrapper::before{
+    content:"";
+    position:absolute;
+    top:22px;
+    left:6%;
+    right:6%;
+    height:4px;
+    background:#d9d9d9;
+    z-index:0;
+}
+
+.progress-step{
+    position:relative;
+    z-index:2;
+    text-align:center;
+    width:110px;
+}
+
+.progress-circle{
+    width:44px;
+    height:44px;
+    border-radius:50%;
+    background:#d6dbe2;
+    color:white;
+    margin:auto;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:bold;
+    font-size:18px;
+}
+
+.progress-circle.active{
+    background:#22c55e;
+}
+
+.progress-circle.current{
+    background:#2563eb;
+}
+
+.progress-label{
+    margin-top:10px;
+    font-size:13px;
+    font-weight:600;
+}
 
 
 
@@ -1457,7 +1525,13 @@ LOGIN
 <!-- LEFT -->
 <div class="col">
 
+
 <div class="card">
+
+  <!-- PROCUREMENT PROGRESS -->
+  <div id="procurementProgressContainer"></div>
+
+  <br>
 
   <div style="display:flex; justify-content:space-between; align-items:center;">
     <h3>📋 My Requests</h3>
@@ -1467,6 +1541,19 @@ LOGIN
   <div id="staffList"></div>
 
 </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 </div>
@@ -1484,7 +1571,7 @@ LOGIN
 
 <div class="topbar">
   <h2 style="color:white; letter-spacing:1px;">
-  🏛️ ORD Approval Dashboard
+  🏛️ Office of the Regional Director Approval Dashboard
 </h2>
 
 
@@ -2483,9 +2570,13 @@ function loadStaff(){
 
     let html = `
     <table>
-      <tr>
-        <th>Date</th>
-        <th>PR No.</th>
+     
+<tr>
+    <th style="width:45px;">✔ to view status</th>
+    <th>Date</th>
+    <th>PR No.</th>
+
+
         <th>Name</th>
         <th>Purpose</th>
         <th>Status</th>
@@ -2494,10 +2585,20 @@ function loadStaff(){
       </tr>
     `;
 
+
+
+
     list.forEach((r)=>{
       if(r.username !== currentUser.email) return;
 
+
       let remarks = "";
+
+
+
+
+
+
 
       if(r.status === "APPROVED_ORD"){
         remarks = "Forwarded to Admin for Canvass";
@@ -2521,8 +2622,15 @@ function loadStaff(){
         remarks = "-";
       }
 
-      html += `
-      <tr class="${isRejected(r.status) ? 'rejected-row' : ''}">
+     html += `
+<tr class="${isRejected(r.status) ? 'rejected-row' : ''}">
+
+<td style="text-align:center;">
+<input
+type="checkbox"
+name="selectedPR"
+onclick="selectRequest(this,'${r.id}')">
+</td>
 
 
         <td>${r.dateRequested ? new Date(r.dateRequested).toLocaleDateString() : "-"}</td>
@@ -6026,33 +6134,6 @@ window.changePassword = async function () {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
-
 async function cancelRequest(id){
   try{
 
@@ -7684,7 +7765,6 @@ function loadPOItems(r) {
 
 
 
-
 let supplier = document.getElementById("poSupplier").value.trim();
 
 let bidderIndex = (r.bidders || []).findIndex(
@@ -7693,7 +7773,9 @@ let bidderIndex = (r.bidders || []).findIndex(
 
 if (bidderIndex === -1) return;
 
-// ✅ Ito ang kulang
+
+
+
 window.currentPO.selectedBidder = supplier;
 window.currentPO.selectedBidderIndex = bidderIndex;
 
@@ -8116,10 +8198,149 @@ window.requestAgain = async function(id){
 }
 
 
+function renderProgress(request){
+
+
+let current = 1;
+
+if(request.status==="PENDING_ORD"){
+    current=2;
+}
+else if(request.status==="APPROVED_ORD"){
+    current=3;
+}
+
+
+// Waiting for TOS/FASS approval
+if(
+    request.status==="FOR_TOS_CANVASS" ||
+    request.status==="FOR_FASS_CANVASS"
+){
+    current = 4;
+}
+
+// Approved by TOS/FASS → Ready for Abstract
+else if(
+    request.status==="APPROVED_CANVASS_TOS" ||
+    request.status==="APPROVED_CANVASS_FASS"
+){
+    current = 5;
+}
+
+
+// Kapag may Abstract na, siguraduhing nasa Step 5 pa rin
+if(
+    request.abstractGenerated ||
+    (request.abstractItems && request.abstractItems.length>0)
+){
+    current = Math.max(current, 5);
+}
+
+// Kapag may Purchase Order na, tapos na ang procurement
+if(request.poCreated){
+    current = 7;
+}
 
 
 
 
+
+
+
+
+
+
+const steps=[
+"Submitted",
+"ORD Approval",
+"Canvass",
+"TOS/FASS",
+"Abstract of Bids",
+"Purchase Order",
+"Completed"
+];
+
+let html=`
+<div class="progress-card">
+
+<div class="progress-title">
+🚀 Procurement Progress
+</div>
+
+<div class="progress-wrapper">
+`;
+
+steps.forEach((s,i)=>{
+
+let cls="";
+
+// Kapag completed na, lahat green
+if(current===7){
+    cls="active";
+}
+else if(i+1<current){
+    cls="active";
+}
+else if(i+1===current){
+    cls="current";
+}
+
+html+=`
+<div class="progress-step">
+
+<div class="progress-circle ${cls}">
+${i+1}
+</div>
+
+<div class="progress-label">
+${s}
+</div>
+
+</div>
+`;
+
+});
+
+html+=`
+</div>
+</div>
+`;
+
+document.getElementById("procurementProgressContainer").innerHTML=html;
+
+}
+
+
+window.selectRequest = async function(box,id){
+
+document.querySelectorAll(
+'input[name="selectedPR"]'
+).forEach(c=>{
+
+if(c!==box)
+c.checked=false;
+
+});
+
+if(!box.checked){
+
+document.getElementById(
+"procurementProgressContainer"
+).innerHTML="";
+
+return;
+
+}
+
+let list=await getRequests();
+
+let r=list.find(x=>x.id===id);
+
+if(!r)return;
+
+renderProgress(r);
+
+}
 
 
 
