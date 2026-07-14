@@ -1277,6 +1277,13 @@ animation:pulseBadge 1.5s infinite;
 
 }
 
+.menu-badge-gray{
+    background:#6b7280;
+    color:#fff;
+}
+
+
+
 @keyframes pulseBadge{
 
 0%{
@@ -1782,12 +1789,12 @@ LOGIN
 
 <button class="admin-menu-btn" onclick="showAdminSection('records')">
     <span>📁 Records</span>
-    <span class="menu-badge" id="badgeRecords">0</span>
+   <span class="menu-badge menu-badge-gray" id="badgeRecords">0</span>
 </button>
 
 <button class="admin-menu-btn" onclick="showAdminSection('users')">
     <span>👥 User Management</span>
-    <span class="menu-badge" id="badgeUsers">0</span>
+    <span class="menu-badge menu-badge-gray" id="badgeUsers">0</span>
 </button>
 
 <button class="admin-menu-btn" onclick="showAdminSection('developer')">
@@ -2597,30 +2604,50 @@ function loadStaff(){
 
 
 
+if(r.status === "PENDING_ORD"){
+    remarks = "🟡 Waiting for ORD Approval";
+}
+else if(r.status === "APPROVED_ORD"){
+    remarks = "🔵 Forwarded to Procurement for the preparation of Canvass";
+}
+else if(r.status === "CANVASSED"){
+    remarks = "🔵Forwarded to TOS/FASS for Canvass Signature";
+}
+else if(r.status === "FOR_TOS_CANVASS"){
+    remarks = "🟡 Waiting for TOS Approval";
+}
+else if(r.status === "FOR_FASS_CANVASS"){
+    remarks = "🟡 Waiting for FASS Approval";
+}
+else if(
+    r.status === "APPROVED_CANVASS_TOS" ||
+    r.status === "APPROVED_CANVASS_FASS"
+){
+    remarks = "Approved Canvass - Processed";
+}
+else if(r.status === "DONE"){
+    remarks = "🟢 Completed";
+}
+else if(r.status === "REJECTED"){
+    remarks = "🔴 Rejected: " + (r.rejectReason || "No reason");
+}
+else if(r.status === "CANCELLED"){
+    remarks = "⚫ Cancelled by user";
+}
+else{
+    remarks = "-";
+}
+
+
+     
 
 
 
-      if(r.status === "APPROVED_ORD"){
-        remarks = "Forwarded to Admin for Canvass";
-      }
-      else if(r.status === "CANVASSED"){
-        remarks = "Forwarded to TOS/FASS for Canvass Signature";
-      }
-      else if(
-        r.status === "APPROVED_CANVASS_TOS" ||
-        r.status === "APPROVED_CANVASS_FASS"
-      ){
-        remarks = "Approved Canvass - Processed";
-      }
-      else if(r.status === "REJECTED"){
-        remarks = "Rejected: " + (r.rejectReason || "No reason");
-      }
-      else if(r.status === "CANCELLED"){
-        remarks = "Cancelled by user";
-      }
-      else{
-        remarks = "-";
-      }
+
+
+
+
+     
 
      html += `
 <tr class="${isRejected(r.status) ? 'rejected-row' : ''}">
@@ -2847,9 +2874,9 @@ ${
 
 
 else if(r.status === "FOR_TOS_CANVASS"){
-      label = "⏳ FOR TOS APPROVAL"; color = "orange";
+      label = "⏳ FOR TOS RFQ APPROVAL"; color = "orange";
     } else if(r.status === "FOR_FASS_CANVASS"){
-      label = "⏳ FOR FASS APPROVAL"; color = "orange";
+      label = "⏳ FOR FASS RFQ APPROVAL"; color = "orange";
     } else if(r.status === "CANVASSED"){
       label = "📑 CANVASSED";
     } else if(
@@ -5114,9 +5141,17 @@ function extractNumber(val){
 }
 
 async function loadUsers(){
-let users = await getUsers();
+
+  let users = await getUsers();
+
+  // 🔥 UPDATE USER BADGE
+  document.getElementById("badgeUsers").textContent = users.length;
 
   let html = "<table>";
+
+
+
+
   html += `
     <tr>
     <th>Full Name</th>
@@ -5314,6 +5349,7 @@ window.editUser = async function(index){
   try{
 
     let users = await getUsers();
+
 
     let user = users[index];
 
@@ -8253,7 +8289,7 @@ if(request.poCreated){
 const steps=[
 "Submitted",
 "ORD Approval",
-"Canvass",
+"Request for Quotation",
 "TOS/FASS",
 "Abstract of Bids",
 "Purchase Order",
