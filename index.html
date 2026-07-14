@@ -2681,12 +2681,34 @@ onclick="selectRequest(this,'${r.id}')">
 
         <td style="white-space:nowrap;">
 
-          ${r.status !== "CANCELLED" ? `
+        ${r.status !== "CANCELLED" ? `
     <button class="action-btn btn-print"
         onclick="printPR('${r.id}')">
-        🖨 Print
+        🖨 Print PR
     </button>
 ` : ''}
+
+${
+[
+    "CANVASSED",
+    "FOR_TOS_CANVASS",
+    "FOR_FASS_CANVASS",
+    "APPROVED_CANVASS_TOS",
+    "APPROVED_CANVASS_FASS",
+    "DONE"
+].includes(r.status)
+?
+`
+<button
+    class="action-btn"
+    style="background:#7c3aed;color:white;"
+    onclick="printCanvassById('${r.id}')">
+    📑 Print Canvass
+</button>
+`
+:
+""
+}
 
 
 ${[
@@ -4489,7 +4511,13 @@ async function openAbstract(i){
   (r.items || []).forEach((it,idx)=>{
     html += `
     <tr>
-      <td><input type="checkbox" id="sel_${idx}"></td>
+     <td>
+    <input
+        type="checkbox"
+        id="sel_${idx}"
+        class="abstract-item"
+        onchange="updateSelectAll()">
+</td>
       <td>${it.desc}</td>
       <td>${it.qty}</td>
       <td>${it.unit}</td>
@@ -7706,10 +7734,52 @@ async function openAbstractById(id){
   document.getElementById("b3").value = r.bidders?.[2] || "";
   document.getElementById("b4").value = r.bidders?.[3] || "";
 
-  let html = `
-  <table>
+ 
+
+let html = `
+
+<div style="
+    display:flex;
+    justify-content:flex-end;
+    align-items:center;
+    margin:8px 0 10px;
+">
+   
+<label style="cursor:pointer;font-weight:bold;">
+    <input
+        type="checkbox"
+        id="selectAllItems"
+        onclick="toggleAllItems(this)">
+    Select All
+</label>
+
+
+
+
+</div>
+
+<table>
+
+
+
+
+
+
+
+
     <tr>
-      <th>Select</th>
+      
+<th style="white-space:nowrap;">
+    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+        <input
+            type="checkbox"
+            id="selectAllItems"
+            onchange="toggleAllItems(this)">
+        Select All
+    </label>
+</th>
+
+
       <th>Description</th>
       <th>Qty</th>
       <th>Unit</th>
@@ -7732,11 +7802,19 @@ async function openAbstractById(id){
     <tr>
 
       <td>
-        <input 
-          type="checkbox"
-          id="sel_${idx}"
-          ${savedItem ? "checked" : ""}
-        >
+
+
+
+       <input
+    type="checkbox"
+    id="sel_${idx}"
+    class="abstract-item"
+    onchange="updateSelectAll()"
+    ${savedItem ? "checked" : ""}
+>
+
+
+
       </td>
 
       <td>${it.desc || ''}</td>
@@ -7781,14 +7859,48 @@ async function openAbstractById(id){
 
   document.getElementById("absItemsTable").innerHTML = html;
 
+
+const selectAll = document.getElementById("selectAllItems");
+
+if(selectAll){
+    selectAll.addEventListener("change", function () {
+        document.querySelectorAll(".abstract-item").forEach(cb=>{
+            cb.checked = this.checked;
+        });
+    });
+}
+
+
+
   document.getElementById("abstractModal")
     .classList.remove("hidden");
 }
 
 
+function toggleAllItems(source){
+
+    const modal = document.getElementById("abstractModal");
+
+    modal.querySelectorAll(".abstract-item").forEach(cb=>{
+        cb.checked = source.checked;
+    });
+
+}
 
 
 
+function updateSelectAll(){
+
+    const modal = document.getElementById("abstractModal");
+
+    const checkboxes = modal.querySelectorAll(".abstract-item");
+
+    const selectAll = document.getElementById("selectAllItems");
+
+    selectAll.checked =
+        [...checkboxes].every(cb => cb.checked);
+
+}
 
 
 
