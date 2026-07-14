@@ -2608,22 +2608,22 @@ if(r.status === "PENDING_ORD"){
     remarks = "🟡 Waiting for ORD Approval";
 }
 else if(r.status === "APPROVED_ORD"){
-    remarks = "🔵 Forwarded to Procurement for the preparation of Canvass";
+    remarks = "🔵 Forwarded to Procurement for the preparation of RFQ";
 }
 else if(r.status === "CANVASSED"){
     remarks = "🔵Forwarded to TOS/FASS for Canvass Signature";
 }
 else if(r.status === "FOR_TOS_CANVASS"){
-    remarks = "🟡 Waiting for TOS Approval";
+    remarks = "🟡 Waiting RFQ for ARD-TOS Approval";
 }
 else if(r.status === "FOR_FASS_CANVASS"){
-    remarks = "🟡 Waiting for FASS Approval";
+    remarks = "🟡 Waiting RFQ for ARD-FASS Approval";
 }
 else if(
     r.status === "APPROVED_CANVASS_TOS" ||
     r.status === "APPROVED_CANVASS_FASS"
 ){
-    remarks = "Approved Canvass - Processed";
+    remarks = "🟢 Approved Canvass - To be Processed";
 }
 else if(r.status === "DONE"){
     remarks = "🟢 Completed";
