@@ -1389,20 +1389,44 @@ transform:scale(1);
 
 <body>
 
-<header style="text-align:center; padding:18px;">
- 
-  <div style="font-size:16px; font-weight:600;">
-    Department of Science and Technology
-  </div>
 
-  <div style="font-size:14px; opacity:0.9;">
-    Regional Office No. 02 • Cagayan Valley
-  </div>
+<header style="padding:18px;">
 
-  <div style="margin-top:6px; font-size:18px; font-weight:700; letter-spacing:1px;">
-    Integrated Procurement Processing System
-  </div>
+<div style="display:flex;align-items:center;justify-content:center;gap:18px;">
+
+    <img
+        id="systemLogo"
+        src=""
+        style="
+        width:75px;
+        height:75px;
+        object-fit:contain;
+        ">
+
+    <div style="text-align:center;">
+
+        <div style="font-size:16px;font-weight:600;">
+            Department of Science and Technology
+        </div>
+
+        <div style="font-size:14px;opacity:.9;">
+            Regional Office No. 02 • Cagayan Valley
+        </div>
+
+        <div style="margin-top:6px;font-size:18px;font-weight:700;letter-spacing:1px;">
+            Integrated Procurement Processing System
+        </div>
+
+    </div>
+
+</div>
+
 </header>
+
+
+
+
+
 
 
 
@@ -1515,9 +1539,23 @@ LOGIN
     Edit Password
   </button>
 
+<button class="action-btn"
+        style="background:#7c3aed;color:white;"
+        onclick="openDeveloperModal()">
+    💻 Developer
+</button>
+
+
+
+
   <button class="action-btn" onclick="logout()">
     Logout
   </button>
+
+
+
+
+
 
 </div>
 
@@ -1604,7 +1642,20 @@ LOGIN
     Edit Password
   </button>
 
+
+<button
+class="action-btn"
+style="background:#7c3aed;color:white;"
+onclick="openDeveloperModal()">
+💻 Developer
+</button>
+
+
   <button onclick="logout()">Logout</button>
+
+
+
+
 
   <span id="ordBadge" style="
       position:absolute;
@@ -1797,10 +1848,11 @@ LOGIN
     <span class="menu-badge menu-badge-gray" id="badgeUsers">0</span>
 </button>
 
-<button class="admin-menu-btn" onclick="showAdminSection('developer')">
+
+<button class="admin-menu-btn"
+        onclick="showAdminSection('developer')">
     <span>💻 Developer</span>
 </button>
-
 
 
 
@@ -1861,7 +1913,6 @@ LOGIN
 
 
 
-
   <h4>Add User</h4>
 
 <input id="newFullName" placeholder="Full Name">
@@ -1903,10 +1954,23 @@ display:block;
   <div id="userList"></div>
 </div>
 
-
-
-
 <div id="developerSection" class="admin-section" style="display:none;">
+
+    <div style="text-align:right;margin-bottom:15px;">
+        <button
+            class="action-btn"
+            style="
+            background:#0b5ed7;
+            color:white;
+            padding:8px 18px;
+            width:auto;"
+            onclick="openLogoModal()">
+            🖼 Change Logo
+        </button>
+    </div>
+
+    <!-- Existing Developer Content -->
+
 
 
 
@@ -2061,6 +2125,15 @@ font-size:13px;
     Edit Password
   </button>
 
+<button
+class="action-btn"
+style="background:#7c3aed;color:white;"
+onclick="openDeveloperModal()">
+💻 Developer
+</button>
+
+
+
   <button onclick="logout()">Logout</button>
 
   <span id="reviewBadge" style="
@@ -2104,6 +2177,178 @@ font-size:13px;
 
 
 </div>
+
+<!-- ================= DEVELOPER MODAL ================= -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div id="developerModal" class="modal">
+
+<div class="modal-content" style="max-width:900px;">
+
+<span class="close" onclick="closeDeveloperModal()">&times;</span>
+
+<div style="
+text-align:center;
+padding:10px;
+">
+
+<div style="font-size:48px;">👨‍💻</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h1 style="margin:5px 0;color:#0b3d91;">
+LEX B. TOLENTINO
+</h1>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h3 style="margin:0;color:#2563eb;">
+Master of Science in Information Technology
+</h3>
+
+<hr>
+
+<p>
+<b>Developer</b><br>
+Integrated Procurement Processing System<br>
+Procurement Division – DOST02 - Cagayan Valley
+</p>
+
+<table style="width:100%;border-collapse:collapse;table-layout:fixed;">
+
+<tr>
+
+<td style="padding:12px;text-align:center;">
+<b>📧 Email</b><br>
+rodtolentino4@gmail.com
+</td>
+
+<td style="padding:12px;text-align:center;">
+<b>📱 Mobile</b><br>
+0965 148 3825
+</td>
+
+<td style="padding:12px;text-align:center;">
+<b>🌐 Facebook</b><br>
+<a href="https://www.facebook.com/Rolex.Personal/" target="_blank">
+facebook.com/Rolex.Personal
+</a>
+</td>
+
+</tr>
+
+</table>
+
+
+
+
+
+
+
+
+<div style="
+
+
+
+
+
+
+
+
+
+
+
+
+
+margin-top:20px;
+padding:12px;
+background:#0f172a;
+color:white;
+border-radius:10px;
+">
+© 2026 LEX B. TOLENTINO | Integrated Procurement Processing System
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+
+</div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2154,17 +2399,20 @@ reauthenticateWithCredential
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 
+import {
+getFirestore,
+collection,
+addDoc,
+getDocs,
+updateDoc,
+doc,
+onSnapshot,
+query,
+where,
+setDoc,
+getDoc
 
-import { 
-  getFirestore, 
-  collection, 
-  addDoc, 
-  getDocs, 
-  updateDoc, 
-  doc,
-  onSnapshot,
-  query,
-  where
+ 
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 
@@ -2250,7 +2498,7 @@ document.getElementById("ordLoggedUser").innerText =
   });
 
   showAdminSection('canvass');
-
+loadDeveloperLogo();
   document.getElementById("adminLoggedUser").innerText =
     "👤 " + (found.fullName || found.email);
 }
@@ -2354,7 +2602,7 @@ document.getElementById("ordLoggedUser").innerText =
   });
 
   showAdminSection('canvass');
-
+loadDeveloperLogo();
   document.getElementById("adminLoggedUser").innerText =
     "👤 " + (found.fullName || found.email);
 }
@@ -8493,7 +8741,157 @@ renderProgress(r);
 
 
 
+window.openDeveloperModal = function () {
+    document.getElementById("developerModal").style.display = "flex";
+}
 
+window.closeDeveloperModal = function () {
+    document.getElementById("developerModal").style.display = "none";
+}
+
+
+
+// ================= DEVELOPER LOGO PREVIEW =================
+
+document.getElementById("developerLogoFile").addEventListener("change", function(e){
+
+    const file = e.target.files[0];
+
+    if(!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = function(evt){
+
+        document.getElementById("developerLogoPreview").src = evt.target.result;
+
+    };
+
+    reader.readAsDataURL(file);
+
+});
+
+
+
+
+window.uploadDeveloperLogo = async function(){
+
+const file =
+document.getElementById("developerLogoFile").files[0];
+
+if(!file){
+    alert("Please select a logo.");
+    return;
+}
+
+const reader = new FileReader();
+
+reader.onload = async function(e){
+
+    const base64 = e.target.result;
+
+    try{
+
+        await setDoc(
+            doc(db,"system_settings","developer"),
+            {
+                Logo: base64
+            },
+            {
+                merge:true
+            }
+        );
+
+        document.getElementById("developerLogoPreview").src = base64;
+
+        alert("✅ Logo saved successfully.");
+
+    }catch(err){
+
+        console.error(err);
+        alert(err.message);
+
+    }
+
+};
+
+reader.readAsDataURL(file);
+
+}
+
+
+
+
+
+async function loadDeveloperLogo(){
+
+try{
+
+    const snap =
+    await getDoc(
+        doc(db,"system_settings","developer")
+    );
+
+    if(!snap.exists()) return;
+
+    const data = snap.data();
+
+    if(data.Logo){
+
+        document.getElementById(
+            "developerLogoPreview"
+        ).src = data.Logo;
+
+
+
+const logo = document.getElementById("systemLogo");
+
+if(logo){
+
+    logo.src = data.Logo;
+
+}
+
+
+
+
+
+
+
+
+
+
+    }
+
+}catch(err){
+
+    console.log(err);
+
+}
+
+}
+
+
+
+function openLogoModal(){
+
+document.getElementById("changeLogoModal").style.display="flex";
+
+}
+
+function closeLogoModal(){
+
+document.getElementById("changeLogoModal").style.display="none";
+
+}
+
+window.openLogoModal = function () {
+    document.getElementById("changeLogoModal").style.display = "flex";
+}
+
+window.closeLogoModal = function () {
+    document.getElementById("changeLogoModal").style.display = "none";
+}
 
 
 
@@ -8819,6 +9217,52 @@ setInterval(updateClock,1000);
 
 </div>
 
+
+<div id="changeLogoModal" class="modal" style="display:none;">
+
+    <div class="modal-content" style="max-width:450px;">
+
+        <span class="close"
+        onclick="closeLogoModal()">&times;</span>
+
+        <h2>🖼 Change System Logo</h2>
+
+        <hr>
+
+        <img
+        id="developerLogoPreview"
+        style="
+        width:120px;
+        height:120px;
+        display:block;
+        margin:auto;
+        object-fit:contain;
+        border:1px solid #ddd;
+        padding:10px;
+        border-radius:10px;
+        background:white;">
+
+        <br>
+
+        <input
+        type="file"
+        id="developerLogoFile"
+        accept="image/*">
+
+        <br><br>
+
+        <button
+        class="action-btn"
+        style="width:100%;background:#0b5ed7;color:white;"
+        onclick="uploadDeveloperLogo()">
+
+        📤 Upload Logo
+
+        </button>
+
+    </div>
+
+</div>
 
 
 
