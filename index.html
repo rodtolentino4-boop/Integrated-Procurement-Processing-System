@@ -963,17 +963,21 @@ transform:translate(-50%,-50%) rotate(360deg);
     z-index: 99999;
 }
 
+
 .modal-content{
-    background: #fff;
-    width: 90%;
-    max-width: 950px;
-    max-height: 85vh;
-    overflow-y: auto;
-    border-radius: 10px;
-    padding: 20px;
-    position: relative;
-    box-shadow: 0 10px 35px rgba(0,0,0,.35);
+    position:relative;
+    background:#fff;
+    width:90%;
+    max-width:900px;
+    border-radius:15px;
+    padding:20px;
 }
+
+
+
+
+
+
 
 .close{
     position:absolute;
@@ -1374,7 +1378,20 @@ transform:scale(1);
 
 
 
+.close{
+    position:absolute;
+    top:15px;
+    right:20px;
+    font-size:32px;
+    font-weight:bold;
+    cursor:pointer;
+    color:#555;
+    z-index:9999;
+}
 
+.close:hover{
+    color:red;
+}
 
 
 
@@ -2375,7 +2392,21 @@ border-radius:10px;
 </div>
 
 
+<!-- APPROVE CANVASS MODAL -->
+<div id="approveCanvassModal" class="modal">
 
+  <div class="modal-content" style="max-width:900px;">
+
+    <span class="close"
+      onclick="closeApproveCanvassModal()">
+      &times;
+    </span>
+
+    <div id="approveCanvassContent"></div>
+
+  </div>
+
+</div>
 
 
 
@@ -2440,6 +2471,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+loadDeveloperLogo();
 const auth = getAuth(app); 
 const storage = getStorage(app);
 
@@ -2601,9 +2633,9 @@ document.getElementById("ordLoggedUser").innerText =
     loadAdmin(list); 
   });
 
-  showAdminSection('canvass');
-loadDeveloperLogo();
-  document.getElementById("adminLoggedUser").innerText =
+ showAdminSection('canvass');
+
+document.getElementById("adminLoggedUser").innerText =
     "👤 " + (found.fullName || found.email);
 }
 
@@ -3237,6 +3269,28 @@ function loadReview(){
     let pendingHTML = "";
     let pendingCount = 0;
 
+
+
+
+pendingHTML = `
+<table>
+<tr>
+    <th>Date</th>
+    <th>PR No.</th>
+    <th>Division</th>
+    <th>Requestor</th>
+    <th>Purpose</th>
+    <th>Action</th>
+</tr>
+`;
+
+
+
+
+
+
+
+
     let approvedHTML = `
     <table>
       <tr>
@@ -3256,21 +3310,50 @@ function loadReview(){
 
         pendingCount++;
 
-        pendingHTML += buildCard(r,i,`
-          <textarea id="remarks${r.id}" placeholder="Remarks"></textarea>
+       
+pendingHTML += `
+<tr>
 
-          <button onclick="approveCanvass('${r.id}')">
-            Approve Canvass
-          </button>
+<td>${new Date(r.dateRequested).toLocaleDateString('en-PH')}</td>
 
-          <textarea id="rejectReason_${r.id}" 
-            placeholder="Reason for rejection">
-          </textarea>
+<td>${r.prNo || ""}</td>
 
-          <button onclick="reject('${r.id}')">
-            Reject
-          </button>
-        `);
+<td>${r.division || ""}</td>
+
+<td>${r.name || ""}</td>
+
+<td>${r.purpose || ""}</td>
+
+<td>
+
+<button
+style="background:#16a34a;"
+onclick="openApproveCanvassModal('${r.id}')">
+✅ Approve
+</button>
+
+<button
+style="background:#2563eb;"
+onclick="viewRequestById('${r.id}')">
+👁 View PR
+</button>
+
+</td>
+
+</tr>
+`;
+
+
+
+
+
+
+
+
+
+
+
+
       }
 
       // ✅ PENDING (FASS)
@@ -3278,21 +3361,46 @@ function loadReview(){
 
         pendingCount++;
 
-        pendingHTML += buildCard(r,i,`
-          <textarea id="remarks${r.id}" placeholder="Remarks"></textarea>
+        
+pendingHTML += `
+<tr>
 
-          <button onclick="approveCanvass('${r.id}')">
-            Approve Canvass
-          </button>
+<td>${new Date(r.dateRequested).toLocaleDateString('en-PH')}</td>
 
-          <textarea id="rejectReason_${r.id}" 
-            placeholder="Reason for rejection">
-          </textarea>
+<td>${r.prNo || ""}</td>
 
-          <button onclick="reject('${r.id}')">
-            Reject
-          </button>
-        `);
+<td>${r.division || ""}</td>
+
+<td>${r.name || ""}</td>
+
+<td>${r.purpose || ""}</td>
+
+<td>
+
+<button
+style="background:#16a34a;"
+onclick="openApproveCanvassModal('${r.id}')">
+✅ Approve
+</button>
+
+<button
+style="background:#2563eb;"
+onclick="viewRequestById('${r.id}')">
+👁 View PR
+</button>
+
+</td>
+
+</tr>
+`;
+
+
+
+
+
+
+
+
       }
 
       // ✅ APPROVED TABLE
@@ -3336,37 +3444,55 @@ function loadReview(){
 
     });
 
-    approvedHTML += "</table>";
 
-    // ✅ NO PENDING MESSAGE
-    if(pendingCount === 0){
 
-      reviewPending.innerHTML = `
-        <p style="
-          text-align:center;
-          color:gray;
-          font-size:16px;
-          margin-top:40px;
-        ">
-          No Pending Request
-        </p>
-      `;
 
-    }else{
+approvedHTML += "</table>";
 
-      reviewPending.innerHTML = `
-        <h4 style="
-          margin-bottom:10px;
-          color:#b91c1c;
-        ">
-          ${pendingCount} Pending Request${pendingCount > 1 ? 's' : ''}
-        </h4>
+// ✅ NO PENDING MESSAGE
+if(pendingCount === 0){
 
-        ${pendingHTML}
-      `;
-    }
+  reviewPending.innerHTML = `
+    <p style="
+      text-align:center;
+      color:gray;
+      font-size:16px;
+      margin-top:40px;
+    ">
+      No Pending Request
+    </p>
+  `;
 
-    reviewApproved.innerHTML = approvedHTML;
+}else{
+
+  pendingHTML += "</table>";
+
+  reviewPending.innerHTML = `
+    <h4 style="
+      margin-bottom:10px;
+      color:#b91c1c;
+    ">
+      ${pendingCount} Pending Request${pendingCount > 1 ? 's' : ''}
+    </h4>
+
+    ${pendingHTML}
+  `;
+
+}
+
+reviewApproved.innerHTML = approvedHTML;
+
+
+
+
+
+
+
+
+
+
+
+    
 
     // ✅ BADGE NOTIFICATION
     let badge = document.getElementById("reviewBadge");
@@ -5403,6 +5529,7 @@ await updateDoc(doc(db, "requests", r.id), {
 
 
   alert("✅ Canvass Approved!");
+closeApproveCanvassModal();
 
   loadReview();
 }
@@ -8894,7 +9021,52 @@ window.closeLogoModal = function () {
 }
 
 
+window.openApproveCanvassModal = async function(id){
 
+  let list = await getRequests();
+
+  let r = list.find(x => x.id === id);
+
+  if(!r){
+    alert("Request not found.");
+    return;
+  }
+
+  document.getElementById("approveCanvassContent").innerHTML =
+    buildCard(r,0,`
+
+      <textarea
+        id="remarks${r.id}"
+        placeholder="Remarks"></textarea>
+
+      <button onclick="approveCanvass('${r.id}')">
+        ✅ Approve Canvass
+      </button>
+
+      <br><br>
+
+      <textarea
+        id="rejectReason_${r.id}"
+        placeholder="Reason for rejection"></textarea>
+
+      <button
+        style="background:#dc2626;"
+        onclick="reject('${r.id}')">
+        Reject
+      </button>
+
+    `);
+
+  document.getElementById("approveCanvassModal").style.display = "flex";
+
+};
+
+
+window.closeApproveCanvassModal = function(){
+
+  document.getElementById("approveCanvassModal").style.display = "none";
+
+};
 
 
   
