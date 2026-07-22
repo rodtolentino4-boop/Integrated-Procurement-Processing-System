@@ -968,11 +968,12 @@ transform:translate(-50%,-50%) rotate(360deg);
     position:relative;
     background:#fff;
     width:90%;
-    max-width:900px;
+    max-width:1100px;
+    max-height:90vh;   /* limit height */
+    overflow-y:auto;   /* enable vertical scroll */
     border-radius:15px;
     padding:20px;
 }
-
 
 
 
@@ -2172,28 +2173,110 @@ onclick="openDeveloperModal()">
 
 <div class="row">
 
-  <!-- LEFT -->
-  <div class="col">
-    <div class="card">
-      <h3>✅ Approved Canvass</h3>
-      <div id="reviewApproved"></div>
+    <!-- LEFT MENU -->
+    <div style="width:250px">
+
+        <div class="card">
+
+            <h3>📂 Menu</h3>
+
+            <button class="admin-menu-btn"
+                onclick="showReviewSection('pending')">
+
+                <span>🟡 Pending Review</span>
+
+                <span
+                class="menu-badge"
+                id="badgePendingReview">0</span>
+
+            </button>
+
+            <button class="admin-menu-btn"
+                onclick="showReviewSection('approved')">
+
+                <span>🟢 Approved Canvass</span>
+
+                <span
+                class="menu-badge menu-badge-gray"
+                id="badgeApprovedReview">0</span>
+
+            </button>
+
+        </div>
+
     </div>
-  </div>
 
-  <!-- RIGHT -->
-  <div class="col">
-    <div class="card">
-      <h3>⏳ Pending Review</h3>
-      <div id="reviewPending"></div>
+
+    <!-- RIGHT CONTENT -->
+    <div class="col">
+
+        <div id="sectionPendingReview" class="card">
+
+            <h3>🟡 Pending Review</h3>
+
+            <div id="reviewPending"></div>
+
+        </div>
+
+
+       <div id="sectionApprovedReview"
+     class="card hidden">
+
+    <h3>🟢 Approved Canvass</h3>
+
+    <div style="margin:10px 0;">
+        <input
+            type="text"
+            id="searchApprovedReview"
+            placeholder="🔍 Search PR No., Division, Requestor, Purpose..."
+            oninput="loadReview()"
+            style="
+                width:350px;
+                padding:8px 12px;
+                border:1px solid #ccc;
+                border-radius:6px;
+            ">
     </div>
-  </div>
+
+    <div id="reviewApproved"></div>
 
 </div>
 
+
+
+
+
+
+    </div>
+
+</div>
+
+
+
+
+
+
+
+
 </div>
 
 
 </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 <!-- ================= DEVELOPER MODAL ================= -->
 
@@ -3268,6 +3351,7 @@ function loadReview(){
 
     let pendingHTML = "";
     let pendingCount = 0;
+let approvedCount = 0;
 
 
 
@@ -3302,6 +3386,22 @@ pendingHTML = `
         <th>Actions</th>
       </tr>
     `;
+
+
+
+let keyword = "";
+
+const searchBox = document.getElementById("searchApprovedReview");
+
+if(searchBox){
+    keyword = searchBox.value.trim().toLowerCase();
+}
+
+
+
+
+
+
 
     list.forEach((r,i)=>{
 
@@ -3404,11 +3504,42 @@ onclick="viewRequestById('${r.id}')">
       }
 
       // ✅ APPROVED TABLE
-      if(
-        (currentUser.role==="TOS" && r.status==="APPROVED_CANVASS_TOS") ||
-        (currentUser.role==="FASS" && r.status==="APPROVED_CANVASS_FASS")
-      ){
+    
 
+// ✅ APPROVED CANVASS
+if(
+
+    currentUser.role === "TOS" && (
+        r.status === "APPROVED_CANVASS_TOS" ||
+        r.status === "DONE"
+    )
+
+    ||
+
+    currentUser.role === "FASS" && (
+        r.status === "APPROVED_CANVASS_FASS" ||
+        r.status === "DONE"
+    )
+
+){
+
+if(keyword){
+
+    let text = (
+        (r.prNo || "") + " " +
+        (r.division || "") + " " +
+        (r.name || "") + " " +
+        (r.purpose || "")
+    ).toLowerCase();
+
+    if(!text.includes(keyword)){
+        return;
+    }
+}
+
+
+
+approvedCount++;
         approvedHTML += `
         <tr>
 
@@ -3428,15 +3559,28 @@ onclick="viewRequestById('${r.id}')">
           <td>${r.name || ""}</td>
           <td>${r.purpose || ""}</td>
 
-          <td>
-            <button onclick="viewRequestById('${r.id}')">
-              View
-            </button>
+         
 
-            <button onclick="printCanvassById('${r.id}')">
-              Print
-            </button>
-          </td>
+
+<td>
+
+<button
+    style="background:#2563eb;"
+    onclick="viewRequestById('${r.id}')">
+    👁 View PR
+</button>
+
+<button
+    style="background:#7c3aed;"
+    onclick="printCanvassById('${r.id}')">
+    📑 View Canvass
+</button>
+
+</td>
+
+
+
+
 
         </tr>
         `;
@@ -3484,7 +3628,16 @@ reviewApproved.innerHTML = approvedHTML;
 
 
 
+const badgePending = document.getElementById("badgePendingReview");
+const badgeApproved = document.getElementById("badgeApprovedReview");
 
+if(badgePending){
+    badgePending.innerText = pendingCount;
+}
+
+if(badgeApproved){
+    badgeApproved.innerText = approvedCount;
+}
 
 
 
@@ -3515,7 +3668,7 @@ reviewApproved.innerHTML = approvedHTML;
 
 
 
-
+window.loadReview = loadReview;
 
 
 
@@ -3689,7 +3842,6 @@ else if (recordsSearch && recordsSearch.value.trim() !== "") {
 
 
 
-
 list
 .sort((a,b)=>{
 
@@ -3752,6 +3904,15 @@ if(
     r.status==="FOR_TOS_CANVASS" ||
     r.status==="FOR_FASS_CANVASS"
 ){
+
+
+
+
+
+
+
+
+
 
 canvassCount++;
 pendingCount++;
@@ -9068,8 +9229,47 @@ window.closeApproveCanvassModal = function(){
 
 };
 
+function showReviewSection(section){
 
-  
+    document.getElementById("sectionPendingReview").classList.add("hidden");
+    document.getElementById("sectionApprovedReview").classList.add("hidden");
+
+    if(section==="pending"){
+        document.getElementById("sectionPendingReview").classList.remove("hidden");
+    }
+
+    if(section==="approved"){
+        document.getElementById("sectionApprovedReview").classList.remove("hidden");
+    }
+
+}
+
+window.showReviewSection = function(section){
+
+    document.getElementById("sectionPendingReview").classList.add("hidden");
+    document.getElementById("sectionApprovedReview").classList.add("hidden");
+
+    if(section === "pending"){
+        document.getElementById("sectionPendingReview").classList.remove("hidden");
+    }
+
+    if(section === "approved"){
+        document.getElementById("sectionApprovedReview").classList.remove("hidden");
+    }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
 </script>
 
 <div id="abstractModal" class="hidden card" style="position:fixed; top:5%; left:10%; width:80%; height:90%; overflow:auto; background:white; z-index:999;">
