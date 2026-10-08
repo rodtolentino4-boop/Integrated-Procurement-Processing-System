@@ -1402,6 +1402,243 @@ transform:scale(1);
 
 
 
+
+/* ==========================
+   ORD DASHBOARD - CLEAN ACTIONS + PAGINATION
+========================== */
+.ord-section-card{
+  overflow:hidden;
+}
+
+.ord-section-title{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:14px;
+}
+
+.ord-section-title h3{
+  margin:0;
+}
+
+.ord-table-wrap{
+  width:100%;
+  overflow-x:auto;
+  border-radius:12px;
+}
+
+.ord-table-wrap table{
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0;
+  overflow:hidden;
+}
+
+.ord-table-wrap th{
+  background:#0f172a;
+  color:#fff;
+  padding:11px 10px;
+  font-size:12px;
+  white-space:nowrap;
+}
+
+.ord-table-wrap td{
+  padding:10px 9px;
+  border-bottom:1px solid #e5e7eb;
+  vertical-align:middle;
+  font-size:12px;
+}
+
+.ord-table-wrap tr:hover td{
+  background:#f8fafc;
+}
+
+.ord-actions{
+  min-width:190px;
+}
+
+.ord-action-group{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+}
+
+.ord-action-btn{
+  border:1px solid #d1d5db;
+  border-radius:8px;
+  padding:7px 10px;
+  background:#fff;
+  color:#1f2937;
+  cursor:pointer;
+  font-size:11px;
+  font-weight:700;
+  line-height:1.1;
+  transition:.18s ease;
+  box-shadow:0 1px 2px rgba(0,0,0,.05);
+}
+
+.ord-action-btn:hover{
+  transform:translateY(-1px);
+  box-shadow:0 4px 10px rgba(15,23,42,.12);
+}
+
+.ord-action-btn.view{
+  background:#2563eb;
+  border-color:#2563eb;
+  color:#fff;
+}
+
+.ord-action-btn.print{
+  background:#fff;
+  border-color:#94a3b8;
+  color:#334155;
+}
+
+.ord-action-btn.document{
+  background:#eef6ff;
+  border-color:#93c5fd;
+  color:#1d4ed8;
+}
+
+.ord-action-btn.approve{
+  background:#16a34a;
+  border-color:#16a34a;
+  color:#fff;
+}
+
+.ord-action-btn.disabled{
+  background:#f1f5f9;
+  border-color:#e2e8f0;
+  color:#94a3b8;
+  cursor:not-allowed;
+  box-shadow:none;
+}
+
+.ord-status{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:5px 9px;
+  border-radius:999px;
+  font-size:10px;
+  font-weight:800;
+  line-height:1.15;
+  white-space:normal;
+  text-align:center;
+}
+
+.ord-status.green{background:#dcfce7;color:#166534;}
+.ord-status.orange{background:#ffedd5;color:#9a3412;}
+.ord-status.red{background:#fee2e2;color:#b91c1c;}
+.ord-status.blue{background:#dbeafe;color:#1d4ed8;}
+
+.ord-empty{
+  text-align:center;
+  padding:42px 15px;
+  color:#64748b;
+  background:#f8fafc;
+  border:1px dashed #cbd5e1;
+  border-radius:12px;
+}
+
+.ord-pagination{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-top:14px;
+  padding:10px 2px 0;
+  flex-wrap:wrap;
+}
+
+.ord-page-info{
+  color:#475569;
+  font-size:12px;
+  font-weight:600;
+}
+
+.ord-page-controls{
+  display:flex;
+  align-items:center;
+  gap:5px;
+  flex-wrap:wrap;
+}
+
+.ord-page-btn{
+  min-width:34px;
+  height:32px;
+  padding:0 9px;
+  border:1px solid #cbd5e1;
+  border-radius:8px;
+  background:#fff;
+  color:#334155;
+  cursor:pointer;
+  font-size:12px;
+  font-weight:700;
+}
+
+.ord-page-btn:hover:not(:disabled){
+  background:#eff6ff;
+  border-color:#93c5fd;
+}
+
+.ord-page-btn.active{
+  background:#2563eb;
+  border-color:#2563eb;
+  color:#fff;
+}
+
+.ord-page-btn:disabled{
+  opacity:.45;
+  cursor:not-allowed;
+}
+
+.ord-page-size{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  color:#475569;
+  font-size:12px;
+  font-weight:600;
+}
+
+.ord-page-size select{
+  width:auto;
+  margin:0;
+  padding:6px 9px;
+  border:1px solid #cbd5e1;
+  border-radius:8px;
+  background:#fff;
+  font-size:12px;
+}
+
+.ord-menu-btn-active{
+  background:linear-gradient(135deg,#1d4ed8,#1e40af) !important;
+  box-shadow:0 7px 18px rgba(37,99,235,.28);
+  transform:translateX(4px);
+}
+
+@media(max-width:900px){
+  .ord-actions{min-width:160px;}
+  .ord-action-btn{padding:6px 8px;font-size:10px;}
+  .ord-table-wrap th,.ord-table-wrap td{font-size:11px;}
+}
+
+
+/* Upload progress modal - scoped to document submission */
+#documentUploadModal{display:none;position:fixed;inset:0;background:rgba(15,23,42,.62);z-index:100000;align-items:center;justify-content:center}
+#documentUploadModal .upload-progress-card{width:min(420px,90vw);box-sizing:border-box;background:#fff;border-radius:16px;padding:28px 26px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+#documentUploadModal .upload-progress-track{height:12px;background:#e5e7eb;border-radius:999px;overflow:hidden;margin:18px 0 10px}
+#documentUploadModal .upload-progress-fill{height:100%;width:1%;background:linear-gradient(90deg,#2563eb,#22c55e);border-radius:999px;transition:width .2s ease}
+#documentUploadPercent{font-size:24px;font-weight:800;color:#1d4ed8}
+#documentUploadMessage{font-size:14px;color:#475569}
+.ord-approved-action-group{display:flex;flex-wrap:nowrap;align-items:center;justify-content:center;gap:3px;white-space:nowrap}
+.ord-approved-action-group .ord-action-btn{padding:6px 7px;margin:0;font-size:10px;white-space:nowrap}
+.ord-approved-action-group .ord-action-btn.document{padding-left:6px;padding-right:6px}
+
 </style>
 </head>
 
@@ -1692,20 +1929,44 @@ onclick="openDeveloperModal()">
 
 <div class="row">
 
-<!-- LEFT -->
-<div class="col">
-<div class="card">
-<h3>✅ Approved Requests</h3>
-<div id="ordApproved"></div>
-</div>
+<!-- LEFT MENU -->
+<div style="width:250px">
+
+  <div class="card">
+
+    <h3>📂 Menu</h3>
+
+    <button class="admin-menu-btn"
+      onclick="showORDSection('pending')">
+      <span>🟡 Pending Approval</span>
+      <span class="menu-badge" id="badgePendingORD">0</span>
+    </button>
+
+    <button class="admin-menu-btn"
+      onclick="showORDSection('approved')">
+      <span>🟢 Approved Requests</span>
+      <span class="menu-badge menu-badge-gray" id="badgeApprovedORD">0</span>
+    </button>
+
+  </div>
+
 </div>
 
-<!-- RIGHT -->
+<!-- RIGHT CONTENT -->
 <div class="col">
-<div class="card">
-<h3>⏳ Pending Approval</h3>
-<div id="ordPending"></div>
-</div>
+
+  <div id="sectionPendingORD" class="card">
+    <h3>🟡 Pending Approval</h3>
+    <input type="text" id="searchORDPending" placeholder="🔍 Search PR No., Division, Requestor, Purpose..." oninput="searchORDRecords()" class="ord-search-input">
+    <div id="ordPending"></div>
+  </div>
+
+  <div id="sectionApprovedORD" class="card hidden">
+    <h3>🟢 Approved Requests</h3>
+    <input type="text" id="searchORDApproved" placeholder="🔍 Search PR No., Division, Requestor, Purpose..." oninput="searchORDRecords()" class="ord-search-input">
+    <div id="ordApproved"></div>
+  </div>
+
 </div>
 
 </div>
@@ -1910,16 +2171,32 @@ onclick="openDeveloperModal()">
     </div>
 
 <div id="sectionRecords" class="card hidden">
-  <h3>📁 Records (RECEIVED PURCHASE REQUESTS)</h3>
+  <div class="records-subsection-tabs" role="tablist" aria-label="Records subsections">
+    <button type="button" class="records-subsection-btn active" id="recordsTabAll" onclick="showRecordsSubsection('all')">📁 All Records (Records)</button>
+    <button type="button" class="records-subsection-btn" id="recordsTabAbstract" onclick="showRecordsSubsection('abstract')">📊 Created Abstract of Bids</button>
+    <button type="button" class="records-subsection-btn" id="recordsTabPO" onclick="showRecordsSubsection('po')">🧾 Created Purchase Order</button>
+  </div>
 
-<input 
-  type="text" 
-  id="searchRecords" 
-  placeholder="🔍 Search PR No, Name, Division, Purpose..."
-  oninput="searchRecords()"
->
+  <div id="recordsSubsectionAll" class="records-subsection-panel">
+    <h3>📁 Records (RECEIVED PURCHASE REQUESTS)</h3>
+    <input
+      type="text"
+      id="searchRecords"
+      placeholder="🔍 Search PR No, Name, Division, Purpose..."
+      oninput="searchRecords()"
+    >
+    <div id="adminRecords"></div>
+  </div>
 
-  <div id="adminRecords"></div>
+  <div id="recordsSubsectionAbstract" class="records-subsection-panel hidden">
+    <h3>📊 Records — Created Abstract of Bids</h3>
+    <div id="adminCreatedAbstract"></div>
+  </div>
+
+  <div id="recordsSubsectionPO" class="records-subsection-panel hidden">
+    <h3>🧾 Records — Created Purchase Orders</h3>
+    <div id="adminCreatedPO"></div>
+  </div>
 </div>
 
 <div id="sectionUsers" class="card hidden">
@@ -2213,7 +2490,7 @@ onclick="openDeveloperModal()">
         <div id="sectionPendingReview" class="card">
 
             <h3>🟡 Pending Review</h3>
-
+            <input type="text" id="searchReviewRecords" placeholder="🔍 Search PR No., Division, Requestor, Purpose..." oninput="loadReview()" class="ord-search-input">
             <div id="reviewPending"></div>
 
         </div>
@@ -2224,19 +2501,7 @@ onclick="openDeveloperModal()">
 
     <h3>🟢 Approved Canvass</h3>
 
-    <div style="margin:10px 0;">
-        <input
-            type="text"
-            id="searchApprovedReview"
-            placeholder="🔍 Search PR No., Division, Requestor, Purpose..."
-            oninput="loadReview()"
-            style="
-                width:350px;
-                padding:8px 12px;
-                border:1px solid #ccc;
-                border-radius:6px;
-            ">
-    </div>
+
 
     <div id="reviewApproved"></div>
 
@@ -2832,6 +3097,51 @@ function calcRow(r){
   r.cells[4].innerText = "₱" + total.toLocaleString();
 }
 
+// Scoped progress UI for document/request submission
+let documentUploadTimer = null;
+let documentUploadPercentValue = 1;
+function ensureDocumentUploadModal(){
+  let modal = document.getElementById("documentUploadModal");
+  if(!modal){
+    modal = document.createElement("div");
+    modal.id = "documentUploadModal";
+    modal.setAttribute("role", "status");
+    modal.setAttribute("aria-live", "polite");
+    modal.innerHTML = `<div class="upload-progress-card"><div id="documentUploadIcon" style="font-size:38px;margin-bottom:8px;">📤</div><h3 id="documentUploadHeading" style="margin:0 0 8px;color:#0f172a;">Uploading Document</h3><div id="documentUploadMessage">Please wait while your request is being submitted.</div><div class="upload-progress-track"><div id="documentUploadFill" class="upload-progress-fill"></div></div><div id="documentUploadPercent">1%</div></div>`;
+    document.body.appendChild(modal);
+  }
+  return modal;
+}
+function showDocumentUploadProgress(){
+  const modal = ensureDocumentUploadModal();
+  documentUploadPercentValue = 1;
+  document.getElementById("documentUploadHeading").textContent = "Uploading Document";
+  document.getElementById("documentUploadMessage").textContent = "Please wait while your request is being submitted.";
+  document.getElementById("documentUploadIcon").textContent = "📤";
+  document.getElementById("documentUploadPercent").textContent = "1%";
+  document.getElementById("documentUploadFill").style.width = "1%";
+  modal.style.display = "flex";
+  clearInterval(documentUploadTimer);
+  documentUploadTimer = setInterval(()=>{
+    if(documentUploadPercentValue < 92){
+      documentUploadPercentValue = Math.min(92, documentUploadPercentValue + Math.max(1, Math.ceil((92-documentUploadPercentValue)/12)));
+      document.getElementById("documentUploadPercent").textContent = documentUploadPercentValue + "%";
+      document.getElementById("documentUploadFill").style.width = documentUploadPercentValue + "%";
+    }
+  }, 180);
+}
+function finishDocumentUploadProgress(){
+  ensureDocumentUploadModal();
+  clearInterval(documentUploadTimer);
+  documentUploadTimer = null;
+  document.getElementById("documentUploadFill").style.width = "100%";
+  document.getElementById("documentUploadPercent").textContent = "100%";
+  document.getElementById("documentUploadHeading").textContent = "Submitted";
+  document.getElementById("documentUploadMessage").textContent = "Your request has been submitted successfully.";
+  document.getElementById("documentUploadIcon").textContent = "✅";
+  setTimeout(()=>{ document.getElementById("documentUploadModal").style.display = "none"; }, 1100);
+}
+
 // SUBMIT
 async function submitRequest(){
 
@@ -2848,15 +3158,113 @@ if(!nameField.value.trim() || !positionField.value.trim() || !divisionField.valu
 
 let fileInput = document.getElementById("supportFile");
 let fileURL = "";
+const hasSupportingDocument = fileInput.files.length > 0;
 
-if(fileInput.files.length > 0){
+
+if (!hasSupportingDocument) {
+  const continueWithoutDocument = confirm(
+    "No supporting document is attached. Do you want to continue submitting this request?"
+  );
+
+  if (!continueWithoutDocument) {
+    return;
+  }
+}
+
+
+if(hasSupportingDocument){
+
+  showDocumentUploadProgress();
   let file = fileInput.files[0];
 
-  let storageRef = ref(storage, "supportDocs/" + Date.now() + "_" + file.name);
+  const GOOGLE_DRIVE_UPLOAD_ENDPOINT =
+    "https://script.google.com/macros/s/AKfycbyatVG6fu5XnEm1uFQugW_vh67eB45m59Oq6GEf0sIdKK4L-VCklnhEa3QK7_WNMHaBbA/exec";
 
-  await uploadBytes(storageRef, file);
-  fileURL = await getDownloadURL(storageRef);
+  // Convert selected file to Base64
+  const base64 = await new Promise((resolve, reject) => {
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+
+      const result = String(reader.result || "");
+      const comma = result.indexOf(",");
+
+      resolve(
+        comma >= 0
+          ? result.slice(comma + 1)
+          : result
+      );
+    };
+
+    reader.onerror = () => {
+      reject(
+        new Error("Unable to read the selected document.")
+      );
+    };
+
+    reader.readAsDataURL(file);
+  });
+
+  // Prepare upload request
+  const body = new URLSearchParams();
+
+  body.set("fileBase64", base64);
+  body.set(
+    "fileName",
+    file.name || "Supporting_Document"
+  );
+  body.set(
+    "mimeType",
+    file.type || "application/octet-stream"
+  );
+
+  // Send file to Google Drive
+  const response = await fetch(
+    GOOGLE_DRIVE_UPLOAD_ENDPOINT,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type":
+          "application/x-www-form-urlencoded;charset=UTF-8"
+      },
+      body: body.toString()
+    }
+  );
+
+  if(!response.ok){
+    throw new Error(
+      `Drive upload failed (${response.status}).`
+    );
+  }
+
+  const result = await response.json();
+
+  if(!result.success){
+    throw new Error(
+      result.error ||
+      "Google Drive upload failed."
+    );
+  }
+
+  if(!result.url){
+    throw new Error(
+      "Google Drive did not return the file URL."
+    );
+  }
+
+  // Save returned Drive URL to Firestore
+  fileURL = result.url;
 }
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2897,11 +3305,15 @@ if(window.retrievedId){
 data.requestorSignature = currentUser.signature || "";
 
 await addDoc(collection(db, "requests"), data);
-  
+
+// Finish the upload modal instead of showing a blocking browser alert.
+if(hasSupportingDocument){
+  finishDocumentUploadProgress();
+}else{
+  alert("Submitted!");
+}
 
 document.getElementById("supportFile").value = "";
-
-alert("Submitted!");
 closePRModal();
 loadStaff();
 
@@ -3154,171 +3566,326 @@ async function generatePR(){
 
 // ORD VIEW
 
-function loadORD(){
-  listenRequests((list)=>{
+let ordPendingPage = 1;
+let ordApprovedPage = 1;
+let ordPageSize = 10;
+let ordLastList = [];
+let ordLiveStarted = false;
 
-
-  list.sort((a, b) => {
-  return (b.prNo || "").localeCompare(a.prNo || "");
-});
-
- 
-let pending="";
-let pendingCount = 0;
-let approvedHTML = `
-<table>
-<tr>
-  <th>Date</th>
-  <th>PR No.</th>
-  <th>Division</th>
-  <th>Requestor</th>
-  <th>Designation</th>
-  <th>Purpose</th>
-<th>Remarks</th>
-  <th>Actions</th>
-</tr>
-`;
-
-
-list.forEach((r,i)=>{
-
-  // ✅ PENDING
-  if(r.status==="PENDING_ORD"){
-    pendingCount++;
-
-    if(!pending.includes("<table>")){
-      pending += `
-      <table>
-        <tr>
-          <th>Date</th>
-          <th>PR No.</th>
-          <th>Division</th>
-          <th>Requestor</th>
-          <th>Designation</th>
-          <th>Purpose</th>
-          <th>Actions</th>
-        </tr>
-      `;
-    }
-
-    pending += `
-    <tr>
-      <td>${r.dateRequested ? new Date(r.dateRequested).toLocaleDateString('en-PH') : "-"}</td>
-      <td>${r.prNo || "N/A"}</td>
-      <td>${r.division || ""}</td>
-      <td>${r.name || ""}</td>
-      <td>${r.position || ""}</td>
-      <td>${r.purpose || ""}</td>
-      <td>
-      
-
-${
-    r.supportFile
-    ? `<button onclick="viewSupportingDocument('${r.id}')">
-            📎 View Supporting Documents
-       </button>`
-    : `<button disabled
-            style="opacity:.5;cursor:not-allowed;">
-            📎 No Supporting Document
-       </button>`
+function ordEscape(value){
+  return String(value ?? "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
 }
 
+function ordRenderPagination(targetId, totalItems, page, onPageChange){
+  const target = document.getElementById(targetId);
+  if(!target) return;
 
-        <button onclick="openApproveModal('${r.id}')">✅ Approve</button>
-      </td>
-    </tr>
+  const totalPages = Math.max(1, Math.ceil(totalItems / ordPageSize));
+  const safePage = Math.min(Math.max(1, page), totalPages);
+  const startItem = totalItems === 0 ? 0 : ((safePage - 1) * ordPageSize) + 1;
+  const endItem = Math.min(safePage * ordPageSize, totalItems);
+
+  let pages = "";
+  const windowSize = 5;
+  let first = Math.max(1, safePage - 2);
+  let last = Math.min(totalPages, first + windowSize - 1);
+  first = Math.max(1, last - windowSize + 1);
+
+  for(let p=first; p<=last; p++){
+    pages += `
+      <button class="ord-page-btn ${p===safePage ? "active" : ""}"
+        onclick="${onPageChange}(${p})">
+        ${p}
+      </button>
     `;
   }
 
-  // ✅ APPROVED / ALL OTHER STATUS
-  if(
-    r.status==="APPROVED_ORD" ||
-    r.status==="CANVASSED" ||
-    r.status==="FOR_TOS_CANVASS" ||
-    r.status==="FOR_FASS_CANVASS" ||
-    r.status==="APPROVED_CANVASS_TOS" ||
-    r.status==="APPROVED_CANVASS_FASS" ||
-    r.status==="DONE" ||
-    r.status==="REJECTED"
-  ){
+  target.innerHTML = `
+    <div class="ord-pagination">
+      <div class="ord-page-info">
+        Showing ${startItem}-${endItem} of ${totalItems} entries
+      </div>
 
-    let label = "";
-    let color = "green";
+      <div class="ord-page-controls">
+        <button class="ord-page-btn"
+          onclick="${onPageChange}(${safePage-1})"
+          ${safePage<=1 ? "disabled" : ""}>‹</button>
+        ${pages}
+        <button class="ord-page-btn"
+          onclick="${onPageChange}(${safePage+1})"
+          ${safePage>=totalPages ? "disabled" : ""}>›</button>
+      </div>
 
-   if(r.status === "REJECTED"){
-  if(r.rejectedBy === "TOS"){
-    label = "❌ REJECTED BY TOS";
-  } else if(r.rejectedBy === "FASS"){
-    label = "❌ REJECTED BY FASS";
-  } else {
-    label = "❌ REJECTED";
-  }
-  color = "red";
-}
-
-
-
-else if(r.status === "FOR_TOS_CANVASS"){
-      label = "⏳ FOR TOS RFQ APPROVAL"; color = "orange";
-    } else if(r.status === "FOR_FASS_CANVASS"){
-      label = "⏳ FOR FASS RFQ APPROVAL"; color = "orange";
-    } else if(r.status === "CANVASSED"){
-      label = "📑 CANVASSED";
-    } else if(
-      r.status === "APPROVED_CANVASS_TOS" ||
-      r.status === "APPROVED_CANVASS_FASS"
-    ){
-      label = "✅ CANVASS APPROVED";
-    } else if(r.status === "DONE"){
-      label = "🏁 COMPLETED";
-    } else {
-      label = "✅ APPROVED";
-    }
-
-    approvedHTML += `
-    <tr>
-      <td>${r.dateRequested ? new Date(r.dateRequested).toLocaleDateString('en-PH') : "-"}</td>
-      <td>${r.prNo || ""}</td>
-      <td>${r.division || ""}</td>
-      <td>${r.name || ""}</td>
-      <td>${r.position || ""}</td>
-      <td>${r.purpose || ""}</td>
-      <td><b style="color:${color};">${label}</b></td>
-      <td>
-        <button onclick="viewRequestById('${r.id}')">View</button>
-        <button onclick="printPR('${r.id}')">Print</button>
-      </td>
-    </tr>
-    `;
-  }
-
-});
-
-
-if(pendingCount === 0){
-  ordPending.innerHTML = `
-    <p style="text-align:center; color:gray;">
-      No Pending Request
-    </p>
+      <label class="ord-page-size">
+        Entries per page
+        <select onchange="changeORDPageSize(this.value)">
+          <option value="10" ${ordPageSize===10 ? "selected" : ""}>10</option>
+          <option value="25" ${ordPageSize===25 ? "selected" : ""}>25</option>
+          <option value="50" ${ordPageSize===50 ? "selected" : ""}>50</option>
+        </select>
+      </label>
+    </div>
   `;
-
-}else{
-  pending += "</table>";
-
-  ordPending.innerHTML = `
-    <h4 style="margin-bottom:10px; color:#b91c1c;">
-      ${pendingCount} Pending Request${pendingCount > 1 ? 's' : ''} for Approval
-    </h4>
-  ` + pending;
 }
 
+window.goORDPendingPage = function(page){
+  ordPendingPage = Math.max(1, Number(page) || 1);
+  if(ordLastList.length || ordLiveStarted) renderORD(ordLastList);
+};
 
+window.goORDApprovedPage = function(page){
+  ordApprovedPage = Math.max(1, Number(page) || 1);
+  if(ordLastList.length || ordLiveStarted) renderORD(ordLastList);
+};
 
-    approvedHTML += "</table>";
-ordApproved.innerHTML = approvedHTML;
+window.changeORDPageSize = function(value){
+  ordPageSize = Number(value) || 10;
+  ordPendingPage = 1;
+  ordApprovedPage = 1;
+  if(ordLastList.length || ordLiveStarted) renderORD(ordLastList);
+};
 
+window.searchORDRecords = function(){
+  ordPendingPage = 1;
+  ordApprovedPage = 1;
+  if (Array.isArray(ordLastList) && (ordLastList.length || ordLiveStarted)) {
+    renderORD(ordLastList);
+  }
+};
+
+function renderORD(list){
+    const pendingSearch = (document.getElementById("searchORDPending")?.value || "").trim().toLowerCase();
+    const approvedSearch = (document.getElementById("searchORDApproved")?.value || "").trim().toLowerCase();
+    const matchesSearch = (r, keyword) => !keyword || [r.prNo,r.division,r.name,r.position,r.purpose,r.status].some(v => String(v || "").toLowerCase().includes(keyword));
+
+    list.sort((a, b) => {
+      return (b.prNo || "").localeCompare(a.prNo || "", undefined, {numeric:true});
+    });
+
+    const pendingList = list.filter(r => r.status === "PENDING_ORD" && matchesSearch(r, pendingSearch));
+
+    const approvedList = list.filter(r => (
+      r.status === "APPROVED_ORD" ||
+      r.status === "CANVASSED" ||
+      r.status === "FOR_TOS_CANVASS" ||
+      r.status === "FOR_FASS_CANVASS" ||
+      r.status === "APPROVED_CANVASS_TOS" ||
+      r.status === "APPROVED_CANVASS_FASS" ||
+      r.status === "DONE" ||
+      r.status === "REJECTED"
+    ) && matchesSearch(r, approvedSearch));
+
+    const pendingTotalPages = Math.max(1, Math.ceil(pendingList.length / ordPageSize));
+    const approvedTotalPages = Math.max(1, Math.ceil(approvedList.length / ordPageSize));
+
+    ordPendingPage = Math.min(ordPendingPage, pendingTotalPages);
+    ordApprovedPage = Math.min(ordApprovedPage, approvedTotalPages);
+
+    const pendingStart = (ordPendingPage - 1) * ordPageSize;
+    const approvedStart = (ordApprovedPage - 1) * ordPageSize;
+
+    const pendingPageItems = pendingList.slice(pendingStart, pendingStart + ordPageSize);
+    const approvedPageItems = approvedList.slice(approvedStart, approvedStart + ordPageSize);
+
+    const pendingEl = document.getElementById("ordPending");
+    const approvedEl = document.getElementById("ordApproved");
+
+    if(pendingEl){
+      if(pendingList.length === 0){
+        pendingEl.innerHTML = `
+          <div class="ord-empty">
+            <div style="font-size:30px;margin-bottom:8px;">🎉</div>
+            <b>No Pending Request</b>
+            <div style="margin-top:4px;font-size:12px;">There are no requests waiting for ORD approval.</div>
+          </div>
+        `;
+      }else{
+        let html = `
+          <div class="ord-table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>PR No.</th>
+                  <th>Division</th>
+                  <th>Requestor</th>
+                  <th>Designation</th>
+                  <th>Purpose</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+        `;
+
+        pendingPageItems.forEach(r=>{
+          html += `
+            <tr>
+              <td>${r.dateRequested ? new Date(r.dateRequested).toLocaleDateString('en-PH') : "-"}</td>
+              <td><b>${ordEscape(r.prNo || "N/A")}</b></td>
+              <td>${ordEscape(r.division || "")}</td>
+              <td>${ordEscape(r.name || "")}</td>
+              <td>${ordEscape(r.position || "")}</td>
+              <td>${ordEscape(r.purpose || "")}</td>
+              <td class="ord-actions">
+                <div class="ord-action-group">
+                  ${r.supportFile
+                    ? `<button class="ord-action-btn document" onclick="viewSupportingDocument('${r.id}')" title="View Supporting Document">📎 Document</button>`
+                    : `<button class="ord-action-btn disabled" disabled title="No Supporting Document">📎 No Document</button>`
+                  }
+                  <button class="ord-action-btn approve" onclick="openApproveModal('${r.id}')" title="Approve Request">✅ Approve</button>
+                </div>
+              </td>
+            </tr>
+          `;
+        });
+
+        html += `</tbody></table></div><div id="ordPendingPagination"></div>`;
+        pendingEl.innerHTML = `
+          <div class="ord-section-title">
+            <div style="color:#b91c1c;font-weight:800;">${pendingList.length} Pending Request${pendingList.length===1 ? "" : "s"} for Approval</div>
+          </div>
+          ${html}
+        `;
+
+        ordRenderPagination("ordPendingPagination", pendingList.length, ordPendingPage, "goORDPendingPage");
+      }
+    }
+
+    if(approvedEl){
+      if(approvedList.length === 0){
+        approvedEl.innerHTML = `
+          <div class="ord-empty">
+            <div style="font-size:30px;margin-bottom:8px;">📁</div>
+            <b>No Approved Requests</b>
+            <div style="margin-top:4px;font-size:12px;">No ORD-approved records are available yet.</div>
+          </div>
+        `;
+      }else{
+        let html = `
+          <div class="ord-table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>PR No.</th>
+                  <th>Division</th>
+                  <th>Requestor</th>
+                  <th>Designation</th>
+                  <th>Purpose</th>
+                  <th>Remarks</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+        `;
+
+        approvedPageItems.forEach(r=>{
+          let label = "";
+          let statusClass = "green";
+
+          if(r.status === "REJECTED"){
+            label = r.rejectedBy === "TOS"
+              ? "❌ REJECTED BY TOS"
+              : r.rejectedBy === "FASS"
+                ? "❌ REJECTED BY FASS"
+                : "❌ REJECTED";
+            statusClass = "red";
+          }
+          else if(r.status === "FOR_TOS_CANVASS"){
+            label = "⏳ FOR TOS RFQ APPROVAL";
+            statusClass = "orange";
+          }
+          else if(r.status === "FOR_FASS_CANVASS"){
+            label = "⏳ FOR FASS RFQ APPROVAL";
+            statusClass = "orange";
+          }
+          else if(r.status === "CANVASSED"){
+            label = "📑 CANVASSED";
+            statusClass = "blue";
+          }
+          else if(r.status === "APPROVED_CANVASS_TOS" || r.status === "APPROVED_CANVASS_FASS"){
+            label = "✅ CANVASS APPROVED";
+            statusClass = "green";
+          }
+          else if(r.status === "DONE"){
+            label = "🏁 COMPLETED";
+            statusClass = "green";
+          }
+          else{
+            label = "✅ APPROVED";
+            statusClass = "green";
+          }
+
+          html += `
+            <tr>
+              <td>${r.dateRequested ? new Date(r.dateRequested).toLocaleDateString('en-PH') : "-"}</td>
+              <td><b>${ordEscape(r.prNo || "")}</b></td>
+              <td>${ordEscape(r.division || "")}</td>
+              <td>${ordEscape(r.name || "")}</td>
+              <td>${ordEscape(r.position || "")}</td>
+              <td>${ordEscape(r.purpose || "")}</td>
+              <td><span class="ord-status ${statusClass}">${label}</span></td>
+              <td class="ord-actions">
+                <div class="ord-approved-action-group">
+                  <button class="ord-action-btn view" onclick="viewRequestById('${r.id}')" title="View Purchase Request">👁 View PR</button>
+                  <button class="ord-action-btn print" onclick="printCanvassById('${r.id}')" title="View Canvass">🖨 View Canvass</button>
+                  ${r.supportFile
+                    ? `<button class="ord-action-btn document" onclick="viewSupportingDocument('${r.id}')" title="View Supporting Document">📎 Document</button>`
+                    : `<button class="ord-action-btn disabled" disabled title="No Supporting Document">📎 No Document</button>`
+                  }
+                </div>
+              </td>
+            </tr>
+          `;
+        });
+
+        html += `</tbody></table></div><div id="ordApprovedPagination"></div>`;
+        approvedEl.innerHTML = html;
+        ordRenderPagination("ordApprovedPagination", approvedList.length, ordApprovedPage, "goORDApprovedPage");
+      }
+    }
+
+    const badgePending = document.getElementById("badgePendingORD");
+    const badgeApproved = document.getElementById("badgeApprovedORD");
+
+    if(badgePending) badgePending.innerText = pendingList.length;
+    if(badgeApproved) badgeApproved.innerText = approvedList.length;
+}
+
+function loadORD(){
+  if(ordLiveStarted) return;
+  ordLiveStarted = true;
+  listenRequests((list)=>{
+    ordLastList = list;
+    renderORD(ordLastList);
   });
 }
+
+
+function showORDSection(section){
+  const pendingSection = document.getElementById("sectionPendingORD");
+  const approvedSection = document.getElementById("sectionApprovedORD");
+  const buttons = document.querySelectorAll("#ordPage .admin-menu-btn");
+
+  pendingSection.classList.add("hidden");
+  approvedSection.classList.add("hidden");
+  buttons.forEach(btn => btn.classList.remove("ord-menu-btn-active"));
+
+  if(section === "approved"){
+    approvedSection.classList.remove("hidden");
+    if(buttons[1]) buttons[1].classList.add("ord-menu-btn-active");
+  }else{
+    pendingSection.classList.remove("hidden");
+    if(buttons[0]) buttons[0].classList.add("ord-menu-btn-active");
+  }
+}
+
+window.showORDSection = showORDSection;
 
 
 async function approveORD(id){
@@ -3344,6 +3911,11 @@ async function approveORD(id){
 }
 
 
+
+function reviewMatchesKeyword(r, keyword){
+  if(!keyword) return true;
+  return [r.prNo,r.division,r.name,r.purpose,r.position,r.status].some(v => String(v || "").toLowerCase().includes(keyword));
+}
 
 function loadReview(){
 
@@ -3391,7 +3963,7 @@ pendingHTML = `
 
 let keyword = "";
 
-const searchBox = document.getElementById("searchApprovedReview");
+const searchBox = document.getElementById("searchReviewRecords") || document.getElementById("searchApprovedReview");
 
 if(searchBox){
     keyword = searchBox.value.trim().toLowerCase();
@@ -3406,7 +3978,7 @@ if(searchBox){
     list.forEach((r,i)=>{
 
       // ✅ PENDING (TOS)
-      if(currentUser.role==="TOS" && r.status==="FOR_TOS_CANVASS"){
+      if(currentUser.role==="TOS" && r.status==="FOR_TOS_CANVASS" && reviewMatchesKeyword(r, keyword)){
 
         pendingCount++;
 
@@ -3457,7 +4029,7 @@ onclick="viewRequestById('${r.id}')">
       }
 
       // ✅ PENDING (FASS)
-      if(currentUser.role==="FASS" && r.status==="FOR_FASS_CANVASS"){
+      if(currentUser.role==="FASS" && r.status==="FOR_FASS_CANVASS" && reviewMatchesKeyword(r, keyword)){
 
         pendingCount++;
 
@@ -4054,9 +4626,10 @@ ${
 // ✅ SECTION 2: FOR ABSTRACT (AFTER REVIEW)
 
 if(
-  r.status === "APPROVED_CANVASS_TOS" ||
-  r.status === "APPROVED_CANVASS_FASS" ||
-  r.status === "DONE"
+  (r.status === "APPROVED_CANVASS_TOS" ||
+   r.status === "APPROVED_CANVASS_FASS" ||
+   r.status === "DONE") &&
+  !r.abstractGenerated && (!r.abstractItems || r.abstractItems.length === 0)
 ){
 
 if(
@@ -4140,18 +4713,13 @@ ${r.abstractGenerated
 // ✅ SECTION 3: PURCHASE ORDER TABLE
 
 if(
-  r.status === "APPROVED_CANVASS_TOS" ||
-  r.status === "APPROVED_CANVASS_FASS"
+  (r.status === "APPROVED_CANVASS_TOS" ||
+   r.status === "APPROVED_CANVASS_FASS") &&
+  (r.abstractGenerated || (r.abstractItems && r.abstractItems.length > 0)) &&
+  !r.poCreated
 ){
 
-if(
-    (r.abstractGenerated ||
-    (r.abstractItems && r.abstractItems.length>0))
-    &&
-    !r.poCreated
-){
-    poCount++;
-}
+poCount++;
 
 
   if(!poHTML.includes("<table>")){
@@ -4453,6 +5021,35 @@ if(recordsHTML !== ""){
   recordsHTML += "</table>";
 }
 adminRecords.innerHTML = recordsHTML || "<p>No records found</p>";
+
+// Created-document history sections (read-only views of existing request records)
+const adminCreatedAbstract = document.getElementById("adminCreatedAbstract");
+const adminCreatedPO = document.getElementById("adminCreatedPO");
+const createdAbstractRows = list.filter(r =>
+  r.abstractGenerated || (r.abstractItems && r.abstractItems.length > 0)
+);
+const createdPORows = list.filter(r => r.poCreated);
+function buildCreatedHistoryTable(rows, kind) {
+  if (!rows.length) return '<p style="color:gray;">No records found</p>';
+  const isPO = kind === 'po';
+  return `<div style="overflow-x:auto;"><table><tr>
+    <th>Date</th><th>PR No.</th><th>Division</th><th>Requestor</th><th>Purpose</th>
+    ${isPO ? '<th>PO No.</th>' : '<th>Abstract Status</th>'}
+    <th>Actions</th></tr>` + rows.map(r => `<tr>
+      <td>${r.dateRequested ? new Date(r.dateRequested).toLocaleDateString('en-PH') : '-'}</td>
+      <td>${r.prNo || '-'}</td><td>${r.division || '-'}</td><td>${r.name || '-'}</td><td>${r.purpose || '-'}</td>
+      <td>${isPO ? (r.poNo || '-') : 'Created'}</td>
+      <td><button onclick="printPR('${r.id}')">PR</button>
+      ${isPO
+        ? `<button onclick="openPOModal('${r.id}')">🔄 Regenerate Purchase Order</button>`
+        : `<button onclick="printGeneratedAbstract('${r.id}')">View Abstract</button>
+           <button onclick="openAbstractById('${r.id}')">🔁 Regenerate Abstract of Bids</button>`
+      }</td>
+    </tr>`).join('') + '</table></div>';
+}
+if (adminCreatedAbstract) adminCreatedAbstract.innerHTML = buildCreatedHistoryTable(createdAbstractRows, 'abstract');
+if (adminCreatedPO) adminCreatedPO.innerHTML = buildCreatedHistoryTable(createdPORows, 'po');
+
 document.getElementById("badgeCanvass").innerText = canvassCount;
 document.getElementById("badgeAbstract").innerText = abstractCount;
 document.getElementById("badgePO").innerText = poCount;
@@ -4945,6 +5542,17 @@ th,td{
 <body>
 
 ${allPages}
+
+
+<div id="documentUploadModal" role="status" aria-live="polite">
+  <div class="upload-progress-card">
+    <div id="documentUploadIcon" style="font-size:38px;margin-bottom:8px;">📤</div>
+    <h3 id="documentUploadHeading" style="margin:0 0 8px;color:#0f172a;">Uploading Document</h3>
+    <div id="documentUploadMessage">Please wait while your request is being submitted.</div>
+    <div class="upload-progress-track"><div id="documentUploadFill" class="upload-progress-fill"></div></div>
+    <div id="documentUploadPercent">1%</div>
+  </div>
+</div>
 
 </body>
 </html>
@@ -5511,6 +6119,26 @@ alert("📊 Abstract generated successfully!");
   loadAdmin();
 }
 
+function showRecordsSubsection(subsection){
+  const panels = {
+    all: document.getElementById("recordsSubsectionAll"),
+    abstract: document.getElementById("recordsSubsectionAbstract"),
+    po: document.getElementById("recordsSubsectionPO")
+  };
+  const tabs = {
+    all: document.getElementById("recordsTabAll"),
+    abstract: document.getElementById("recordsTabAbstract"),
+    po: document.getElementById("recordsTabPO")
+  };
+  Object.keys(panels).forEach(key => {
+    if (panels[key]) panels[key].classList.toggle("hidden", key !== subsection);
+    if (tabs[key]) {
+      tabs[key].classList.toggle("active", key === subsection);
+      tabs[key].setAttribute("aria-selected", key === subsection ? "true" : "false");
+    }
+  });
+}
+
 function showAdminSection(section){
 
   // itago lahat
@@ -5537,6 +6165,7 @@ document.getElementById("developerSection").style.display="none";
 
 if(section === "records"){
   document.getElementById("sectionRecords").classList.remove("hidden");
+  showRecordsSubsection("all");
 }
 
 if(section === "users"){
@@ -6029,6 +6658,7 @@ window.approveORD = approveORD;
 window.reject = reject;
 window.printCanvass = printCanvass;
 window.sendTo = sendTo;
+window.showRecordsSubsection = showRecordsSubsection;
 window.showAdminSection = showAdminSection;
 window.viewRequest = viewRequest;
 window.approveCanvass = approveCanvass;
@@ -8055,7 +8685,18 @@ window.printGeneratedAbstract = async function(id){
         font-size:10px;
       }
 
-    </style>
+    
+.ord-search-input{width:min(100%,420px);box-sizing:border-box;padding:10px 13px;margin:8px 0 14px;border:1px solid #cbd5e1;border-radius:8px;font-size:14px;outline:none;}
+.ord-search-input:focus{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.12);}
+
+/* Records subsection tabs: isolated styling, without changing other dashboard buttons */
+.records-subsection-tabs{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 18px 0;}
+.records-subsection-btn{border:1px solid #cbd5e1;border-radius:8px;padding:11px 16px;background:#e8eef7;color:#172554;font-weight:700;cursor:pointer;}
+.records-subsection-btn:hover{background:#dbeafe;}
+.records-subsection-btn.active{background:#2563eb;color:#fff;border-color:#2563eb;}
+.records-subsection-panel.hidden{display:none !important;}
+#searchRecords{width:100%;max-width:100%;box-sizing:border-box;margin:0 0 14px 0;padding:9px 12px;}
+</style>
 
   </head>
 
