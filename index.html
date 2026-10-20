@@ -1972,6 +1972,28 @@ onclick="openDeveloperModal()">
 </div>
 </div>
 
+<!-- BUDGET OFFICE -->
+<div id="budgetPage" class="hidden">
+  <div class="topbar" style="margin-bottom:20px;">
+    <h2 style="color:white;">💰 Budget Office — Fund Sources</h2>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span id="budgetLoggedUser" style="color:white;font-weight:600;"></span>
+      <button onclick="logout()" style="background:#dc2626;color:white;border:0;padding:10px 16px;border-radius:10px;cursor:pointer;">Logout</button>
+    </div>
+  </div>
+  <div class="card">
+    <h3>➕ Manage Fund Sources & Budget Allocation</h3>
+    <p>Add each fund source once. Active sources will automatically appear in Admin's Add User dropdown.</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:12px 0;">
+      <input id="fundSourceName" placeholder="Fund Source Name (e.g. GIA)" style="min-width:220px;">
+      <input id="fundSourceYear" type="number" min="2000" max="2100" placeholder="Fiscal Year (e.g. 2026)" style="width:150px;">
+      <input id="fundSourceBudget" type="number" min="0" step="0.01" placeholder="Approved Budget (₱)" style="width:190px;">
+      <button onclick="addFundSource()">Add Fund Source</button>
+    </div>
+    <div id="fundSourceList"></div>
+  </div>
+</div>
+
 <!-- ADMIN -->
 
 <div id="adminPage" class="hidden">
@@ -2223,7 +2245,13 @@ placeholder="Password">
   <option value="ORD">ORD</option>
   <option value="TOS">TOS</option>
   <option value="FASS">FASS</option>
+  <option value="BUDGET">BUDGET</option>
   <option value="ADMIN">ADMIN</option>
+</select>
+
+<label for="newFundSource" style="display:block;margin-top:10px;font-weight:600;">Assigned Fund Source (for STAFF)</label>
+<select id="newFundSource" style="min-width:220px;">
+  <option value="">Loading fund sources...</option>
 </select>
 
 <!-- SIGNATURE -->
@@ -2841,7 +2869,13 @@ onAuthStateChanged(auth, async (user) => {
     loginPage.classList.add("hidden");
 
     // route again
-    if(found.role==="STAFF"){
+    if(found.role==="BUDGET"){
+      budgetPage.classList.remove("hidden");
+      document.getElementById("budgetLoggedUser").innerText = "👤 " + (found.fullName || found.email);
+      loadFundSources();
+      startBudgetRealtimeListeners();
+    }
+    else if(found.role==="STAFF"){
       staffPage.classList.remove("hidden");
       initTable();
       loadStaff();
@@ -2955,7 +2989,13 @@ window.login = async function(){
     loginPage.classList.add("hidden");
 
     // ROLE ROUTING
-    if(found.role==="STAFF"){
+    if(found.role==="BUDGET"){
+      budgetPage.classList.remove("hidden");
+      document.getElementById("budgetLoggedUser").innerText = "👤 " + (found.fullName || found.email);
+      loadFundSources();
+      startBudgetRealtimeListeners();
+    }
+    else if(found.role==="STAFF"){
       staffPage.classList.remove("hidden");
       initTable();
       loadStaff();
@@ -3035,6 +3075,7 @@ document.getElementById("adminLoggedUser").innerText =
 import { signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 async function logout() {
+  stopBudgetRealtimeListeners();
   try {
     await signOut(auth); // Sign out from Firebase Auth
     currentUser = null;   // Clear current user
@@ -3044,6 +3085,7 @@ async function logout() {
     staffPage.classList.add("hidden");
     ordPage.classList.add("hidden");
     adminPage.classList.add("hidden");
+    budgetPage.classList.add("hidden");
     reviewPage.classList.add("hidden");
 
     // Clear any dynamic content (optional but cleaner)
@@ -3155,6 +3197,78 @@ if(!nameField.value.trim() || !positionField.value.trim() || !divisionField.valu
   return;
 }
 
+
+// BUDGET VALIDATION: block submission when the assigned fund source has insufficient balance.
+const requestItems = [];
+let requestTotal = 0;
+document.querySelectorAll("#itemsTable tr").forEach((row, index) => {
+  if(index === 0) return;
+  const desc = row.cells[1]?.children[0]?.value?.trim() || "";
+  if(!desc) return;
+  const qty = Number(row.cells[2]?.children[0]?.value) || 0;
+  const cost = Number(row.cells[3]?.children[0]?.value) || 0;
+  requestTotal += qty * cost;
+  requestItems.push({
+    unit: row.cells[0]?.children[0]?.value || "",
+    desc,
+    qty: String(qty),
+    cost: String(cost)
+  });
+});
+
+if(requestItems.length === 0 || requestTotal <= 0){
+  alert("Please add at least one item with a valid quantity and cost.");
+  return;
+}
+
+const assignedFundSource = currentUser?.assignedFundSource || "";
+if(!assignedFundSource){
+  alert("No fund source is assigned to your account. Please contact the Admin.");
+  return;
+}
+
+const fiscalYear = new Date().getFullYear();
+let matchedFund = null;
+let existingRequests = [];
+try{
+  const [fundSnapshot, requestSnapshot] = await Promise.all([
+    getDocs(collection(db, "fundSources")),
+    getDocs(collection(db, "requests"))
+  ]);
+  fundSnapshot.forEach(ds => {
+    const f = ds.data();
+    if((f.name || "").trim().toLowerCase() === assignedFundSource.trim().toLowerCase()
+       && Number(f.fiscalYear) === fiscalYear && f.active !== false){
+      matchedFund = {id: ds.id, ...f};
+    }
+  });
+  requestSnapshot.forEach(ds => existingRequests.push({id:ds.id, ...ds.data()}));
+}catch(err){
+  console.error("Budget validation failed", err);
+  alert("Unable to verify the fund source budget. Your PR was not submitted. Please try again or contact the administrator.");
+  return;
+}
+
+if(!matchedFund){
+  alert(`No active budget allocation was found for ${assignedFundSource} for FY ${fiscalYear}. Please contact the Budget Office.`);
+  return;
+}
+
+const excludedBudgetStatuses = ["REJECTED", "CANCELLED", "CANCELED", "REJECTED_ORD"];
+const alreadyCommitted = existingRequests.reduce((sum, req) => {
+  if((req.fundSource || "").trim().toLowerCase() !== assignedFundSource.trim().toLowerCase()) return sum;
+  if(Number(req.fiscalYear) !== fiscalYear) return sum;
+  if(excludedBudgetStatuses.includes(String(req.status || "").toUpperCase())) return sum;
+  const savedTotal = Number(req.totalAmount);
+  if(Number.isFinite(savedTotal) && savedTotal > 0) return sum + savedTotal;
+  return sum + (Array.isArray(req.items) ? req.items.reduce((t, item) => t + (Number(item.qty)||0) * (Number(item.cost)||0), 0) : 0);
+}, 0);
+const allocatedBudget = Number(matchedFund.annualBudget) || 0;
+const availableBalance = allocatedBudget - alreadyCommitted;
+if(requestTotal > availableBalance){
+  alert(`INSUFFICIENT BUDGET\n\nAssigned Fund Source: ${assignedFundSource}\nFiscal Year: ${fiscalYear}\nAllocated Budget: ₱${allocatedBudget.toLocaleString("en-PH",{minimumFractionDigits:2,maximumFractionDigits:2})}\nAlready committed: ₱${alreadyCommitted.toLocaleString("en-PH",{minimumFractionDigits:2,maximumFractionDigits:2})}\nAvailable balance: ₱${Math.max(0,availableBalance).toLocaleString("en-PH",{minimumFractionDigits:2,maximumFractionDigits:2})}\nThis PR total: ₱${requestTotal.toLocaleString("en-PH",{minimumFractionDigits:2,maximumFractionDigits:2})}\n\nYour request was not submitted. Please reduce the amount or contact the Budget Office.`);
+  return;
+}
 
 let fileInput = document.getElementById("supportFile");
 let fileURL = "";
@@ -3276,26 +3390,13 @@ if(hasSupportingDocument){
   type:reqType.value,
   purpose:purpose.value,
   status:"PENDING_ORD",
-  items:[],
+  items: requestItems,
+  totalAmount: requestTotal,
+  fundSource: assignedFundSource,
+  fiscalYear,
   supportFile: fileURL,
-
   dateRequested: new Date().toISOString()
-
 };
-
-
-  document.querySelectorAll("#itemsTable tr").forEach((r,i)=>{
-    if(i===0)return;
-    let desc=r.cells[1].children[0].value;
-    if(desc){
-      data.items.push({
-        unit:r.cells[0].children[0].value,
-        desc,
-        qty:r.cells[2].children[0].value,
-        cost:r.cells[3].children[0].value
-      });
-    }
-  });
 
 if(window.retrievedId){
   await deleteDoc(doc(db, "requests", window.retrievedId));
@@ -6171,6 +6272,7 @@ if(section === "records"){
 if(section === "users"){
   document.getElementById("sectionUsers").classList.remove("hidden");
   loadUsers();
+  loadFundSourceDropdown();
 }
 
 
@@ -6333,6 +6435,125 @@ function extractNumber(val){
   return match ? Number(match[0].replace(/,/g,'')) : 0;
 }
 
+// Live listeners for Budget Office totals; refresh the displayed balance whenever PRs or allocations change.
+let budgetRequestsUnsubscribe = null;
+let budgetFundsUnsubscribe = null;
+function startBudgetRealtimeListeners(){
+  if(budgetRequestsUnsubscribe) budgetRequestsUnsubscribe();
+  if(budgetFundsUnsubscribe) budgetFundsUnsubscribe();
+  budgetRequestsUnsubscribe = onSnapshot(collection(db, "requests"), () => {
+    if(!document.getElementById("budgetPage")?.classList.contains("hidden")) loadFundSources();
+  }, err => console.error("Budget live request listener:", err));
+  budgetFundsUnsubscribe = onSnapshot(collection(db, "fundSources"), () => {
+    if(!document.getElementById("budgetPage")?.classList.contains("hidden")) loadFundSources();
+  }, err => console.error("Budget live fund source listener:", err));
+}
+function stopBudgetRealtimeListeners(){
+  if(budgetRequestsUnsubscribe){ budgetRequestsUnsubscribe(); budgetRequestsUnsubscribe = null; }
+  if(budgetFundsUnsubscribe){ budgetFundsUnsubscribe(); budgetFundsUnsubscribe = null; }
+}
+
+// BUDGET OFFICE: Fund Sources are stored centrally and reused by Admin account creation.
+async function getFundSources(){
+  const snap = await getDocs(collection(db, "fundSources"));
+  const list = [];
+  snap.forEach(d => list.push({id:d.id, ...d.data()}));
+  return list.sort((a,b)=>(a.name||"").localeCompare(b.name||""));
+}
+
+async function loadFundSourceDropdown(){
+  const select = document.getElementById("newFundSource");
+  if(!select) return;
+  const previous = select.value;
+  const sources = await getFundSources();
+  select.innerHTML = '<option value="">Select Fund Source</option>';
+  sources.filter(x => x.active !== false).forEach(x => {
+    const option = document.createElement("option");
+    option.value = x.name;
+    option.textContent = x.name + (x.fiscalYear ? " — FY " + x.fiscalYear : "");
+    select.appendChild(option);
+  });
+  if([...select.options].some(o=>o.value===previous)) select.value=previous;
+}
+
+async function addFundSource(){
+  const name = document.getElementById("fundSourceName").value.trim();
+  const fiscalYear = Number(document.getElementById("fundSourceYear").value) || new Date().getFullYear();
+  const annualBudget = Number(document.getElementById("fundSourceBudget").value);
+  if(!name){ alert("Enter a fund source name."); return; }
+  if(!Number.isFinite(annualBudget) || annualBudget < 0){ alert("Enter a valid approved budget (zero is allowed)."); return; }
+  try{
+    const sources = await getFundSources();
+    if(sources.some(x => (x.name||"").trim().toLowerCase()===name.toLowerCase() && Number(x.fiscalYear)===fiscalYear)){
+      alert("This fund source already exists for that fiscal year."); return;
+    }
+    await addDoc(collection(db,"fundSources"),{
+      name, fiscalYear, annualBudget, active:true,
+      createdAt:new Date().toISOString(), createdBy:currentUser?.email || ""
+    });
+    document.getElementById("fundSourceName").value="";
+    document.getElementById("fundSourceYear").value="";
+    document.getElementById("fundSourceBudget").value="";
+    await loadFundSources();
+    alert("Fund source and budget allocation saved successfully.");
+  }catch(err){ console.error(err); alert("Unable to save fund source: " + err.message); }
+}
+
+async function loadFundSources(){
+  const container = document.getElementById("fundSourceList");
+  if(!container) return;
+  try{
+    const [sources, requestSnapshot] = await Promise.all([
+      getFundSources(),
+      getDocs(collection(db, "requests"))
+    ]);
+    const requests = [];
+    requestSnapshot.forEach(ds => requests.push(ds.data()));
+    const excludedBudgetStatuses = ["REJECTED", "CANCELLED", "CANCELED", "REJECTED_ORD"];
+    const money = value => "₱" + (Number(value)||0).toLocaleString("en-PH",{minimumFractionDigits:2,maximumFractionDigits:2});
+    if(!sources.length){ container.innerHTML="<p>No fund sources added yet.</p>"; }
+    else {
+      container.innerHTML = `<table><tr><th>Fund Source</th><th>Fiscal Year</th><th>Approved Budget</th><th>Committed / Used</th><th>Available Balance</th><th>Status</th><th>Action</th></tr>` + sources.map(x=>{
+        const committed = requests.reduce((sum, req) => {
+          if((req.fundSource||"").trim().toLowerCase() !== (x.name||"").trim().toLowerCase()) return sum;
+          if(Number(req.fiscalYear) !== Number(x.fiscalYear)) return sum;
+          if(excludedBudgetStatuses.includes(String(req.status||"").toUpperCase())) return sum;
+          const savedTotal = Number(req.totalAmount);
+          if(Number.isFinite(savedTotal) && savedTotal > 0) return sum + savedTotal;
+          return sum + (Array.isArray(req.items) ? req.items.reduce((t,item)=>t+(Number(item.qty)||0)*(Number(item.cost)||0),0) : 0);
+        },0);
+        const allocated = Number(x.annualBudget)||0;
+        const available = Math.max(0, allocated-committed);
+        return `<tr><td>${escapeHtml(x.name||"")}</td><td>${Number(x.fiscalYear)||"-"}</td><td>${money(allocated)}</td><td>${money(committed)}</td><td><strong>${money(available)}</strong></td><td>${x.active===false?"Inactive":"Active"}</td><td><button onclick="toggleFundSource('${x.id}')">${x.active===false?"Activate":"Deactivate"}</button> <button onclick="editFundSource('${x.id}')">Edit Budget</button></td></tr>`;
+      }).join("") + "</table>";
+    }
+    await loadFundSourceDropdown();
+  }catch(err){ console.error(err); container.innerHTML="<p>Unable to load fund sources or calculate balances. Check Firestore permissions.</p>"; }
+}
+
+function escapeHtml(value){
+  return String(value).replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;", "'":"&#39;"}[ch]));
+}
+
+window.toggleFundSource = async function(id){
+  try{
+    const sources=await getFundSources(); const source=sources.find(x=>x.id===id); if(!source)return;
+    await updateDoc(doc(db,"fundSources",id),{active:source.active===false, updatedAt:new Date().toISOString(), updatedBy:currentUser?.email||""});
+    await loadFundSources();
+  }catch(err){alert("Unable to update fund source: "+err.message);}
+};
+
+window.editFundSource = async function(id){
+  try{
+    const sources=await getFundSources(); const source=sources.find(x=>x.id===id); if(!source)return;
+    const value=prompt("Update approved budget for "+source.name+" (FY "+source.fiscalYear+"):",String(source.annualBudget||0));
+    if(value===null)return;
+    const amount=Number(value); if(!Number.isFinite(amount)||amount<0){alert("Enter a valid non-negative budget.");return;}
+    await updateDoc(doc(db,"fundSources",id),{annualBudget:amount,updatedAt:new Date().toISOString(),updatedBy:currentUser?.email||""});
+    await loadFundSources();
+  }catch(err){alert("Unable to update budget: "+err.message);}
+};
+
 async function loadUsers(){
 
   let users = await getUsers();
@@ -6350,6 +6571,7 @@ async function loadUsers(){
     <th>Full Name</th>
 <th>Username</th>
 <th>Role</th>
+      <th>Assigned Fund Source</th>
       <th>Action</th>
     </tr>
   `;
@@ -6360,6 +6582,7 @@ async function loadUsers(){
        <td>${u.fullName || "-"}</td>
 <td>${u.email}</td>
 <td>${u.role}</td>
+<td>${u.assignedFundSource || "-"}</td>
        
 
 
@@ -6455,6 +6678,10 @@ async function addUser(){
     alert("Complete fields");
     return;
   }
+  if(role === "STAFF" && !document.getElementById("newFundSource").value){
+    alert("Please assign a fund source to this STAFF account.");
+    return;
+  }
 
   try{
 
@@ -6474,6 +6701,7 @@ await addDoc(collection(db, "users"), {
   email: email.toLowerCase().trim(),
   role,
   fullName,
+  assignedFundSource: role === "STAFF" ? (document.getElementById("newFundSource").value || "") : "",
   signature: signatureBase64
 });
 
@@ -6487,8 +6715,8 @@ newFullName.value = "";
 newUsername.value = "";
 newPassword.value = "";
 newRole.value = "STAFF"; // optional default
-
-
+await loadFundSourceDropdown();
+document.getElementById("newFundSource").value = "";
 
 signatureBase64 = "";
 
@@ -6559,7 +6787,7 @@ window.editUser = async function(index){
     if(newName === null) return;
 
     let newRole = prompt(
-      "Edit Role (STAFF, ORD, TOS, FASS, ADMIN):",
+      "Edit Role (STAFF, ORD, TOS, FASS, BUDGET, ADMIN):",
       user.role || ""
     );
 
@@ -6620,6 +6848,7 @@ async function getUsers(){
       email: (data.email || "").toLowerCase().trim(),
       role: data.role || "",
       fullName: data.fullName || "",
+      assignedFundSource: data.assignedFundSource || "",
       signature: data.signature || "" // 🔥 IMPORTANT
     });
 
@@ -6668,6 +6897,8 @@ window.generateAbstract = generateAbstract;
 window.createPO = createPO;
 window.addUser = addUser;
 window.deleteUser = deleteUser;
+window.addFundSource = addFundSource;
+window.loadFundSources = loadFundSources;
 window.searchRecords = async function(){
   let list = await getRequests();
   loadAdmin(list, true);
@@ -7266,8 +7497,67 @@ window.openPRModal = function(){
     </tr>`;
   initTable();
 
-  // autofill name
+  // autofill requestor name and assigned source fund (read-only)
   document.getElementById("name").value = currentUser.fullName || "";
+  const fundSourceField = document.getElementById("prFundSource");
+  if(fundSourceField){
+    fundSourceField.value = currentUser.assignedFundSource || "Not assigned — contact Admin";
+  }
+  refreshPRAvailableFunds();
+}
+
+// Display remaining allocation for the requestor's assigned fund source.
+window.refreshPRAvailableFunds = async function(){
+  const balanceField = document.getElementById("prAvailableFunds");
+  const note = document.getElementById("prAvailableFundsNote");
+  if(!balanceField) return;
+  const assignedFundSource = currentUser?.assignedFundSource || "";
+  if(!assignedFundSource){
+    balanceField.value = "No fund source assigned";
+    if(note) note.textContent = "Please contact the Admin.";
+    return;
+  }
+  const fiscalYear = new Date().getFullYear();
+  balanceField.value = "Loading...";
+  if(note) note.textContent = `Fiscal Year ${fiscalYear}`;
+  try{
+    const [fundSnapshot, requestSnapshot] = await Promise.all([
+      getDocs(collection(db, "fundSources")),
+      getDocs(collection(db, "requests"))
+    ]);
+    let matchedFund = null;
+    fundSnapshot.forEach(ds => {
+      const f = ds.data();
+      if((f.name || "").trim().toLowerCase() === assignedFundSource.trim().toLowerCase()
+        && Number(f.fiscalYear) === fiscalYear && f.active !== false){
+        matchedFund = {id: ds.id, ...f};
+      }
+    });
+    if(!matchedFund){
+      balanceField.value = "Budget not found";
+      if(note) note.textContent = `No active allocation for ${assignedFundSource} in FY ${fiscalYear}.`;
+      return;
+    }
+    const excludedStatuses = ["REJECTED", "CANCELLED", "CANCELED", "REJECTED_ORD"];
+    let committed = 0;
+    requestSnapshot.forEach(ds => {
+      const req = ds.data();
+      if((req.fundSource || "").trim().toLowerCase() !== assignedFundSource.trim().toLowerCase()) return;
+      if(Number(req.fiscalYear) !== fiscalYear) return;
+      if(excludedStatuses.includes(String(req.status || "").toUpperCase())) return;
+      const savedTotal = Number(req.totalAmount);
+      if(Number.isFinite(savedTotal) && savedTotal > 0) committed += savedTotal;
+      else if(Array.isArray(req.items)) committed += req.items.reduce((t,item) => t + (Number(item.qty)||0)*(Number(item.cost)||0),0);
+    });
+    const allocated = Number(matchedFund.annualBudget) || 0;
+    const available = allocated - committed;
+    balanceField.value = "₱" + Math.max(0, available).toLocaleString("en-PH", {minimumFractionDigits:2, maximumFractionDigits:2});
+    if(note) note.textContent = `FY ${fiscalYear} · Approved: ₱${allocated.toLocaleString("en-PH", {minimumFractionDigits:2, maximumFractionDigits:2})} · Committed: ₱${committed.toLocaleString("en-PH", {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+  }catch(err){
+    console.error("Unable to load available fund balance", err);
+    balanceField.value = "Unable to load balance";
+    if(note) note.textContent = "Please check your connection or contact the administrator.";
+  }
 }
 
 window.closePRModal = function(){
@@ -9955,6 +10245,23 @@ window.showReviewSection = function(section){
 
     <input id="name" placeholder="Name">
 
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin:10px 0;">
+      <div style="flex:1 1 260px;min-width:0;">
+        <label for="prFundSource" style="display:block;font-weight:600;margin-bottom:5px;">Assigned Source Fund <span style="font-size:11px;background:#e8f5e9;color:#1b5e20;padding:3px 7px;border-radius:10px;">AUTO</span></label>
+        <input id="prFundSource" type="text" placeholder="Automatically assigned from your account" readonly
+          style="width:100%;box-sizing:border-box;background:#f3f4f6;color:#374151;font-weight:600;cursor:not-allowed;"
+          title="This is automatically assigned by the Admin and cannot be changed in the PR form.">
+        <small style="display:block;color:#6b7280;margin-top:4px;">Your PR will be charged to this assigned source fund.</small>
+      </div>
+      <div style="flex:1 1 260px;min-width:0;">
+        <label for="prAvailableFunds" style="display:block;font-weight:600;margin-bottom:5px;">Available Funds (Read Only)</label>
+        <input id="prAvailableFunds" type="text" value="Loading available balance..." readonly
+          style="width:100%;box-sizing:border-box;background:#f3f4f6;color:#166534;font-weight:700;cursor:not-allowed;"
+          title="Calculated from the current fiscal year's allocation minus non-rejected/non-cancelled requests.">
+        <small id="prAvailableFundsNote" style="display:block;color:#6b7280;margin-top:4px;">Remaining balance for your assigned source fund.</small>
+      </div>
+    </div>
+
     <div class="row">
       <div class="col">
         <input id="position" placeholder="Position">
@@ -10130,8 +10437,8 @@ document.onkeydown = function(e) {
   }
 
   // CTRL + U
-//  if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) {
-   // return false;
+  if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) {
+    return false;
   }
 
   // CTRL + SHIFT + C
